@@ -1,0 +1,39 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node / Vite
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Rust / Tauri build artifacts
+src-tauri/target
+src-tauri/gen
+
+# Bundled service binaries — fetched by scripts/fetch-binaries.mjs, never committed
+resources/
+
+# Local app state (SQLite, snapshots, generated configs, leaf certs, log tails)
+.lamp-bench/
+
+# AI tooling — kept local, not part of the repo
+CLAUDE.md
+.claude/

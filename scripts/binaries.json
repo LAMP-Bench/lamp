@@ -1,0 +1,139 @@
+{
+  "apache": {
+    "version": "2.4.66",
+    "extract_to": "apache",
+    "platforms": {
+      "windows-x64": {
+        "filename": "httpd-2.4.66-251206-Win64-VS17.zip",
+        "url": "https://www.apachelounge.com/download/VS17/binaries/httpd-2.4.66-251206-Win64-VS17.zip",
+        "sha256": "2CD1F349B6705E43E784E876A233EEB1A859FA6B8ABC693A91F87B35A368F7F9",
+        "strip_root_dir": "Apache24"
+      }
+    }
+  },
+  "nginx": {
+    "version": "1.30.0",
+    "extract_to": "nginx",
+    "platforms": {
+      "windows-x64": {
+        "filename": "nginx-1.30.0.zip",
+        "url": "https://nginx.org/download/nginx-1.30.0.zip",
+        "sha256": "70F52D646E86D88FDBD03CD968AFDD08F9DE819ECBEFC06E6135CFBB7EABE2F9",
+        "strip_root_dir": "nginx-1.30.0"
+      }
+    }
+  },
+  "mod_fcgid": {
+    "version": "2.3.10",
+    "extract_to": "apache/modules-extra",
+    "platforms": {
+      "windows-x64": {
+        "filename": "mod_fcgid-2.3.10-win64-VS17.zip",
+        "url": "https://www.apachelounge.com/download/VS17/modules/mod_fcgid-2.3.10-win64-VS17.zip",
+        "sha256": "CF3DED8953863C68FC522EE48F516565E67E18B180B9E5B147668C04FA5DC46D"
+      }
+    }
+  },
+  "mysql-8.0": {
+    "version": "8.0.46",
+    "extract_to": "mysql-8.0",
+    "platforms": {
+      "windows-x64": {
+        "filename": "mysql-8.0.46-winx64.zip",
+        "url": "https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-8.0.46-winx64.zip",
+        "sha256": "28E9EDA019D88EFF4478D811EA2110B83F02A3966BE157FE91CC55DEF3AB0D4D",
+        "strip_root_dir": "mysql-8.0.46-winx64"
+      }
+    }
+  },
+  "mysql-5.7": {
+    "version": "5.7.44",
+    "extract_to": "mysql-5.7",
+    "platforms": {
+      "windows-x64": {
+        "filename": "mysql-5.7.44-winx64.zip",
+        "url": "https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.44-winx64.zip",
+        "sha256": "AED661FE8120254A1DC30F5A4D5DE346681922F4847CF025E2D4084ECA78E70E",
+        "strip_root_dir": "mysql-5.7.44-winx64"
+      }
+    }
+  },
+  "redis": {
+    "version": "5.0.14.1",
+    "extract_to": "redis",
+    "platforms": {
+      "windows-x64": {
+        "filename": "Redis-x64-5.0.14.1.zip",
+        "url": "https://github.com/tporadowski/redis/releases/download/v5.0.14.1/Redis-x64-5.0.14.1.zip",
+        "sha256": "018EA18A35876383CBB5F4CD0258ADFC87747CF9D619BCE1CF73A2E36F720CCF"
+      }
+    }
+  },
+  "php-8.3": {
+    "version": "8.3.31",
+    "extract_to": "php-8.3",
+    "platforms": {
+      "windows-x64": {
+        "filename": "php-8.3.31-nts-Win32-vs16-x64.zip",
+        "url": "https://windows.php.net/downloads/releases/php-8.3.31-nts-Win32-vs16-x64.zip",
+        "sha256": "389C1327D325F6B6B3B892A5B2E1484CA5B5DF775B6C4DDF5D1B5DC3B34AC761"
+      }
+    }
+  },
+  "php-8.4": {
+    "version": "8.4.21",
+    "extract_to": "php-8.4",
+    "platforms": {
+      "windows-x64": {
+        "filename": "php-8.4.21-nts-Win32-vs17-x64.zip",
+        "url": "https://windows.php.net/downloads/releases/php-8.4.21-nts-Win32-vs17-x64.zip",
+        "sha256": "2CB57D0D3A17B1248C6A53B600719D4B051E1C374373404D5031409C0725031D"
+      }
+    }
+  },
+  "xdebug-8.3": {
+    "version": "3.5.1",
+    "raw_file": "php-8.3/ext/php_xdebug.dll",
+    "platforms": {
+      "windows-x64": {
+        "filename": "php_xdebug-3.5.1-8.3-nts-vs16-x86_64.dll",
+        "url": "https://xdebug.org/files/php_xdebug-3.5.1-8.3-nts-vs16-x86_64.dll",
+        "sha256": "27F081F0EA3012B44DEFCCC99CC21D75DB3C4CEFFB8E1435048FB300C9AAC189"
+      }
+    }
+  },
+  "xdebug-8.4": {
+    "version": "3.5.1",
+    "raw_file": "php-8.4/ext/php_xdebug.dll",
+    "platforms": {
+      "windows-x64": {
+        "filename": "php_xdebug-3.5.1-8.4-nts-vs17-x86_64.dll",
+        "url": "https://xdebug.org/files/php_xdebug-3.5.1-8.4-nts-vs17-x86_64.dll",
+        "sha256": "B386583D38741652135CB34A1B816855819C37D13C66F79CB8B107751A858BE3"
+      }
+    }
+  },
+  "composer": {
+    "version": "2.9.7",
+    "raw_file": "composer/composer.phar",
+    "platforms": {
+      "windows-x64": {
+        "filename": "composer.phar",
+        "url": "https://getcomposer.org/download/2.9.7/composer.phar",
+        "sha256": "D3C6801EA6E5DD291D0F149295A4D0F1539A74D5231958FE8FDAA889A497E6CF"
+      }
+    }
+  },
+  "phpmyadmin": {
+    "version": "5.2.3",
+    "extract_to": "phpmyadmin",
+    "platforms": {
+      "windows-x64": {
+        "filename": "phpMyAdmin-5.2.3-all-languages.zip",
+        "url": "https://files.phpmyadmin.net/phpMyAdmin/5.2.3/phpMyAdmin-5.2.3-all-languages.zip",
+        "sha256": "2D2E13C735366D318425C78E4EE2CC8FC648D77FABA3DDEA2CD516E43885733F",
+        "strip_root_dir": "phpMyAdmin-5.2.3-all-languages"
+      }
+    }
+  }
+}

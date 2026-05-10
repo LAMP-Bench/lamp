@@ -1,0 +1,51 @@
+use rusqlite::Connection;
+use std::path::Path;
+
+const INITIAL_SCHEMA: &str = "
+CREATE TABLE IF NOT EXISTS hosts (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT    NOT NULL UNIQUE,
+    docroot     TEXT    NOT NULL,
+    php_version TEXT    NOT NULL DEFAULT '8.4',
+    created_at  TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+";
+
+pub fn open(path: &Path) -> Result<Connection, rusqlite::Error> {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).ok();
+    }
+    let conn = Connection::open(path)?;
+    conn.execute_batch(INITIAL_SCHEMA)?;
+    migrate(&conn)?;
+    Ok(conn)
+}
+
+/// Forward migrations applied to DBs that pre-date a column. Idempotent —
+/// safe to call on fresh tables.
+fn migrate(conn: &Connection) -> rusqlite::Result<()> {
+    add_column_if_missing(conn, "hosts", "php_version", "TEXT NOT NULL DEFAULT '8.4'")?;
+    add_column_if_missing(conn, "hosts", "apache_extra", "TEXT NOT NULL DEFAULT ''")?;
+    add_column_if_missing(conn, "hosts", "nginx_extra", "TEXT NOT NULL DEFAULT ''")?;
+    Ok(())
+}
+
+fn add_column_if_missing(
+    conn: &Connection,
+    table: &str,
+    column: &str,
+    spec: &str,
+) -> rusqlite::Result<()> {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM pragma_table_info(?1) WHERE name = ?2",
+        rusqlite::params![table, column],
+        |row| row.get(0),
+    )?;
+    if count == 0 {
+        conn.execute(
+            &format!("ALTER TABLE {table} ADD COLUMN {column} {spec}"),
+            [],
+        )?;
+    }
+    Ok(())
+}
