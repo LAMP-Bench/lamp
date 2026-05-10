@@ -113,6 +113,53 @@
       }
     }
   },
+  "wordpress": {
+    "version": "6.8.2",
+    "extract_to": "wordpress",
+    "platforms": {
+      "windows-x64": {
+        "filename": "wordpress-6.8.2.zip",
+        "url": "https://wordpress.org/wordpress-6.8.2.zip",
+        "sha256": "46BBC3D5807E7ABA4FB64AADA0D5D99E41B4E80C4373B5CE0269898ECA798AC7",
+        "strip_root_dir": "wordpress"
+      }
+    }
+  },
+  "joomla": {
+    "version": "5.2.3",
+    "extract_to": "joomla",
+    "platforms": {
+      "windows-x64": {
+        "filename": "Joomla_5-2-3.zip",
+        "url": "https://downloads.joomla.org/cms/joomla5/5-2-3/Joomla_5-2-3-Stable-Full_Package.zip",
+        "sha256": "5A06C946A132EB00B9090816D32A7E3280CF1840A2A5329CCCACB52B923FBED5"
+      }
+    }
+  },
+  "drupal": {
+    "version": "11.0.7",
+    "extract_to": "drupal",
+    "platforms": {
+      "windows-x64": {
+        "filename": "drupal-11.0.7.zip",
+        "url": "https://ftp.drupal.org/files/projects/drupal-11.0.7.zip",
+        "sha256": "DE12DCCAE940C144A0AF0DD68BBF92E85783C4A4F04C8D6064A5C1478AF600A8",
+        "strip_root_dir": "drupal-11.0.7"
+      }
+    }
+  },
+  "mediawiki": {
+    "version": "1.43.1",
+    "extract_to": "mediawiki",
+    "platforms": {
+      "windows-x64": {
+        "filename": "mediawiki-1.43.1.zip",
+        "url": "https://releases.wikimedia.org/mediawiki/1.43/mediawiki-1.43.1.zip",
+        "sha256": "AC1C4DDA9EF70DF66D16339542461EC93545B57BEC916361C862054ED59BD13C",
+        "strip_root_dir": "mediawiki-1.43.1"
+      }
+    }
+  },
   "composer": {
     "version": "2.9.7",
     "raw_file": "composer/composer.phar",

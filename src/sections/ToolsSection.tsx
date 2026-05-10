@@ -3,7 +3,16 @@ import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { IconType } from "react-icons";
 import { FiExternalLink, FiPackage, FiX, FiEdit3 } from "react-icons/fi";
-import { SiPhpmyadmin, SiLaravel, SiComposer, SiPhp } from "react-icons/si";
+import {
+  SiPhpmyadmin,
+  SiLaravel,
+  SiComposer,
+  SiPhp,
+  SiWordpress,
+  SiJoomla,
+  SiDrupal,
+  SiWikipedia,
+} from "react-icons/si";
 
 type CommandResult = {
   success: boolean;
@@ -18,12 +27,65 @@ export function ToolsSection({
   openInEditor: (path: string) => void;
 }) {
   return (
-    <div className="p-6 space-y-3 max-w-3xl">
-      <PhpMyAdminCard />
-      <PhpIniCard openInEditor={openInEditor} />
-      <ComposerCard />
-      <LaravelCard />
+    <div className="p-6 space-y-6 max-w-3xl">
+      <Section title="Database">
+        <PhpMyAdminCard />
+      </Section>
+
+      <Section title="PHP">
+        <PhpIniCard openInEditor={openInEditor} />
+        <ComposerCard />
+        <LaravelCard />
+      </Section>
+
+      <Section title="CMS Extras">
+        <CmsCard
+          icon={SiWordpress}
+          iconColor="text-blue-600"
+          title="WordPress"
+          subtitle="One-click install. Creates DB, generates wp-config.php with fresh salts, registers host."
+          command="wordpress_install"
+        />
+        <CmsCard
+          icon={SiJoomla}
+          iconColor="text-sky-600"
+          title="Joomla"
+          subtitle="One-click install. Creates DB + host. Complete setup in the web installer."
+          command="joomla_install"
+        />
+        <CmsCard
+          icon={SiDrupal}
+          iconColor="text-blue-500"
+          title="Drupal"
+          subtitle="One-click install. Drupal 11. DB + host registered. Finish in the web installer."
+          command="drupal_install"
+        />
+        <CmsCard
+          icon={SiWikipedia}
+          iconColor="text-amber-600"
+          title="MediaWiki"
+          subtitle="One-click install. DB + host registered. Visit the URL to run mw-config/."
+          command="mediawiki_install"
+        />
+      </Section>
     </div>
+  );
+}
+
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="space-y-2">
+      <h2 className="text-[11px] uppercase tracking-wider text-neutral-500 font-medium">
+        {title}
+      </h2>
+      <div className="space-y-2">{children}</div>
+    </section>
   );
 }
 
@@ -33,7 +95,7 @@ function PhpMyAdminCard() {
       icon={SiPhpmyadmin}
       iconColor="text-amber-500"
       title="phpMyAdmin"
-      subtitle="Database admin · requires apache + mysql running"
+      subtitle="Database admin — requires apache + mysql running"
       action={
         <button
           onClick={() => openUrl("http://localhost:8080/phpmyadmin/")}
@@ -90,8 +152,6 @@ function PhpIniCard({
 }
 
 function repoBase() {
-  // The dev-time repo path. In a packaged build this would come from a Tauri
-  // command exposing the resource dir.
   return "C:/Users/anthropic/Desktop/a/lamp";
 }
 
@@ -142,6 +202,243 @@ function LaravelCard() {
       />
       {open && <LaravelDialog onClose={() => setOpen(false)} />}
     </>
+  );
+}
+
+function CmsCard({
+  icon,
+  iconColor,
+  title,
+  subtitle,
+  command,
+}: {
+  icon: IconType;
+  iconColor: string;
+  title: string;
+  subtitle: string;
+  command: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <ToolCard
+        icon={icon}
+        iconColor={iconColor}
+        title={title}
+        subtitle={subtitle}
+        action={
+          <button
+            onClick={() => setOpen(true)}
+            className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5"
+          >
+            <FiPackage />
+            New site
+          </button>
+        }
+      />
+      {open && (
+        <CmsInstallDialog
+          title={`Install ${title}`}
+          icon={icon}
+          iconColor={iconColor}
+          command={command}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </>
+  );
+}
+
+function CmsInstallDialog({
+  title,
+  icon: Icon,
+  iconColor,
+  command,
+  onClose,
+}: {
+  title: string;
+  icon: IconType;
+  iconColor: string;
+  command: string;
+  onClose: () => void;
+}) {
+  const [siteName, setSiteName] = useState("");
+  const [hostname, setHostname] = useState("");
+  const [parentDir, setParentDir] = useState("");
+  const [phpVersions, setPhpVersions] = useState<string[]>([]);
+  const [phpVersion, setPhpVersion] = useState("");
+  const [hostTouched, setHostTouched] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [createdUrl, setCreatedUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    invoke<string[]>("php_versions").then((v) => {
+      setPhpVersions(v);
+      setPhpVersion(v[v.length - 1] ?? "");
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!hostTouched && siteName) {
+      const slug = siteName
+        .toLowerCase()
+        .replace(/[^a-z0-9-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      setHostname(slug ? `${slug}.local` : "");
+    }
+  }, [siteName, hostTouched]);
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      await invoke<string>(command, {
+        siteName: siteName.trim(),
+        hostname: hostname.trim(),
+        parentDir: parentDir.trim(),
+        phpVersion,
+      });
+      setCreatedUrl(`http://${hostname.trim()}:8080/`);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-neutral-900/40 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
+        <div className="px-5 py-3 border-b border-neutral-200 flex items-center justify-between">
+          <h3 className="font-semibold text-neutral-900 flex items-center gap-2">
+            <Icon className={iconColor} />
+            {title}
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-1 rounded hover:bg-neutral-100 text-neutral-500"
+          >
+            <FiX />
+          </button>
+        </div>
+
+        {createdUrl ? (
+          <div className="p-5 space-y-3 text-sm">
+            <p className="text-emerald-700">
+              Installed and host registered. Open the URL to finish the setup
+              wizard:
+            </p>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                openUrl(createdUrl);
+              }}
+              className="block rounded bg-neutral-100 p-3 font-mono text-xs break-all text-sky-700 hover:underline"
+            >
+              {createdUrl}
+            </a>
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={() => openUrl(createdUrl)}
+                className="px-4 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium flex items-center gap-1.5"
+              >
+                <FiExternalLink />
+                Open site
+              </button>
+              <button
+                onClick={onClose}
+                className="px-4 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={submit} className="p-5 space-y-3 text-sm">
+            <Field label="Site name">
+              <input
+                value={siteName}
+                onChange={(e) => setSiteName(e.target.value)}
+                placeholder="my-site"
+                autoFocus
+                className="flex-1 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
+              />
+            </Field>
+            <Field label="Hostname">
+              <input
+                value={hostname}
+                onChange={(e) => {
+                  setHostname(e.target.value);
+                  setHostTouched(true);
+                }}
+                placeholder="my-site.local"
+                className="flex-1 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
+              />
+            </Field>
+            <Field label="Parent directory">
+              <input
+                value={parentDir}
+                onChange={(e) => setParentDir(e.target.value)}
+                placeholder="C:/Users/me/projects"
+                className="flex-1 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
+              />
+            </Field>
+            <Field label="PHP version">
+              <select
+                value={phpVersion}
+                onChange={(e) => setPhpVersion(e.target.value)}
+                className="px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500 bg-white"
+              >
+                {phpVersions.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
+            {error && (
+              <div className="text-xs text-red-600 font-mono break-words bg-red-50 border border-red-200 rounded p-2">
+                {error}
+              </div>
+            )}
+
+            <div className="text-xs text-neutral-500">
+              {busy
+                ? "Copying files, creating DB, updating hosts file (UAC)…"
+                : "MySQL must be running. Triggers a UAC prompt to register the hostname."}
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="submit"
+                disabled={
+                  busy ||
+                  !siteName.trim() ||
+                  !hostname.trim() ||
+                  !parentDir.trim() ||
+                  !phpVersion
+                }
+                className="px-4 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white font-medium disabled:opacity-50"
+              >
+                {busy ? "Installing…" : "Install"}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={busy}
+                className="px-4 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
   );
 }
 

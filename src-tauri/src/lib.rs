@@ -1,4 +1,5 @@
 mod cloud;
+mod cms;
 mod config_gen;
 mod db;
 mod deploy;
@@ -8,7 +9,7 @@ mod services;
 mod snapshots;
 pub mod ssl;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 use hosts::Host;
@@ -21,6 +22,7 @@ use services::redis::RedisService;
 use services::{Service, ServiceStatus};
 use ssl::LocalCa;
 use std::process::Command;
+use tauri::Manager;
 
 struct AppState {
     db: Mutex<Connection>,
@@ -30,6 +32,58 @@ struct AppState {
     redis: Mutex<RedisService>,
     php_installs: Vec<PhpInstall>,
     default_php: String,
+    resources_dir: PathBuf,
+    runtime_dir: PathBuf,
+}
+
+/// Where bundled binaries live at runtime.
+///
+/// In debug builds we read from the repo's `resources/` next to `Cargo.toml`,
+/// so `pnpm tauri dev` doesn't need a reinstall. In release builds we pull
+/// them from the location Tauri's bundler dropped them into, next to the
+/// installed binary.
+fn resources_root(app: &tauri::AppHandle) -> PathBuf {
+    #[cfg(debug_assertions)]
+    {
+        let _ = app;
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .expect("src-tauri parent")
+            .join("resources")
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        app.path()
+            .resource_dir()
+            .expect("Tauri resource dir")
+            .join("resources")
+    }
+}
+
+/// Where Lamp Bench keeps its writable state: SQLite DB, generated configs,
+/// per-host certs, MySQL data dirs, log files.
+///
+/// In debug builds: `.lamp-bench/` at the repo root — convenient to inspect.
+/// In release builds: the OS app-data dir, e.g.
+/// `%APPDATA%\com.lampbench.app\` on Windows.
+fn runtime_root(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    #[cfg(debug_assertions)]
+    {
+        let _ = app;
+        Ok(PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .expect("src-tauri parent")
+            .join(".lamp-bench"))
+    }
+    #[cfg(not(debug_assertions))]
+    {
+        let dir = app
+            .path()
+            .app_data_dir()
+            .map_err(|e| format!("app_data_dir: {e}"))?;
+        std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+        Ok(dir)
+    }
 }
 
 #[derive(Serialize)]
@@ -63,15 +117,8 @@ fn php_exe(state: &AppState, version: Option<&str>) -> Result<PathBuf, String> {
         .join(format!("php{}", std::env::consts::EXE_SUFFIX)))
 }
 
-fn composer_phar() -> PathBuf {
-    repo_root().join("resources").join("composer").join("composer.phar")
-}
-
-fn repo_root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .parent()
-        .expect("src-tauri parent")
-        .to_path_buf()
+fn composer_phar(state: &AppState) -> PathBuf {
+    state.resources_dir.join("composer").join("composer.phar")
 }
 
 #[tauri::command]
@@ -239,7 +286,8 @@ fn git_init(path: String) -> Result<CommandResult, String> {
 #[tauri::command]
 fn composer_version(state: tauri::State<AppState>) -> Result<CommandResult, String> {
     let php = php_exe(&state, None)?;
-    run_capture(Command::new(&php).arg(composer_phar()).arg("--version"))
+    let phar = composer_phar(&state);
+    run_capture(Command::new(&php).arg(phar).arg("--version"))
 }
 
 #[tauri::command]
@@ -262,9 +310,10 @@ fn laravel_create(
     }
 
     let php = php_exe(&state, php_version.as_deref())?;
+    let phar = composer_phar(&state);
     let res = run_capture(
         Command::new(&php)
-            .arg(composer_phar())
+            .arg(phar)
             .arg("create-project")
             .arg("laravel/laravel")
             .arg(&project_dir)
@@ -293,6 +342,132 @@ fn file_write(path: String, content: String) -> Result<(), String> {
     std::fs::write(&path, content).map_err(|e| format!("write {path}: {e}"))
 }
 
+fn mysql_active(state: &AppState) -> (PathBuf, u16) {
+    let mysql = state.mysql.lock().unwrap();
+    let active = mysql.active_version();
+    (
+        state.resources_dir.join(format!("mysql-{active}")),
+        3306u16,
+    )
+}
+
+fn register_host_and_apply(
+    state: &AppState,
+    hostname: &str,
+    docroot: &Path,
+    php_version: &str,
+) -> Result<String, String> {
+    let docroot_str = docroot.to_string_lossy().replace('\\', "/");
+    {
+        let conn = state.db.lock().unwrap();
+        hosts::create(&conn, hostname, &docroot_str, php_version)?;
+    }
+    apply_host_changes(state)?;
+    Ok(docroot_str)
+}
+
+#[tauri::command]
+fn wordpress_install(
+    site_name: String,
+    hostname: String,
+    parent_dir: String,
+    php_version: String,
+    state: tauri::State<AppState>,
+) -> Result<String, String> {
+    let (mysql_dir, mysql_port) = mysql_active(&state);
+    let req = cms::wordpress::InstallRequest {
+        site_name: site_name.trim().to_string(),
+        hostname: hostname.trim().to_string(),
+        parent_dir: PathBuf::from(parent_dir.trim()),
+        mysql_dir,
+        mysql_port,
+        source_dir: state.resources_dir.join("wordpress"),
+    };
+    let result = cms::wordpress::install(&req)?;
+    register_host_and_apply(&state, &req.hostname, &result.docroot, php_version.trim())
+}
+
+fn cms_install_generic(
+    state: &AppState,
+    source_subdir: &str,
+    db_prefix: &str,
+    site_name: &str,
+    hostname: &str,
+    parent_dir: &str,
+    php_version: &str,
+) -> Result<String, String> {
+    let parent = PathBuf::from(parent_dir.trim());
+    let target = parent.join(site_name.trim());
+    let (mysql_dir, mysql_port) = mysql_active(state);
+    let db_name = cms::sanitize_db_name(db_prefix, site_name.trim());
+
+    let docroot = cms::install_files_and_db(
+        &state.resources_dir.join(source_subdir),
+        &target,
+        &mysql_dir,
+        mysql_port,
+        &db_name,
+    )?;
+    register_host_and_apply(state, hostname.trim(), &docroot, php_version.trim())
+}
+
+#[tauri::command]
+fn joomla_install(
+    site_name: String,
+    hostname: String,
+    parent_dir: String,
+    php_version: String,
+    state: tauri::State<AppState>,
+) -> Result<String, String> {
+    cms_install_generic(
+        &state,
+        "joomla",
+        "joomla",
+        &site_name,
+        &hostname,
+        &parent_dir,
+        &php_version,
+    )
+}
+
+#[tauri::command]
+fn drupal_install(
+    site_name: String,
+    hostname: String,
+    parent_dir: String,
+    php_version: String,
+    state: tauri::State<AppState>,
+) -> Result<String, String> {
+    cms_install_generic(
+        &state,
+        "drupal",
+        "drupal",
+        &site_name,
+        &hostname,
+        &parent_dir,
+        &php_version,
+    )
+}
+
+#[tauri::command]
+fn mediawiki_install(
+    site_name: String,
+    hostname: String,
+    parent_dir: String,
+    php_version: String,
+    state: tauri::State<AppState>,
+) -> Result<String, String> {
+    cms_install_generic(
+        &state,
+        "mediawiki",
+        "mw",
+        &site_name,
+        &hostname,
+        &parent_dir,
+        &php_version,
+    )
+}
+
 #[tauri::command]
 fn php_lint(
     path: String,
@@ -304,8 +479,12 @@ fn php_lint(
 }
 
 #[tauri::command]
-fn read_log(service: &str, lines: usize) -> Result<String, String> {
-    let runtime = repo_root().join(".lamp-bench");
+fn read_log(
+    service: &str,
+    lines: usize,
+    state: tauri::State<AppState>,
+) -> Result<String, String> {
+    let runtime = &state.runtime_dir;
     let path = match service {
         "apache" => runtime.join("apache").join("logs").join("error.log"),
         "nginx" => runtime.join("nginx").join("logs").join("error.log"),
@@ -328,71 +507,80 @@ fn read_log(service: &str, lines: usize) -> Result<String, String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let root = repo_root();
-    let runtime = root.join(".lamp-bench");
-    let resources = root.join("resources");
-
-    let conn = db::open(&runtime.join("lamp.db")).expect("open lamp.db");
-
-    let php_installs = vec![
-        PhpInstall {
-            version: "8.3".into(),
-            dir: resources.join("php-8.3"),
-        },
-        PhpInstall {
-            version: "8.4".into(),
-            dir: resources.join("php-8.4"),
-        },
-    ];
-    let default_php = "8.4".to_string();
-
-    let ca_dir = runtime.join("ca");
-    let ssl_dir = runtime.join("ssl");
-
-    let mysql_installs = vec![
-        MysqlInstall {
-            version: "5.7".into(),
-            dir: resources.join("mysql-5.7"),
-        },
-        MysqlInstall {
-            version: "8.0".into(),
-            dir: resources.join("mysql-8.0"),
-        },
-    ];
-    let default_mysql = "8.0".to_string();
-
-    let state = AppState {
-        db: Mutex::new(conn),
-        apache: Mutex::new(ApacheService::new(
-            resources.join("apache"),
-            resources.join("phpmyadmin"),
-            php_installs.clone(),
-            default_php.clone(),
-            LocalCa::new(ca_dir.clone()),
-            ssl_dir.clone(),
-            runtime.clone(),
-        )),
-        nginx: Mutex::new(NginxService::new(
-            resources.join("nginx"),
-            runtime.clone(),
-            ssl_dir,
-            LocalCa::new(ca_dir),
-            php_installs.clone(),
-            default_php.clone(),
-        )),
-        mysql: Mutex::new(MysqlService::new(
-            mysql_installs,
-            default_mysql,
-            runtime.clone(),
-        )),
-        redis: Mutex::new(RedisService::new(resources.join("redis"), runtime)),
-        php_installs,
-        default_php,
-    };
-
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .manage(state)
+        .setup(|app| {
+            let resources = resources_root(&app.handle());
+            let runtime = runtime_root(&app.handle())
+                .map_err(|e| -> Box<dyn std::error::Error> { e.into() })?;
+            std::fs::create_dir_all(&runtime).ok();
+
+            let conn = db::open(&runtime.join("lamp.db"))?;
+
+            let php_installs = vec![
+                PhpInstall {
+                    version: "8.3".into(),
+                    dir: resources.join("php-8.3"),
+                },
+                PhpInstall {
+                    version: "8.4".into(),
+                    dir: resources.join("php-8.4"),
+                },
+            ];
+            let default_php = "8.4".to_string();
+
+            let ca_dir = runtime.join("ca");
+            let ssl_dir = runtime.join("ssl");
+
+            let mysql_installs = vec![
+                MysqlInstall {
+                    version: "5.7".into(),
+                    dir: resources.join("mysql-5.7"),
+                },
+                MysqlInstall {
+                    version: "8.0".into(),
+                    dir: resources.join("mysql-8.0"),
+                },
+            ];
+            let default_mysql = "8.0".to_string();
+
+            let state = AppState {
+                db: Mutex::new(conn),
+                apache: Mutex::new(ApacheService::new(
+                    resources.join("apache"),
+                    resources.join("phpmyadmin"),
+                    php_installs.clone(),
+                    default_php.clone(),
+                    LocalCa::new(ca_dir.clone()),
+                    ssl_dir.clone(),
+                    runtime.clone(),
+                )),
+                nginx: Mutex::new(NginxService::new(
+                    resources.join("nginx"),
+                    runtime.clone(),
+                    ssl_dir,
+                    LocalCa::new(ca_dir),
+                    php_installs.clone(),
+                    default_php.clone(),
+                )),
+                mysql: Mutex::new(MysqlService::new(
+                    mysql_installs,
+                    default_mysql,
+                    runtime.clone(),
+                )),
+                redis: Mutex::new(RedisService::new(
+                    resources.join("redis"),
+                    runtime.clone(),
+                )),
+                php_installs,
+                default_php,
+                resources_dir: resources,
+                runtime_dir: runtime,
+            };
+
+            app.manage(state);
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             app_version,
             service_start,
@@ -411,6 +599,10 @@ pub fn run() {
             git_init,
             composer_version,
             laravel_create,
+            wordpress_install,
+            joomla_install,
+            drupal_install,
+            mediawiki_install,
             file_read,
             file_write,
             php_lint,
