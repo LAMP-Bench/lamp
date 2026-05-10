@@ -85,7 +85,7 @@ gitignored.
 
 ## License
 
-TBD.
+[MIT](./LICENSE) © 2026 caixax
 
 ## Contributing
 
