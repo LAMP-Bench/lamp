@@ -2,9 +2,10 @@ import { ReactNode, useEffect, useState } from "react";
 import { IconType } from "react-icons";
 import {
   FiHome,
+  FiGlobe,
   FiTool,
   FiTerminal,
-  FiEdit3,
+  FiSliders,
   FiChevronDown,
   FiChevronUp,
   FiHelpCircle,
@@ -19,9 +20,10 @@ import type { SectionId, ServiceName } from "../types";
 type NavItem = { id: SectionId; label: string; icon: ReactNode };
 
 const NAV_ITEMS: NavItem[] = [
-  { id: "hosts", label: "Hosts", icon: <FiHome /> },
+  { id: "home", label: "Home", icon: <FiHome /> },
+  { id: "hosts", label: "Hosts", icon: <FiGlobe /> },
   { id: "tools", label: "Tools", icon: <FiTool /> },
-  { id: "editor", label: "Editor", icon: <FiEdit3 /> },
+  { id: "config", label: "Config", icon: <FiSliders /> },
   { id: "logs", label: "Logs", icon: <FiTerminal /> },
 ];
 

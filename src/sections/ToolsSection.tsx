@@ -2,12 +2,11 @@ import { FormEvent, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { IconType } from "react-icons";
-import { FiExternalLink, FiPackage, FiX, FiEdit3 } from "react-icons/fi";
+import { FiExternalLink, FiPackage, FiX } from "react-icons/fi";
 import {
   SiPhpmyadmin,
   SiLaravel,
   SiComposer,
-  SiPhp,
   SiWordpress,
   SiJoomla,
   SiDrupal,
@@ -21,53 +20,50 @@ type CommandResult = {
   exit_code: number;
 };
 
-export function ToolsSection({
-  openInEditor,
-}: {
-  openInEditor: (path: string) => void;
-}) {
+export function ToolsSection() {
   return (
-    <div className="p-6 space-y-6 max-w-3xl">
-      <Section title="Database">
-        <PhpMyAdminCard />
-      </Section>
+    <div className="h-full overflow-y-auto">
+      <div className="p-6 space-y-6 max-w-3xl">
+        <Section title="Database">
+          <PhpMyAdminCard />
+        </Section>
 
-      <Section title="PHP">
-        <PhpIniCard openInEditor={openInEditor} />
-        <ComposerCard />
-        <LaravelCard />
-      </Section>
+        <Section title="PHP">
+          <ComposerCard />
+          <LaravelCard />
+        </Section>
 
-      <Section title="CMS Extras">
-        <CmsCard
-          icon={SiWordpress}
-          iconColor="text-blue-600"
-          title="WordPress"
-          subtitle="One-click install. Creates DB, generates wp-config.php with fresh salts, registers host."
-          command="wordpress_install"
-        />
-        <CmsCard
-          icon={SiJoomla}
-          iconColor="text-sky-600"
-          title="Joomla"
-          subtitle="One-click install. Creates DB + host. Complete setup in the web installer."
-          command="joomla_install"
-        />
-        <CmsCard
-          icon={SiDrupal}
-          iconColor="text-blue-500"
-          title="Drupal"
-          subtitle="One-click install. Drupal 11. DB + host registered. Finish in the web installer."
-          command="drupal_install"
-        />
-        <CmsCard
-          icon={SiWikipedia}
-          iconColor="text-amber-600"
-          title="MediaWiki"
-          subtitle="One-click install. DB + host registered. Visit the URL to run mw-config/."
-          command="mediawiki_install"
-        />
-      </Section>
+        <Section title="CMS Extras">
+          <CmsCard
+            icon={SiWordpress}
+            iconColor="text-blue-600"
+            title="WordPress"
+            subtitle="One-click install. DB, wp-config.php with fresh salts, files copied to htdocs."
+            command="wordpress_install"
+          />
+          <CmsCard
+            icon={SiJoomla}
+            iconColor="text-sky-600"
+            title="Joomla"
+            subtitle="One-click install. DB created. Finish setup in the web installer."
+            command="joomla_install"
+          />
+          <CmsCard
+            icon={SiDrupal}
+            iconColor="text-blue-500"
+            title="Drupal"
+            subtitle="Drupal 11. DB created. Finish in the web installer."
+            command="drupal_install"
+          />
+          <CmsCard
+            icon={SiWikipedia}
+            iconColor="text-amber-600"
+            title="MediaWiki"
+            subtitle="DB created. Visit /mw-config/ to finish setup."
+            command="mediawiki_install"
+          />
+        </Section>
+      </div>
     </div>
   );
 }
@@ -107,52 +103,6 @@ function PhpMyAdminCard() {
       }
     />
   );
-}
-
-function PhpIniCard({
-  openInEditor,
-}: {
-  openInEditor: (path: string) => void;
-}) {
-  const [versions, setVersions] = useState<string[]>([]);
-  useEffect(() => {
-    invoke<string[]>("php_versions").then(setVersions);
-  }, []);
-
-  return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-4">
-        <div className="size-11 rounded-md bg-neutral-100 flex items-center justify-center shrink-0">
-          <SiPhp className="text-2xl text-indigo-500" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="font-medium text-neutral-900">php.ini</div>
-          <div className="text-xs text-neutral-500">
-            Per-version PHP config. Apache must restart to pick up changes.
-          </div>
-        </div>
-      </div>
-      <div className="mt-3 flex flex-wrap gap-2 ml-[60px]">
-        {versions.map((v) => {
-          const iniPath = `${repoBase()}/resources/php-${v}/php.ini`;
-          return (
-            <button
-              key={v}
-              onClick={() => openInEditor(iniPath)}
-              className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5 font-mono"
-            >
-              <FiEdit3 />
-              php-{v}/php.ini
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function repoBase() {
-  return "C:/Users/anthropic/Desktop/a/lamp";
 }
 
 function ComposerCard() {
@@ -263,11 +213,12 @@ function CmsInstallDialog({
   onClose: () => void;
 }) {
   const [siteName, setSiteName] = useState("");
-  const [hostname, setHostname] = useState("");
   const [parentDir, setParentDir] = useState("");
+  const [addHost, setAddHost] = useState(false);
+  const [hostname, setHostname] = useState("");
+  const [hostTouched, setHostTouched] = useState(false);
   const [phpVersions, setPhpVersions] = useState<string[]>([]);
   const [phpVersion, setPhpVersion] = useState("");
-  const [hostTouched, setHostTouched] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdUrl, setCreatedUrl] = useState<string | null>(null);
@@ -277,17 +228,20 @@ function CmsInstallDialog({
       setPhpVersions(v);
       setPhpVersion(v[v.length - 1] ?? "");
     });
+    // Default the install location to the user-facing htdocs. The user only
+    // overrides this if they want the project elsewhere.
+    invoke<string>("htdocs_path").then(setParentDir).catch(() => {});
   }, []);
 
   useEffect(() => {
-    if (!hostTouched && siteName) {
+    if (addHost && !hostTouched && siteName) {
       const slug = siteName
         .toLowerCase()
         .replace(/[^a-z0-9-]+/g, "-")
         .replace(/^-+|-+$/g, "");
       setHostname(slug ? `${slug}.local` : "");
     }
-  }, [siteName, hostTouched]);
+  }, [addHost, siteName, hostTouched]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -296,11 +250,16 @@ function CmsInstallDialog({
     try {
       await invoke<string>(command, {
         siteName: siteName.trim(),
-        hostname: hostname.trim(),
+        hostname: addHost ? hostname.trim() : "",
         parentDir: parentDir.trim(),
         phpVersion,
       });
-      setCreatedUrl(`http://${hostname.trim()}:8080/`);
+      // When user opted out of a custom host, the site is reachable through
+      // the default vhost as a path under localhost.
+      const url = addHost && hostname.trim()
+        ? `http://${hostname.trim()}:8080/`
+        : `http://localhost:8080/${siteName.trim()}/`;
+      setCreatedUrl(url);
     } catch (e) {
       setError(String(e));
     } finally {
@@ -327,8 +286,7 @@ function CmsInstallDialog({
         {createdUrl ? (
           <div className="p-5 space-y-3 text-sm">
             <p className="text-emerald-700">
-              Installed and host registered. Open the URL to finish the setup
-              wizard:
+              Installed. Open the URL to finish the setup wizard:
             </p>
             <a
               href="#"
@@ -367,22 +325,10 @@ function CmsInstallDialog({
                 className="flex-1 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
               />
             </Field>
-            <Field label="Hostname">
-              <input
-                value={hostname}
-                onChange={(e) => {
-                  setHostname(e.target.value);
-                  setHostTouched(true);
-                }}
-                placeholder="my-site.local"
-                className="flex-1 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
-              />
-            </Field>
-            <Field label="Parent directory">
+            <Field label="Install in">
               <input
                 value={parentDir}
                 onChange={(e) => setParentDir(e.target.value)}
-                placeholder="C:/Users/me/projects"
                 className="flex-1 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
               />
             </Field>
@@ -400,6 +346,41 @@ function CmsInstallDialog({
               </select>
             </Field>
 
+            <div className="grid grid-cols-[120px_1fr] gap-3 items-start pt-1">
+              <div />
+              <label className="flex items-start gap-2 text-neutral-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={addHost}
+                  onChange={(e) => setAddHost(e.target.checked)}
+                  className="mt-0.5"
+                />
+                <span>
+                  Also register as a virtual host
+                  <span className="block text-[11px] text-neutral-500">
+                    Custom hostname like{" "}
+                    <code>my-site.local</code> — triggers a UAC prompt to
+                    update the hosts file. Skip to access it as a path under
+                    <code> localhost:8080</code>.
+                  </span>
+                </span>
+              </label>
+            </div>
+
+            {addHost && (
+              <Field label="Hostname">
+                <input
+                  value={hostname}
+                  onChange={(e) => {
+                    setHostname(e.target.value);
+                    setHostTouched(true);
+                  }}
+                  placeholder="my-site.local"
+                  className="flex-1 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
+                />
+              </Field>
+            )}
+
             {error && (
               <div className="text-xs text-red-600 font-mono break-words bg-red-50 border border-red-200 rounded p-2">
                 {error}
@@ -408,8 +389,8 @@ function CmsInstallDialog({
 
             <div className="text-xs text-neutral-500">
               {busy
-                ? "Copying files, creating DB, updating hosts file (UAC)…"
-                : "MySQL must be running. Triggers a UAC prompt to register the hostname."}
+                ? "Copying files, creating DB…"
+                : "MySQL must be running."}
             </div>
 
             <div className="flex items-center gap-2 pt-2">
@@ -418,9 +399,9 @@ function CmsInstallDialog({
                 disabled={
                   busy ||
                   !siteName.trim() ||
-                  !hostname.trim() ||
                   !parentDir.trim() ||
-                  !phpVersion
+                  !phpVersion ||
+                  (addHost && !hostname.trim())
                 }
                 className="px-4 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white font-medium disabled:opacity-50"
               >
@@ -456,6 +437,7 @@ function LaravelDialog({ onClose }: { onClose: () => void }) {
       setPhpVersions(v);
       setPhpVersion(v[v.length - 1] ?? "");
     });
+    invoke<string>("htdocs_path").then(setParentDir).catch(() => {});
   }, []);
 
   async function submit(e: FormEvent) {
@@ -494,8 +476,7 @@ function LaravelDialog({ onClose }: { onClose: () => void }) {
         {createdPath ? (
           <div className="p-5 space-y-3 text-sm">
             <p className="text-emerald-700">
-              Project created. The Laravel public dir is below — add it as a
-              host in the Hosts panel:
+              Project created. Public dir below — add it as a host in Hosts:
             </p>
             <pre className="rounded bg-neutral-100 p-3 font-mono text-xs break-words whitespace-pre-wrap">
               {createdPath}
@@ -524,7 +505,6 @@ function LaravelDialog({ onClose }: { onClose: () => void }) {
               <input
                 value={parentDir}
                 onChange={(e) => setParentDir(e.target.value)}
-                placeholder="C:/Users/me/projects"
                 className="flex-1 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
               />
             </Field>
@@ -551,7 +531,7 @@ function LaravelDialog({ onClose }: { onClose: () => void }) {
             <div className="text-xs text-neutral-500">
               {busy
                 ? "Running composer create-project — this can take 1-3 min on first download."
-                : "Composer will download Laravel and its dependencies. Be patient."}
+                : "Composer will download Laravel and its dependencies."}
             </div>
 
             <div className="flex items-center gap-2 pt-2">

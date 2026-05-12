@@ -34,56 +34,62 @@ struct AppState {
     default_php: String,
     resources_dir: PathBuf,
     runtime_dir: PathBuf,
+    htdocs_dir: PathBuf,
 }
 
-/// Where bundled binaries live at runtime.
-///
-/// In debug builds we read from the repo's `resources/` next to `Cargo.toml`,
-/// so `pnpm tauri dev` doesn't need a reinstall. In release builds we pull
-/// them from the location Tauri's bundler dropped them into, next to the
-/// installed binary.
-fn resources_root(app: &tauri::AppHandle) -> PathBuf {
+/// Lamp Bench is a self-contained install: bundled binaries, runtime state
+/// and user-facing `htdocs/` all live under one root. In production that root
+/// is the install dir (derived from `current_exe`). In dev it's the repo
+/// root, so the binaries fetched by `pnpm scripts:fetch-binaries` line up
+/// with the layout the prod build expects.
+fn install_dir(_app: &tauri::AppHandle) -> PathBuf {
     #[cfg(debug_assertions)]
     {
-        let _ = app;
         PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .parent()
             .expect("src-tauri parent")
-            .join("resources")
+            .to_path_buf()
     }
     #[cfg(not(debug_assertions))]
     {
-        app.path()
-            .resource_dir()
-            .expect("Tauri resource dir")
-            .join("resources")
+        std::env::current_exe()
+            .ok()
+            .and_then(|p| p.parent().map(|p| p.to_path_buf()))
+            .unwrap_or_else(|| PathBuf::from("."))
     }
 }
 
-/// Where Lamp Bench keeps its writable state: SQLite DB, generated configs,
-/// per-host certs, MySQL data dirs, log files.
-///
-/// In debug builds: `.lamp-bench/` at the repo root — convenient to inspect.
-/// In release builds: the OS app-data dir, e.g.
-/// `%APPDATA%\com.lampbench.app\` on Windows.
+fn resources_root(app: &tauri::AppHandle) -> PathBuf {
+    install_dir(app).join("resources")
+}
+
+/// Writable state: generated configs, per-host SSL certs, MySQL data dirs,
+/// log files, the SQLite app DB. Lives next to bundled resources so the
+/// whole app folder can be moved or backed up as a single unit. In debug
+/// it's `.lamp-bench/` next to the repo (gitignored); in production it's
+/// `<install>/runtime/` (writable thanks to the NSIS post-install ACL hook).
 fn runtime_root(app: &tauri::AppHandle) -> Result<PathBuf, String> {
-    #[cfg(debug_assertions)]
-    {
-        let _ = app;
-        Ok(PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .parent()
-            .expect("src-tauri parent")
-            .join(".lamp-bench"))
-    }
-    #[cfg(not(debug_assertions))]
-    {
-        let dir = app
-            .path()
-            .app_data_dir()
-            .map_err(|e| format!("app_data_dir: {e}"))?;
-        std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
-        Ok(dir)
-    }
+    let dir = if cfg!(debug_assertions) {
+        install_dir(app).join(".lamp-bench")
+    } else {
+        install_dir(app).join("runtime")
+    };
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    Ok(dir)
+}
+
+/// User-facing `htdocs/`. Default Apache vhost serves from here, CMS
+/// installers default to it. Sits at the top of the install dir in
+/// production (`C:\<install>\htdocs\`) so users can find their projects
+/// without digging through hidden folders.
+fn htdocs_root(app: &tauri::AppHandle) -> Result<PathBuf, String> {
+    let dir = if cfg!(debug_assertions) {
+        install_dir(app).join(".lamp-bench").join("htdocs")
+    } else {
+        install_dir(app).join("htdocs")
+    };
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    Ok(dir)
 }
 
 #[derive(Serialize)]
@@ -92,6 +98,23 @@ struct CommandResult {
     stdout: String,
     stderr: String,
     exit_code: i32,
+}
+
+fn seed_default_index(htdocs: &Path) {
+    let index = htdocs.join("index.html");
+    if index.exists() {
+        return;
+    }
+    let _ = std::fs::write(
+        &index,
+        "<!doctype html>\n\
+         <html><head><meta charset=\"utf-8\"><title>Lamp Bench</title></head>\n\
+         <body style=\"font-family:system-ui;max-width:42rem;margin:4rem auto;padding:0 1rem;color:#222\">\n\
+         <h1>Lamp Bench</h1>\n\
+         <p>This is the default <code>htdocs</code> directory. Drop project folders here, or use <strong>Tools → CMS Extras</strong> to install one with a click.</p>\n\
+         <p>Apache serves this page at <code>http://localhost:8080/</code>. Per-host virtual hosts live alongside it on the same port.</p>\n\
+         </body></html>\n",
+    );
 }
 
 fn run_capture(cmd: &mut Command) -> Result<CommandResult, String> {
@@ -384,6 +407,12 @@ fn wordpress_install(
         source_dir: state.resources_dir.join("wordpress"),
     };
     let result = cms::wordpress::install(&req)?;
+
+    // Hostname is optional. When empty the site is reachable through the
+    // default vhost as `localhost:8080/<site_name>/`.
+    if req.hostname.is_empty() {
+        return Ok(result.docroot.to_string_lossy().replace('\\', "/"));
+    }
     register_host_and_apply(&state, &req.hostname, &result.docroot, php_version.trim())
 }
 
@@ -408,6 +437,9 @@ fn cms_install_generic(
         mysql_port,
         &db_name,
     )?;
+    if hostname.trim().is_empty() {
+        return Ok(docroot.to_string_lossy().replace('\\', "/"));
+    }
     register_host_and_apply(state, hostname.trim(), &docroot, php_version.trim())
 }
 
@@ -479,6 +511,34 @@ fn php_lint(
 }
 
 #[tauri::command]
+fn htdocs_path(state: tauri::State<AppState>) -> String {
+    state.htdocs_dir.to_string_lossy().replace('\\', "/")
+}
+
+#[tauri::command]
+fn editor_open(path: String, app: tauri::AppHandle) -> Result<(), String> {
+    use tauri::{WebviewUrl, WebviewWindowBuilder};
+    let label = format!(
+        "editor-{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_millis())
+            .unwrap_or(0)
+    );
+    // We hand the path off through the URL hash. App.tsx checks it on mount
+    // and renders a full-screen EditorSection when present.
+    let encoded = path.replace('#', "%23");
+    let url = format!("index.html#editor={encoded}");
+    WebviewWindowBuilder::new(&app, &label, WebviewUrl::App(url.into()))
+        .title(format!("Lamp Bench — {}", path))
+        .inner_size(1100.0, 720.0)
+        .min_inner_size(600.0, 400.0)
+        .build()
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
 fn read_log(
     service: &str,
     lines: usize,
@@ -513,7 +573,9 @@ pub fn run() {
             let resources = resources_root(&app.handle());
             let runtime = runtime_root(&app.handle())
                 .map_err(|e| -> Box<dyn std::error::Error> { e.into() })?;
-            std::fs::create_dir_all(&runtime).ok();
+            let htdocs = htdocs_root(&app.handle())
+                .map_err(|e| -> Box<dyn std::error::Error> { e.into() })?;
+            seed_default_index(&htdocs);
 
             let conn = db::open(&runtime.join("lamp.db"))?;
 
@@ -554,6 +616,7 @@ pub fn run() {
                     LocalCa::new(ca_dir.clone()),
                     ssl_dir.clone(),
                     runtime.clone(),
+                    htdocs.clone(),
                 )),
                 nginx: Mutex::new(NginxService::new(
                     resources.join("nginx"),
@@ -576,6 +639,7 @@ pub fn run() {
                 default_php,
                 resources_dir: resources,
                 runtime_dir: runtime,
+                htdocs_dir: htdocs,
             };
 
             app.manage(state);
@@ -595,6 +659,8 @@ pub fn run() {
             host_update,
             host_delete,
             read_log,
+            htdocs_path,
+            editor_open,
             git_available,
             git_init,
             composer_version,

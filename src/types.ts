@@ -12,7 +12,7 @@ export type Host = {
   nginx_extra: string;
 };
 
-export type SectionId = "hosts" | "tools" | "editor" | "logs";
+export type SectionId = "home" | "hosts" | "tools" | "config" | "logs";
 
 export type LogName = "apache" | "mysql" | "nginx";
 

@@ -21,6 +21,10 @@ pub struct ApacheService {
     runtime_dir: PathBuf,
     ca: LocalCa,
     ssl_dir: PathBuf,
+    /// User-facing htdocs root. Default vhost serves from here, CMS one-click
+    /// installs land here. Lives next to runtime state, not under
+    /// `resources/apache/` (which is read-only after install).
+    htdocs_dir: PathBuf,
     port: u16,
     hosts: Vec<Host>,
     child: Option<Child>,
@@ -35,6 +39,7 @@ impl ApacheService {
         ca: LocalCa,
         ssl_dir: PathBuf,
         runtime_dir: PathBuf,
+        htdocs_dir: PathBuf,
     ) -> Self {
         Self {
             apache_dir,
@@ -44,6 +49,7 @@ impl ApacheService {
             ca,
             ssl_dir,
             runtime_dir,
+            htdocs_dir,
             port: DEFAULT_PORT,
             hosts: Vec::new(),
             child: None,
@@ -173,6 +179,7 @@ impl ApacheService {
             self.port,
             &self.hosts,
             &self.ssl_dir,
+            &self.htdocs_dir,
             |version| self.php_install(version).dir.clone(),
         );
         fs::write(&conf_path, conf).map_err(|e| e.to_string())?;
@@ -233,6 +240,7 @@ fn build_conf(
     port: u16,
     hosts: &[Host],
     ssl_dir: &Path,
+    htdocs_dir: &Path,
     php_dir_for: impl Fn(&str) -> PathBuf,
 ) -> String {
     let server_root = posix(apache_dir);
@@ -240,6 +248,7 @@ fn build_conf(
     let pma = posix(pma_dir);
     let default_cgi = posix(&default_php_dir.join("php-cgi.exe"));
     let ssl = posix(ssl_dir);
+    let htdocs = posix(htdocs_dir);
     let ssl_port = SSL_PORT;
 
     let mut out = format!(
@@ -290,13 +299,16 @@ fn build_conf(
          \n"
     );
 
-    // Default catch-all vhost: HTTP
+    // Default catch-all vhost (HTTP + HTTPS) — serves from the user-facing
+    // htdocs dir, NOT the bundled Apache welcome page. CMS one-click installs
+    // and stray project folders both live there, accessible as
+    // `localhost:8080/<project>/`.
     out.push_str(&format!(
         "<VirtualHost *:{port}>\n\
-         \x20   DocumentRoot \"{server_root}/htdocs\"\n\
-         \x20   <Directory \"{server_root}/htdocs\">\n\
+         \x20   DocumentRoot \"{htdocs}\"\n\
+         \x20   <Directory \"{htdocs}\">\n\
          \x20       Options Indexes FollowSymLinks ExecCGI\n\
-         \x20       AllowOverride None\n\
+         \x20       AllowOverride All\n\
          \x20       Require all granted\n\
          \x20       <FilesMatch \\.php$>\n\
          \x20           SetHandler fcgid-script\n\
@@ -306,16 +318,15 @@ fn build_conf(
          </VirtualHost>\n\n"
     ));
 
-    // Default catch-all vhost: HTTPS (uses localhost leaf cert)
     out.push_str(&format!(
         "<VirtualHost *:{ssl_port}>\n\
-         \x20   DocumentRoot \"{server_root}/htdocs\"\n\
+         \x20   DocumentRoot \"{htdocs}\"\n\
          \x20   SSLEngine on\n\
          \x20   SSLCertificateFile \"{ssl}/localhost.crt\"\n\
          \x20   SSLCertificateKeyFile \"{ssl}/localhost.key\"\n\
-         \x20   <Directory \"{server_root}/htdocs\">\n\
+         \x20   <Directory \"{htdocs}\">\n\
          \x20       Options Indexes FollowSymLinks ExecCGI\n\
-         \x20       AllowOverride None\n\
+         \x20       AllowOverride All\n\
          \x20       Require all granted\n\
          \x20       <FilesMatch \\.php$>\n\
          \x20           SetHandler fcgid-script\n\

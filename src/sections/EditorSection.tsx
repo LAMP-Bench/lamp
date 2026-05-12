@@ -42,9 +42,13 @@ function languageForPath(path: string): string {
 export function EditorSection({
   initialPath,
   onConsumedInitialPath,
+  fullscreen: _fullscreen,
 }: {
   initialPath?: string | null;
   onConsumedInitialPath?: () => void;
+  /// Reserved for layout differences in the standalone editor window. Kept
+  /// in the API so the parent doesn't have to know we ignore it for now.
+  fullscreen?: boolean;
 } = {}) {
   const [path, setPath] = useState("");
   const [content, setContent] = useState("");

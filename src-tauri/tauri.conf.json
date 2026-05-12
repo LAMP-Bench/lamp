@@ -39,6 +39,13 @@
       "../resources/mysql-8.0/": "./resources/mysql-8.0/",
       "../resources/php-8.4/": "./resources/php-8.4/",
       "../resources/phpmyadmin/": "./resources/phpmyadmin/"
+    },
+    "windows": {
+      "nsis": {
+        "installMode": "perMachine",
+        "template": "./installer-template.nsi",
+        "installerHooks": "./installer-hooks.nsh"
+      }
     }
   }
 }
