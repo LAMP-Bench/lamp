@@ -56,8 +56,12 @@ async function extract(archivePath, destDir) {
 
 async function main() {
   const force = process.argv.includes("--force");
+  // `--bundled-only` skips entries marked `bundled: false` in binaries.json.
+  // CI release builds use this so the installer doesn't carry every CMS and
+  // every PHP version — those download on-demand at runtime.
+  const bundledOnly = process.argv.includes("--bundled-only");
   const platform = detectPlatform();
-  console.log(`Platform: ${platform}`);
+  console.log(`Platform: ${platform}${bundledOnly ? " (bundled-only)" : ""}`);
 
   await mkdir(resourcesDir, { recursive: true });
   await mkdir(cacheDir, { recursive: true });
@@ -65,6 +69,13 @@ async function main() {
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 
   for (const [name, entry] of Object.entries(manifest)) {
+    // `bundled` defaults to true when missing so existing entries don't break.
+    const isBundled = entry.bundled !== false;
+    if (bundledOnly && !isBundled) {
+      console.log(`[skip] ${name} is on-demand only (bundled: false)`);
+      continue;
+    }
+
     const p = entry.platforms?.[platform];
     if (!p) {
       console.log(`[skip] no ${platform} binary configured for ${name}`);

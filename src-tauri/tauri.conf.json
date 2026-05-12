@@ -34,7 +34,11 @@
       "icons/icon.ico"
     ],
     "resources": {
-      "../resources/": "./resources/"
+      "../resources/apache/": "./resources/apache/",
+      "../resources/composer/": "./resources/composer/",
+      "../resources/mysql-8.0/": "./resources/mysql-8.0/",
+      "../resources/php-8.4/": "./resources/php-8.4/",
+      "../resources/phpmyadmin/": "./resources/phpmyadmin/"
     }
   }
 }

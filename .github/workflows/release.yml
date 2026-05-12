@@ -67,8 +67,13 @@ jobs:
           path: resources/.cache
           key: ${{ runner.os }}-resources-${{ hashFiles('scripts/binaries.json') }}
 
+      # `--bundled-only` pulls just the essentials marked `bundled: true`
+      # in scripts/binaries.json (Apache, mod_fcgid, MySQL 8.0, PHP 8.4,
+      # Xdebug for 8.4, phpMyAdmin, Composer). Optional things — alt
+      # PHP/MySQL versions, Nginx, Redis, every CMS — are skipped at build
+      # time and meant to download on-demand from within the app.
       - name: Fetch bundled service binaries
-        run: pnpm scripts:fetch-binaries
+        run: pnpm scripts:fetch-binaries -- --bundled-only
 
       - name: Build Tauri app + upload to alpha-testing release
         uses: tauri-apps/tauri-action@v0

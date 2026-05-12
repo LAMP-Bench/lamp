@@ -2,6 +2,7 @@
   "apache": {
     "version": "2.4.66",
     "extract_to": "apache",
+    "bundled": true,
     "platforms": {
       "windows-x64": {
         "filename": "httpd-2.4.66-251206-Win64-VS17.zip",
@@ -11,9 +12,22 @@
       }
     }
   },
+  "mod_fcgid": {
+    "version": "2.3.10",
+    "extract_to": "apache/modules-extra",
+    "bundled": true,
+    "platforms": {
+      "windows-x64": {
+        "filename": "mod_fcgid-2.3.10-win64-VS17.zip",
+        "url": "https://www.apachelounge.com/download/VS17/modules/mod_fcgid-2.3.10-win64-VS17.zip",
+        "sha256": "CF3DED8953863C68FC522EE48F516565E67E18B180B9E5B147668C04FA5DC46D"
+      }
+    }
+  },
   "nginx": {
     "version": "1.30.0",
     "extract_to": "nginx",
+    "bundled": false,
     "platforms": {
       "windows-x64": {
         "filename": "nginx-1.30.0.zip",
@@ -23,20 +37,10 @@
       }
     }
   },
-  "mod_fcgid": {
-    "version": "2.3.10",
-    "extract_to": "apache/modules-extra",
-    "platforms": {
-      "windows-x64": {
-        "filename": "mod_fcgid-2.3.10-win64-VS17.zip",
-        "url": "https://www.apachelounge.com/download/VS17/modules/mod_fcgid-2.3.10-win64-VS17.zip",
-        "sha256": "CF3DED8953863C68FC522EE48F516565E67E18B180B9E5B147668C04FA5DC46D"
-      }
-    }
-  },
   "mysql-8.0": {
     "version": "8.0.46",
     "extract_to": "mysql-8.0",
+    "bundled": true,
     "platforms": {
       "windows-x64": {
         "filename": "mysql-8.0.46-winx64.zip",
@@ -49,6 +53,7 @@
   "mysql-5.7": {
     "version": "5.7.44",
     "extract_to": "mysql-5.7",
+    "bundled": false,
     "platforms": {
       "windows-x64": {
         "filename": "mysql-5.7.44-winx64.zip",
@@ -61,6 +66,7 @@
   "redis": {
     "version": "5.0.14.1",
     "extract_to": "redis",
+    "bundled": false,
     "platforms": {
       "windows-x64": {
         "filename": "Redis-x64-5.0.14.1.zip",
@@ -72,6 +78,7 @@
   "php-8.3": {
     "version": "8.3.31",
     "extract_to": "php-8.3",
+    "bundled": false,
     "platforms": {
       "windows-x64": {
         "filename": "php-8.3.31-nts-Win32-vs16-x64.zip",
@@ -83,6 +90,7 @@
   "php-8.4": {
     "version": "8.4.21",
     "extract_to": "php-8.4",
+    "bundled": true,
     "platforms": {
       "windows-x64": {
         "filename": "php-8.4.21-nts-Win32-vs17-x64.zip",
@@ -94,6 +102,7 @@
   "xdebug-8.3": {
     "version": "3.5.1",
     "raw_file": "php-8.3/ext/php_xdebug.dll",
+    "bundled": false,
     "platforms": {
       "windows-x64": {
         "filename": "php_xdebug-3.5.1-8.3-nts-vs16-x86_64.dll",
@@ -105,6 +114,7 @@
   "xdebug-8.4": {
     "version": "3.5.1",
     "raw_file": "php-8.4/ext/php_xdebug.dll",
+    "bundled": true,
     "platforms": {
       "windows-x64": {
         "filename": "php_xdebug-3.5.1-8.4-nts-vs17-x86_64.dll",
@@ -116,6 +126,7 @@
   "wordpress": {
     "version": "6.8.2",
     "extract_to": "wordpress",
+    "bundled": false,
     "platforms": {
       "windows-x64": {
         "filename": "wordpress-6.8.2.zip",
@@ -128,6 +139,7 @@
   "joomla": {
     "version": "5.2.3",
     "extract_to": "joomla",
+    "bundled": false,
     "platforms": {
       "windows-x64": {
         "filename": "Joomla_5-2-3.zip",
@@ -139,6 +151,7 @@
   "drupal": {
     "version": "11.0.7",
     "extract_to": "drupal",
+    "bundled": false,
     "platforms": {
       "windows-x64": {
         "filename": "drupal-11.0.7.zip",
@@ -151,6 +164,7 @@
   "mediawiki": {
     "version": "1.43.1",
     "extract_to": "mediawiki",
+    "bundled": false,
     "platforms": {
       "windows-x64": {
         "filename": "mediawiki-1.43.1.zip",
@@ -163,6 +177,7 @@
   "composer": {
     "version": "2.9.7",
     "raw_file": "composer/composer.phar",
+    "bundled": true,
     "platforms": {
       "windows-x64": {
         "filename": "composer.phar",
@@ -174,6 +189,7 @@
   "phpmyadmin": {
     "version": "5.2.3",
     "extract_to": "phpmyadmin",
+    "bundled": true,
     "platforms": {
       "windows-x64": {
         "filename": "phpMyAdmin-5.2.3-all-languages.zip",
