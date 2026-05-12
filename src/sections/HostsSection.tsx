@@ -10,26 +10,29 @@ import {
   FiGitBranch,
   FiSave,
   FiRotateCcw,
+  FiCamera,
+  FiRefreshCw,
+  FiTrash2,
 } from "react-icons/fi";
-import type { Host } from "../types";
+import type { Host, PhpCatalogEntry, Snapshot } from "../types";
 
-type Tab = "general" | "apache" | "nginx" | "ssl" | "extras";
+type Tab = "general" | "apache" | "nginx" | "ssl" | "snapshots" | "extras";
 
 export function HostsSection() {
   const [hosts, setHosts] = useState<Host[]>([]);
-  const [versions, setVersions] = useState<string[]>([]);
+  const [catalog, setCatalog] = useState<PhpCatalogEntry[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function refresh(preferId?: number | null) {
     try {
-      const [hostList, vers] = await Promise.all([
+      const [hostList, cat] = await Promise.all([
         invoke<Host[]>("host_list"),
-        invoke<string[]>("php_versions"),
+        invoke<PhpCatalogEntry[]>("php_catalog"),
       ]);
       setHosts(hostList);
-      setVersions(vers);
+      setCatalog(cat);
       const wanted = preferId ?? selectedId;
       if (wanted == null && hostList.length) {
         setSelectedId(hostList[0].id);
@@ -76,7 +79,7 @@ export function HostsSection() {
       <div className="flex-1 min-w-0 overflow-auto">
         {adding ? (
           <AddHostForm
-            versions={versions}
+            catalog={catalog}
             onCancel={() => {
               setAdding(false);
               setError(null);
@@ -92,7 +95,7 @@ export function HostsSection() {
           <HostDetail
             key={selected.id}
             host={selected}
-            versions={versions}
+            catalog={catalog}
             onSaved={(updated) => refresh(updated.id)}
           />
         ) : (
@@ -189,11 +192,11 @@ function HostList({
 
 function HostDetail({
   host,
-  versions,
+  catalog,
   onSaved,
 }: {
   host: Host;
-  versions: string[];
+  catalog: PhpCatalogEntry[];
   onSaved: (updated: Host) => void;
 }) {
   const [tab, setTab] = useState<Tab>("general");
@@ -250,6 +253,7 @@ function HostDetail({
     { id: "apache", label: "Apache", enabled: true },
     { id: "nginx", label: "Nginx", enabled: true },
     { id: "ssl", label: "SSL", enabled: true },
+    { id: "snapshots", label: "Snapshots", enabled: true },
     { id: "extras", label: "Extras", enabled: false },
   ];
 
@@ -280,7 +284,7 @@ function HostDetail({
 
       <div className="flex-1 overflow-auto p-6">
         {tab === "general" && (
-          <GeneralTab draft={draft} setDraft={setDraft} versions={versions} />
+          <GeneralTab draft={draft} setDraft={setDraft} catalog={catalog} />
         )}
         {tab === "apache" && (
           <ExtrasTab
@@ -299,6 +303,7 @@ function HostDetail({
           />
         )}
         {tab === "ssl" && <SslTab host={host} />}
+        {tab === "snapshots" && <SnapshotsTab host={host} />}
       </div>
 
       <div className="border-t border-neutral-200 px-6 py-2.5 flex items-center gap-3 bg-neutral-50">
@@ -336,11 +341,11 @@ function HostDetail({
 function GeneralTab({
   draft,
   setDraft,
-  versions,
+  catalog,
 }: {
   draft: Host;
   setDraft: (h: Host) => void;
-  versions: string[];
+  catalog: PhpCatalogEntry[];
 }) {
   return (
     <div className="max-w-2xl space-y-4 text-sm">
@@ -372,14 +377,18 @@ function GeneralTab({
         <select
           value={draft.php_version}
           onChange={(e) => setDraft({ ...draft, php_version: e.target.value })}
-          className="w-32 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500 bg-white"
+          className="w-44 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500 bg-white"
         >
-          {versions.map((v) => (
-            <option key={v} value={v}>
-              {v}
+          {catalog.map((e) => (
+            <option key={e.version} value={e.version}>
+              {e.version}
+              {e.installed ? "" : " — download"}
             </option>
           ))}
         </select>
+        <span className="text-xs text-neutral-500">
+          Versions marked "download" are fetched on save.
+        </span>
       </Field>
 
       <Field label="Document root">
@@ -492,14 +501,173 @@ function Field({
   );
 }
 
+function SnapshotsTab({ host }: { host: Host }) {
+  const [list, setList] = useState<Snapshot[]>([]);
+  const [label, setLabel] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function refresh() {
+    try {
+      const r = await invoke<Snapshot[]>("snapshot_list", {
+        hostId: host.id,
+      });
+      setList(r);
+    } catch (e) {
+      setError(String(e));
+    }
+  }
+
+  useEffect(() => {
+    refresh();
+  }, [host.id]);
+
+  async function create(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      await invoke<Snapshot>("snapshot_create", {
+        hostId: host.id,
+        label: label.trim() || "Untitled snapshot",
+      });
+      setLabel("");
+      await refresh();
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function restore(id: number) {
+    if (
+      !confirm(
+        "Restore this snapshot? Files in the docroot will be overwritten with the snapshot's contents (existing files NOT in the snapshot are left alone)."
+      )
+    )
+      return;
+    setBusy(true);
+    setError(null);
+    try {
+      await invoke("snapshot_restore", { id });
+      alert("Restored.");
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove(id: number) {
+    if (!confirm("Delete this snapshot? The .tar.zst file is removed.")) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await invoke("snapshot_delete", { id });
+      await refresh();
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="max-w-3xl space-y-4 text-sm">
+      <form
+        onSubmit={create}
+        className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 flex items-center gap-2"
+      >
+        <FiCamera className="text-neutral-500 ml-1 shrink-0" />
+        <input
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder='Label (e.g. "before plugin update")'
+          className="flex-1 px-3 py-1.5 rounded border border-neutral-300 bg-white text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+        />
+        <button
+          type="submit"
+          disabled={busy}
+          className="px-3 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium disabled:opacity-50"
+        >
+          {busy ? "…" : "Take snapshot"}
+        </button>
+      </form>
+
+      <p className="text-xs text-neutral-500">
+        Snapshots capture <span className="font-mono">{host.docroot}</span> as
+        a single <span className="font-mono">.tar.zst</span> archive. The
+        database is <strong>not</strong> included yet — use phpMyAdmin's
+        export/import for that until Phase 7.x adds DB-aware snapshots.
+      </p>
+
+      {list.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-neutral-300 p-6 text-center text-neutral-500 text-sm">
+          No snapshots yet.
+        </div>
+      ) : (
+        <div className="rounded-lg border border-neutral-200 bg-white overflow-hidden divide-y divide-neutral-100">
+          {list.map((s) => (
+            <div
+              key={s.id}
+              className="px-4 py-3 flex items-center gap-3 text-sm"
+            >
+              <FiCamera className="text-neutral-400 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-neutral-900 truncate">
+                  {s.label}
+                </div>
+                <div className="text-[11px] text-neutral-500 font-mono">
+                  {s.created_at} · {formatSize(s.size_bytes)}
+                </div>
+              </div>
+              <button
+                onClick={() => restore(s.id)}
+                disabled={busy}
+                className="px-2.5 py-1 rounded border border-neutral-300 hover:bg-neutral-50 text-xs flex items-center gap-1.5 text-neutral-700 disabled:opacity-50"
+              >
+                <FiRefreshCw />
+                Restore
+              </button>
+              <button
+                onClick={() => remove(s.id)}
+                disabled={busy}
+                className="p-1.5 rounded text-red-500 hover:bg-red-50 disabled:opacity-50"
+                title="Delete snapshot"
+              >
+                <FiTrash2 />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {error && (
+        <div className="text-xs text-red-600 font-mono break-words bg-red-50 border border-red-200 rounded p-2">
+          {error}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024)
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
 function AddHostForm({
-  versions,
+  catalog,
   onCancel,
   onCreated,
   error,
   setError,
 }: {
-  versions: string[];
+  catalog: PhpCatalogEntry[];
   onCancel: () => void;
   onCreated: (id: number) => void;
   error: string | null;
@@ -507,12 +675,16 @@ function AddHostForm({
 }) {
   const [name, setName] = useState("");
   const [docroot, setDocroot] = useState("");
-  const [phpVersion, setPhpVersion] = useState(
-    versions[versions.length - 1] ?? ""
-  );
+  // Default to the latest INSTALLED version. If everything is missing
+  // (unusual — installer ships 8.4) fall back to the highest in the catalog.
+  const installed = catalog.filter((e) => e.installed);
+  const fallback =
+    installed[installed.length - 1] ?? catalog[catalog.length - 1];
+  const [phpVersion, setPhpVersion] = useState(fallback?.version ?? "");
   const [initGit, setInitGit] = useState(false);
   const [gitAvailable, setGitAvailable] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [stage, setStage] = useState<"idle" | "downloading">("idle");
 
   useEffect(() => {
     invoke<boolean>("git_available").then(setGitAvailable);
@@ -523,6 +695,14 @@ function AddHostForm({
     setBusy(true);
     setError(null);
     try {
+      // Auto-download the picked PHP version if it isn't on disk yet. The
+      // bundled php_install command grabs both `php-X.Y` and `xdebug-X.Y`.
+      const picked = catalog.find((e) => e.version === phpVersion);
+      if (picked && !picked.installed) {
+        setStage("downloading");
+        await invoke("php_install", { version: phpVersion });
+      }
+
       const host = await invoke<Host>("host_create", {
         name: name.trim(),
         docroot: docroot.trim(),
@@ -541,6 +721,7 @@ function AddHostForm({
       setError(String(e));
     } finally {
       setBusy(false);
+      setStage("idle");
     }
   }
 
@@ -571,14 +752,18 @@ function AddHostForm({
             <select
               value={phpVersion}
               onChange={(e) => setPhpVersion(e.target.value)}
-              className="w-32 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 bg-white"
+              className="w-44 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 bg-white"
             >
-              {versions.map((v) => (
-                <option key={v} value={v}>
-                  {v}
+              {catalog.map((e) => (
+                <option key={e.version} value={e.version}>
+                  {e.version}
+                  {e.installed ? "" : " — download"}
                 </option>
               ))}
             </select>
+            <span className="text-xs text-neutral-500">
+              Versions marked "download" are fetched on Save.
+            </span>
           </Field>
 
           <Field label="Document root">
@@ -618,7 +803,11 @@ function AddHostForm({
             disabled={busy || !name.trim() || !docroot.trim() || !phpVersion}
             className="px-4 py-2 rounded bg-sky-500 hover:bg-sky-600 text-white font-medium disabled:opacity-50"
           >
-            {busy ? "Saving…" : "Save"}
+            {stage === "downloading"
+              ? "Downloading PHP…"
+              : busy
+              ? "Saving…"
+              : "Save"}
           </button>
           <button
             type="button"

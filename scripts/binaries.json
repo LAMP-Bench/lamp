@@ -63,6 +63,18 @@
       }
     }
   },
+  "mailhog": {
+    "version": "1.0.1",
+    "raw_file": "mailhog/MailHog.exe",
+    "bundled": false,
+    "platforms": {
+      "windows-x64": {
+        "filename": "MailHog_windows_amd64.exe",
+        "url": "https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_windows_amd64.exe",
+        "sha256": "B217990446E97A60FF09EC21D3F86E54415595148904A7F7737F5019D01671CE"
+      }
+    }
+  },
   "redis": {
     "version": "5.0.14.1",
     "extract_to": "redis",
@@ -72,6 +84,30 @@
         "filename": "Redis-x64-5.0.14.1.zip",
         "url": "https://github.com/tporadowski/redis/releases/download/v5.0.14.1/Redis-x64-5.0.14.1.zip",
         "sha256": "018EA18A35876383CBB5F4CD0258ADFC87747CF9D619BCE1CF73A2E36F720CCF"
+      }
+    }
+  },
+  "php-8.1": {
+    "version": "8.1.34",
+    "extract_to": "php-8.1",
+    "bundled": false,
+    "platforms": {
+      "windows-x64": {
+        "filename": "php-8.1.34-nts-Win32-vs16-x64.zip",
+        "url": "https://windows.php.net/downloads/releases/php-8.1.34-nts-Win32-vs16-x64.zip",
+        "sha256": "9CFE246CB144076C16F5913A3EF88A474C3DD7E60F0F0C8BB95FAF68674016CC"
+      }
+    }
+  },
+  "php-8.2": {
+    "version": "8.2.31",
+    "extract_to": "php-8.2",
+    "bundled": false,
+    "platforms": {
+      "windows-x64": {
+        "filename": "php-8.2.31-nts-Win32-vs16-x64.zip",
+        "url": "https://windows.php.net/downloads/releases/php-8.2.31-nts-Win32-vs16-x64.zip",
+        "sha256": "941BD3B87683EB16D5FFA7F5997DE9A5E07EF08BA875048E5C4D95B4FC778162"
       }
     }
   },
@@ -99,6 +135,42 @@
       }
     }
   },
+  "php-8.5": {
+    "version": "8.5.6",
+    "extract_to": "php-8.5",
+    "bundled": false,
+    "platforms": {
+      "windows-x64": {
+        "filename": "php-8.5.6-nts-Win32-vs17-x64.zip",
+        "url": "https://windows.php.net/downloads/releases/php-8.5.6-nts-Win32-vs17-x64.zip",
+        "sha256": "E25CC9400A7D176F18074F677EF0159D6B04AECFB255C924D808B7144075092F"
+      }
+    }
+  },
+  "xdebug-8.1": {
+    "version": "3.5.1",
+    "raw_file": "php-8.1/ext/php_xdebug.dll",
+    "bundled": false,
+    "platforms": {
+      "windows-x64": {
+        "filename": "php_xdebug-3.5.1-8.1-nts-vs16-x86_64.dll",
+        "url": "https://xdebug.org/files/php_xdebug-3.5.1-8.1-nts-vs16-x86_64.dll",
+        "sha256": "A39D322CF70C49D5681D1926D8E496597A116D6829FB110973A51980267B95FA"
+      }
+    }
+  },
+  "xdebug-8.2": {
+    "version": "3.5.1",
+    "raw_file": "php-8.2/ext/php_xdebug.dll",
+    "bundled": false,
+    "platforms": {
+      "windows-x64": {
+        "filename": "php_xdebug-3.5.1-8.2-nts-vs16-x86_64.dll",
+        "url": "https://xdebug.org/files/php_xdebug-3.5.1-8.2-nts-vs16-x86_64.dll",
+        "sha256": "00AF08ED9936E2C768F48308DCEB91AAD6A0EDB0DB7F29695137663B9FC4EF25"
+      }
+    }
+  },
   "xdebug-8.3": {
     "version": "3.5.1",
     "raw_file": "php-8.3/ext/php_xdebug.dll",
@@ -120,6 +192,18 @@
         "filename": "php_xdebug-3.5.1-8.4-nts-vs17-x86_64.dll",
         "url": "https://xdebug.org/files/php_xdebug-3.5.1-8.4-nts-vs17-x86_64.dll",
         "sha256": "B386583D38741652135CB34A1B816855819C37D13C66F79CB8B107751A858BE3"
+      }
+    }
+  },
+  "xdebug-8.5": {
+    "version": "3.5.1",
+    "raw_file": "php-8.5/ext/php_xdebug.dll",
+    "bundled": false,
+    "platforms": {
+      "windows-x64": {
+        "filename": "php_xdebug-3.5.1-8.5-nts-vs17-x86_64.dll",
+        "url": "https://xdebug.org/files/php_xdebug-3.5.1-8.5-nts-vs17-x86_64.dll",
+        "sha256": "8CDDAFD5326A97ED2B0321CD0529A76178238FB628E62C646F299AB4A1357E36"
       }
     }
   },

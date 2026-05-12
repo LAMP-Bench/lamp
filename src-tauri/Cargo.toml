@@ -21,3 +21,12 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 rcgen = { version = "0.13", features = ["x509-parser"] }
 time = { version = "0.3", features = ["std"] }
 rand = "0.8"
+# Runtime on-demand binary downloads (Redis, Nginx, alt PHP, CMSes, …).
+# ureq's blocking HTTP + rustls TLS so we don't need system OpenSSL. zip
+# handles the extraction. sha2 verifies the manifest's pinned SHA256.
+ureq = { version = "2.10", default-features = false, features = ["tls"] }
+sha2 = "0.10"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+# Snapshots — tar.zst archive of a host's docroot
+tar = "0.4"
+zstd = { version = "0.13", default-features = false }

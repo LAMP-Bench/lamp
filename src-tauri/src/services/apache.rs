@@ -60,6 +60,16 @@ impl ApacheService {
         self.hosts = hosts;
     }
 
+    /// Refresh the list of available PHP versions from disk. Callers do this
+    /// right before `start()` / `reload()` so newly-downloaded PHP versions
+    /// (via the on-demand runtime fetch) get picked up without restarting
+    /// the whole app.
+    pub fn set_php_installs(&mut self, installs: Vec<PhpInstall>) {
+        if !installs.is_empty() {
+            self.php_installs = installs;
+        }
+    }
+
     pub fn available_php_versions(&self) -> Vec<String> {
         self.php_installs.iter().map(|p| p.version.clone()).collect()
     }
@@ -122,7 +132,16 @@ impl ApacheService {
                  xdebug.start_with_request=trigger\n\
                  xdebug.client_host=127.0.0.1\n\
                  xdebug.client_port=9003\n\
-                 xdebug.discover_client_host=0\n",
+                 xdebug.discover_client_host=0\n\
+                 \n\
+                 ; Mail capture via MailHog — listening on 127.0.0.1:1025\n\
+                 ; when the Mailhog service is running. PHP's mail() routes\n\
+                 ; here so the user can inspect emails in the MailHog web UI\n\
+                 ; at http://localhost:8025 instead of trying to deliver.\n\
+                 [mail function]\n\
+                 SMTP = 127.0.0.1\n\
+                 smtp_port = 1025\n\
+                 sendmail_from = noreply@localhost\n",
                 ext = posix(&p.dir.join("ext"))
             ));
             fs::write(&ini, content).map_err(|e| format!("write {}: {e}", ini.display()))?;

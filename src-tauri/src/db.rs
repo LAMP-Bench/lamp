@@ -9,6 +9,16 @@ CREATE TABLE IF NOT EXISTS hosts (
     php_version TEXT    NOT NULL DEFAULT '8.4',
     created_at  TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS snapshots (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    host_id     INTEGER NOT NULL,
+    label       TEXT    NOT NULL,
+    path        TEXT    NOT NULL UNIQUE,
+    size_bytes  INTEGER NOT NULL,
+    created_at  TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (host_id) REFERENCES hosts(id) ON DELETE CASCADE
+);
 ";
 
 pub fn open(path: &Path) -> Result<Connection, rusqlite::Error> {

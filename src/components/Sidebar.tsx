@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { IconType } from "react-icons";
 import {
   FiHome,
@@ -9,10 +10,11 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiHelpCircle,
+  FiDownload,
 } from "react-icons/fi";
 import { SiApache, SiNginx, SiMysql, SiRedis } from "react-icons/si";
+import { FiMail } from "react-icons/fi";
 import { LuLamp } from "react-icons/lu";
-import { invoke } from "@tauri-apps/api/core";
 import { Toggle } from "./Toggle";
 import { useService } from "../useService";
 import type { SectionId, ServiceName } from "../types";
@@ -32,13 +34,47 @@ type SvcSpec = {
   label: string;
   icon: IconType;
   iconColor: string;
+  /// Manifest entry that has to exist on disk before the toggle can flip.
+  /// `null` for bundled services that ship with the installer.
+  binaryName: string | null;
 };
 
 const SERVICES: SvcSpec[] = [
-  { name: "apache", label: "Apache", icon: SiApache, iconColor: "text-red-500" },
-  { name: "nginx", label: "Nginx", icon: SiNginx, iconColor: "text-emerald-500" },
-  { name: "mysql", label: "MySQL", icon: SiMysql, iconColor: "text-sky-500" },
-  { name: "redis", label: "Redis", icon: SiRedis, iconColor: "text-rose-500" },
+  {
+    name: "apache",
+    label: "Apache",
+    icon: SiApache,
+    iconColor: "text-red-500",
+    binaryName: null,
+  },
+  {
+    name: "nginx",
+    label: "Nginx",
+    icon: SiNginx,
+    iconColor: "text-emerald-500",
+    binaryName: "nginx",
+  },
+  {
+    name: "mysql",
+    label: "MySQL",
+    icon: SiMysql,
+    iconColor: "text-sky-500",
+    binaryName: null,
+  },
+  {
+    name: "redis",
+    label: "Redis",
+    icon: SiRedis,
+    iconColor: "text-rose-500",
+    binaryName: "redis",
+  },
+  {
+    name: "mailhog",
+    label: "MailHog",
+    icon: FiMail,
+    iconColor: "text-amber-500",
+    binaryName: "mailhog",
+  },
 ];
 
 export function Sidebar({
@@ -138,58 +174,59 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
   const running = status?.kind === "running";
   const Icon = spec.icon;
 
+  // null = not yet checked, true = files exist, false = on-demand and missing.
+  const [installed, setInstalled] = useState<boolean | null>(
+    spec.binaryName == null ? true : null
+  );
+  const [installing, setInstalling] = useState(false);
+
+  useEffect(() => {
+    if (spec.binaryName == null) return;
+    invoke<boolean>("binary_installed", { name: spec.binaryName })
+      .then(setInstalled)
+      .catch(() => setInstalled(false));
+  }, [spec.binaryName]);
+
+  async function install() {
+    if (spec.binaryName == null) return;
+    setInstalling(true);
+    try {
+      await invoke("binary_download", { name: spec.binaryName });
+      setInstalled(true);
+    } catch (e) {
+      alert(`Install failed: ${e}`);
+    } finally {
+      setInstalling(false);
+    }
+  }
+
   return (
     <div className="px-4 py-1.5 flex items-center gap-3">
       <Icon className={`text-[15px] ${spec.iconColor}`} />
-      <div className="flex-1 flex items-center gap-1.5 text-neutral-800 min-w-0">
-        <span className="truncate">{spec.label}</span>
-        {spec.name === "mysql" && <MysqlVersionPicker running={running} />}
+      <div className="flex-1 flex items-center gap-1.5 text-neutral-800">
+        <span>{spec.label}</span>
         {running && (
           <span
-            className="size-1.5 rounded-full bg-emerald-500 shrink-0"
+            className="size-1.5 rounded-full bg-emerald-500"
             title="running"
           />
         )}
       </div>
-      <Toggle checked={running} onChange={toggle} disabled={busy} />
+      {installed === null ? (
+        <span className="text-[10px] text-neutral-400 font-mono">…</span>
+      ) : installed ? (
+        <Toggle checked={running} onChange={toggle} disabled={busy} />
+      ) : (
+        <button
+          onClick={install}
+          disabled={installing}
+          className="px-2 py-0.5 rounded text-[11px] font-medium text-sky-700 border border-sky-300 hover:bg-sky-50 disabled:opacity-50 flex items-center gap-1"
+          title="Download this service"
+        >
+          <FiDownload className="text-[10px]" />
+          {installing ? "…" : "Install"}
+        </button>
+      )}
     </div>
-  );
-}
-
-function MysqlVersionPicker({ running }: { running: boolean }) {
-  const [versions, setVersions] = useState<string[]>([]);
-  const [active, setActive] = useState("");
-
-  useEffect(() => {
-    invoke<string[]>("mysql_versions").then(setVersions);
-    invoke<string>("mysql_active_version").then(setActive);
-  }, []);
-
-  async function change(v: string) {
-    try {
-      await invoke("mysql_set_version", { version: v });
-      setActive(v);
-    } catch (e) {
-      alert(String(e));
-    }
-  }
-
-  if (versions.length <= 1) return null;
-
-  return (
-    <select
-      value={active}
-      onChange={(e) => change(e.target.value)}
-      onClick={(e) => e.stopPropagation()}
-      disabled={running}
-      title={running ? "Stop MySQL before switching" : "Switch MySQL version"}
-      className="text-[11px] font-mono bg-transparent border border-neutral-200 rounded px-1 py-0 focus:outline-none focus:border-sky-400 disabled:opacity-50"
-    >
-      {versions.map((v) => (
-        <option key={v} value={v}>
-          {v}
-        </option>
-      ))}
-    </select>
   );
 }

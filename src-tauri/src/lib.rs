@@ -3,6 +3,7 @@ mod cms;
 mod config_gen;
 mod db;
 mod deploy;
+mod downloads;
 mod hosts;
 mod php;
 mod services;
@@ -16,6 +17,7 @@ use hosts::Host;
 use rusqlite::Connection;
 use serde::Serialize;
 use services::apache::{ApacheService, PhpInstall};
+use services::mailhog::MailhogService;
 use services::mysql::{MysqlInstall, MysqlService};
 use services::nginx::NginxService;
 use services::redis::RedisService;
@@ -30,6 +32,7 @@ struct AppState {
     mysql: Mutex<MysqlService>,
     nginx: Mutex<NginxService>,
     redis: Mutex<RedisService>,
+    mailhog: Mutex<MailhogService>,
     php_installs: Vec<PhpInstall>,
     default_php: String,
     resources_dir: PathBuf,
@@ -159,18 +162,23 @@ fn service_start(name: &str, state: tauri::State<AppState>) -> Result<(), String
     match name {
         "apache" => {
             let hosts = load_hosts(&state)?;
+            let installs = downloads::discover_php_installs(&state.resources_dir);
             let mut apache = state.apache.lock().unwrap();
+            apache.set_php_installs(installs);
             apache.set_hosts(hosts);
             apache.start()
         }
         "nginx" => {
             let hosts = load_hosts(&state)?;
+            let installs = downloads::discover_php_installs(&state.resources_dir);
             let mut nginx = state.nginx.lock().unwrap();
+            nginx.set_php_installs(installs);
             nginx.set_hosts(hosts);
             nginx.start()
         }
         "mysql" => state.mysql.lock().unwrap().start(),
         "redis" => state.redis.lock().unwrap().start(),
+        "mailhog" => state.mailhog.lock().unwrap().start(),
         other => Err(format!("unknown service: {other}")),
     }
 }
@@ -182,6 +190,7 @@ fn service_stop(name: &str, state: tauri::State<AppState>) -> Result<(), String>
         "nginx" => state.nginx.lock().unwrap().stop(),
         "mysql" => state.mysql.lock().unwrap().stop(),
         "redis" => state.redis.lock().unwrap().stop(),
+        "mailhog" => state.mailhog.lock().unwrap().stop(),
         other => Err(format!("unknown service: {other}")),
     }
 }
@@ -193,6 +202,7 @@ fn service_status(name: &str, state: tauri::State<AppState>) -> Result<ServiceSt
         "nginx" => Ok(state.nginx.lock().unwrap().status()),
         "mysql" => Ok(state.mysql.lock().unwrap().status()),
         "redis" => Ok(state.redis.lock().unwrap().status()),
+        "mailhog" => Ok(state.mailhog.lock().unwrap().status()),
         other => Err(format!("unknown service: {other}")),
     }
 }
@@ -264,6 +274,52 @@ fn host_update(
 }
 
 #[tauri::command]
+fn snapshot_list(
+    host_id: i64,
+    state: tauri::State<AppState>,
+) -> Result<Vec<snapshots::Snapshot>, String> {
+    let conn = state.db.lock().unwrap();
+    snapshots::list_for_host(&conn, host_id)
+}
+
+#[tauri::command]
+fn snapshot_create(
+    host_id: i64,
+    label: String,
+    state: tauri::State<AppState>,
+) -> Result<snapshots::Snapshot, String> {
+    let conn = state.db.lock().unwrap();
+    let host = hosts::list(&conn)?
+        .into_iter()
+        .find(|h| h.id == host_id)
+        .ok_or_else(|| format!("host {host_id} not found"))?;
+    snapshots::create(&conn, &host, &label, &state.runtime_dir)
+}
+
+#[tauri::command]
+fn snapshot_restore(id: i64, state: tauri::State<AppState>) -> Result<(), String> {
+    let conn = state.db.lock().unwrap();
+    let host_id: i64 = conn
+        .query_row(
+            "SELECT host_id FROM snapshots WHERE id = ?1",
+            rusqlite::params![id],
+            |row| row.get(0),
+        )
+        .map_err(|e| format!("snapshot lookup: {e}"))?;
+    let host = hosts::list(&conn)?
+        .into_iter()
+        .find(|h| h.id == host_id)
+        .ok_or_else(|| format!("host {host_id} not found"))?;
+    snapshots::restore(&conn, id, &host)
+}
+
+#[tauri::command]
+fn snapshot_delete(id: i64, state: tauri::State<AppState>) -> Result<(), String> {
+    let conn = state.db.lock().unwrap();
+    snapshots::delete(&conn, id)
+}
+
+#[tauri::command]
 fn host_delete(id: i64, state: tauri::State<AppState>) -> Result<(), String> {
     {
         let conn = state.db.lock().unwrap();
@@ -276,13 +332,16 @@ fn host_delete(id: i64, state: tauri::State<AppState>) -> Result<(), String> {
 fn apply_host_changes(state: &AppState) -> Result<(), String> {
     let all = load_hosts(state)?;
     hosts::apply_to_system(&all)?;
+    let installs = downloads::discover_php_installs(&state.resources_dir);
     {
         let mut apache = state.apache.lock().unwrap();
+        apache.set_php_installs(installs.clone());
         apache.set_hosts(all.clone());
         apache.reload()?;
     }
     {
         let mut nginx = state.nginx.lock().unwrap();
+        nginx.set_php_installs(installs);
         nginx.set_hosts(all);
         nginx.reload()?;
     }
@@ -511,6 +570,26 @@ fn php_lint(
 }
 
 #[tauri::command]
+fn binary_installed(name: &str, state: tauri::State<AppState>) -> bool {
+    downloads::is_installed(name, &state.resources_dir)
+}
+
+#[tauri::command]
+fn binary_download(name: &str, state: tauri::State<AppState>) -> Result<(), String> {
+    downloads::download(name, &state.resources_dir)
+}
+
+#[tauri::command]
+fn php_catalog(state: tauri::State<AppState>) -> Vec<downloads::PhpCatalogEntry> {
+    downloads::php_catalog(&state.resources_dir)
+}
+
+#[tauri::command]
+fn php_install(version: String, state: tauri::State<AppState>) -> Result<(), String> {
+    downloads::install_php_with_xdebug(&version, &state.resources_dir)
+}
+
+#[tauri::command]
 fn htdocs_path(state: tauri::State<AppState>) -> String {
     state.htdocs_dir.to_string_lossy().replace('\\', "/")
 }
@@ -635,6 +714,10 @@ pub fn run() {
                     resources.join("redis"),
                     runtime.clone(),
                 )),
+                mailhog: Mutex::new(MailhogService::new(
+                    resources.join("mailhog"),
+                    runtime.clone(),
+                )),
                 php_installs,
                 default_php,
                 resources_dir: resources,
@@ -658,9 +741,17 @@ pub fn run() {
             host_create,
             host_update,
             host_delete,
+            snapshot_list,
+            snapshot_create,
+            snapshot_restore,
+            snapshot_delete,
             read_log,
             htdocs_path,
             editor_open,
+            binary_installed,
+            binary_download,
+            php_catalog,
+            php_install,
             git_available,
             git_init,
             composer_version,

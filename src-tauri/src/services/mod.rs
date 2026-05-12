@@ -2,6 +2,7 @@
 //! Memcached, MailHog).
 
 pub mod apache;
+pub mod mailhog;
 pub mod mysql;
 pub mod nginx;
 pub mod redis;

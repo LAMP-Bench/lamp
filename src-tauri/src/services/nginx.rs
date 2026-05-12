@@ -50,6 +50,12 @@ impl NginxService {
         self.hosts = hosts;
     }
 
+    pub fn set_php_installs(&mut self, installs: Vec<PhpInstall>) {
+        if !installs.is_empty() {
+            self.php_installs = installs;
+        }
+    }
+
     pub fn reload(&mut self) -> Result<(), String> {
         if self.nginx_child.is_some() {
             self.stop()?;

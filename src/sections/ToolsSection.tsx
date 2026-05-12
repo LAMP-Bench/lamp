@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { IconType } from "react-icons";
-import { FiExternalLink, FiPackage, FiX } from "react-icons/fi";
+import { FiExternalLink, FiPackage, FiX, FiMail } from "react-icons/fi";
 import {
   SiPhpmyadmin,
   SiLaravel,
@@ -28,6 +28,10 @@ export function ToolsSection() {
           <PhpMyAdminCard />
         </Section>
 
+        <Section title="Email">
+          <MailHogCard />
+        </Section>
+
         <Section title="PHP">
           <ComposerCard />
           <LaravelCard />
@@ -40,6 +44,7 @@ export function ToolsSection() {
             title="WordPress"
             subtitle="One-click install. DB, wp-config.php with fresh salts, files copied to htdocs."
             command="wordpress_install"
+            binaryName="wordpress"
           />
           <CmsCard
             icon={SiJoomla}
@@ -47,6 +52,7 @@ export function ToolsSection() {
             title="Joomla"
             subtitle="One-click install. DB created. Finish setup in the web installer."
             command="joomla_install"
+            binaryName="joomla"
           />
           <CmsCard
             icon={SiDrupal}
@@ -54,6 +60,7 @@ export function ToolsSection() {
             title="Drupal"
             subtitle="Drupal 11. DB created. Finish in the web installer."
             command="drupal_install"
+            binaryName="drupal"
           />
           <CmsCard
             icon={SiWikipedia}
@@ -61,6 +68,7 @@ export function ToolsSection() {
             title="MediaWiki"
             subtitle="DB created. Visit /mw-config/ to finish setup."
             command="mediawiki_install"
+            binaryName="mediawiki"
           />
         </Section>
       </div>
@@ -95,6 +103,26 @@ function PhpMyAdminCard() {
       action={
         <button
           onClick={() => openUrl("http://localhost:8080/phpmyadmin/")}
+          className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5"
+        >
+          <FiExternalLink />
+          Open
+        </button>
+      }
+    />
+  );
+}
+
+function MailHogCard() {
+  return (
+    <ToolCard
+      icon={FiMail}
+      iconColor="text-amber-500"
+      title="MailHog inbox"
+      subtitle="Catches PHP mail() and shows them in a web UI. Start MailHog first."
+      action={
+        <button
+          onClick={() => openUrl("http://localhost:8025/")}
           className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5"
         >
           <FiExternalLink />
@@ -161,12 +189,14 @@ function CmsCard({
   title,
   subtitle,
   command,
+  binaryName,
 }: {
   icon: IconType;
   iconColor: string;
   title: string;
   subtitle: string;
   command: string;
+  binaryName: string;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -192,6 +222,7 @@ function CmsCard({
           icon={icon}
           iconColor={iconColor}
           command={command}
+          binaryName={binaryName}
           onClose={() => setOpen(false)}
         />
       )}
@@ -204,12 +235,14 @@ function CmsInstallDialog({
   icon: Icon,
   iconColor,
   command,
+  binaryName,
   onClose,
 }: {
   title: string;
   icon: IconType;
   iconColor: string;
   command: string;
+  binaryName: string;
   onClose: () => void;
 }) {
   const [siteName, setSiteName] = useState("");
@@ -220,6 +253,9 @@ function CmsInstallDialog({
   const [phpVersions, setPhpVersions] = useState<string[]>([]);
   const [phpVersion, setPhpVersion] = useState("");
   const [busy, setBusy] = useState(false);
+  const [stage, setStage] = useState<"idle" | "downloading" | "installing">(
+    "idle"
+  );
   const [error, setError] = useState<string | null>(null);
   const [createdUrl, setCreatedUrl] = useState<string | null>(null);
 
@@ -248,22 +284,34 @@ function CmsInstallDialog({
     setBusy(true);
     setError(null);
     try {
+      // Auto-download the CMS source if it's an on-demand binary that hasn't
+      // been fetched yet. The runtime download is sync (blocks until done)
+      // so the UI just shows a "Downloading…" message.
+      const installed = await invoke<boolean>("binary_installed", {
+        name: binaryName,
+      });
+      if (!installed) {
+        setStage("downloading");
+        await invoke("binary_download", { name: binaryName });
+      }
+
+      setStage("installing");
       await invoke<string>(command, {
         siteName: siteName.trim(),
         hostname: addHost ? hostname.trim() : "",
         parentDir: parentDir.trim(),
         phpVersion,
       });
-      // When user opted out of a custom host, the site is reachable through
-      // the default vhost as a path under localhost.
-      const url = addHost && hostname.trim()
-        ? `http://${hostname.trim()}:8080/`
-        : `http://localhost:8080/${siteName.trim()}/`;
+      const url =
+        addHost && hostname.trim()
+          ? `http://${hostname.trim()}:8080/`
+          : `http://localhost:8080/${siteName.trim()}/`;
       setCreatedUrl(url);
     } catch (e) {
       setError(String(e));
     } finally {
       setBusy(false);
+      setStage("idle");
     }
   }
 
@@ -388,9 +436,10 @@ function CmsInstallDialog({
             )}
 
             <div className="text-xs text-neutral-500">
-              {busy
-                ? "Copying files, creating DB…"
-                : "MySQL must be running."}
+              {stage === "downloading" &&
+                "Downloading CMS files… (first install only, can take a minute)"}
+              {stage === "installing" && "Copying files, creating DB…"}
+              {stage === "idle" && "MySQL must be running."}
             </div>
 
             <div className="flex items-center gap-2 pt-2">
