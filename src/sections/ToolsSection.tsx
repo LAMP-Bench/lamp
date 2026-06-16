@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { IconType } from "react-icons";
-import { FiExternalLink, FiPackage, FiX, FiMail, FiImage } from "react-icons/fi";
+import { FiExternalLink, FiPackage, FiX, FiMail, FiImage, FiUploadCloud } from "react-icons/fi";
 import {
   SiPhpmyadmin,
   SiLaravel,
@@ -34,6 +34,10 @@ export function ToolsSection() {
 
         <Section title="Images">
           <ImageOptimizerCard />
+        </Section>
+
+        <Section title="Deploy">
+          <FtpDeployCard />
         </Section>
 
         <Section title="PHP">
@@ -794,4 +798,144 @@ function formatBytes(b: number): string {
   if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
   if (b < 1024 * 1024 * 1024) return `${(b / (1024 * 1024)).toFixed(1)} MB`;
   return `${(b / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+}
+
+type DeployReport = {
+  files_uploaded: number;
+  bytes_uploaded: number;
+  errors: string[];
+};
+
+function FtpDeployCard() {
+  const [host, setHost] = useState("");
+  const [port, setPort] = useState(21);
+  const [user, setUser] = useState("");
+  const [password, setPassword] = useState("");
+  const [remoteDir, setRemoteDir] = useState("/public_html");
+  const [localDir, setLocalDir] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [report, setReport] = useState<DeployReport | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function run() {
+    setBusy(true);
+    setError(null);
+    setReport(null);
+    try {
+      const r = await invoke<DeployReport>("ftp_upload", {
+        host: host.trim(),
+        port,
+        user: user.trim(),
+        password,
+        remoteDir: remoteDir.trim(),
+        localDir: localDir.trim(),
+      });
+      setReport(r);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="rounded-lg border border-neutral-200 bg-white p-4">
+      <div className="flex items-center gap-3 mb-3">
+        <FiUploadCloud className="text-violet-600 text-xl" />
+        <h3 className="font-medium text-neutral-800">FTP upload</h3>
+      </div>
+      <p className="text-xs text-neutral-500 mb-3">
+        Recursive upload of a local folder to an FTP server in binary mode.
+        Plain FTP only for now — SFTP is queued for the next round. Stored
+        profiles per host will come once this is exercised in anger.
+      </p>
+      <div className="grid grid-cols-[120px_1fr_80px] gap-2 items-center text-sm">
+        <label className="text-right text-neutral-600">Host</label>
+        <input
+          value={host}
+          onChange={(e) => setHost(e.target.value)}
+          placeholder="ftp.example.com"
+          className="px-2 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500"
+        />
+        <input
+          type="number"
+          value={port}
+          onChange={(e) => setPort(Number(e.target.value) || 21)}
+          className="px-2 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500"
+        />
+
+        <label className="text-right text-neutral-600">User</label>
+        <input
+          value={user}
+          onChange={(e) => setUser(e.target.value)}
+          className="px-2 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500 col-span-2"
+        />
+
+        <label className="text-right text-neutral-600">Password</label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="px-2 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500 col-span-2"
+        />
+
+        <label className="text-right text-neutral-600">Remote dir</label>
+        <input
+          value={remoteDir}
+          onChange={(e) => setRemoteDir(e.target.value)}
+          placeholder="/public_html"
+          className="px-2 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500 col-span-2"
+        />
+
+        <label className="text-right text-neutral-600">Local folder</label>
+        <input
+          value={localDir}
+          onChange={(e) => setLocalDir(e.target.value)}
+          placeholder="C:/path/to/project"
+          className="px-2 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500 col-span-2"
+        />
+      </div>
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          onClick={run}
+          disabled={
+            busy ||
+            !host.trim() ||
+            !user.trim() ||
+            !remoteDir.trim() ||
+            !localDir.trim()
+          }
+          className="px-3 py-1.5 rounded bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium disabled:opacity-50"
+        >
+          {busy ? "Uploading…" : "Upload"}
+        </button>
+        {report && (
+          <span className="text-xs text-neutral-700">
+            {report.files_uploaded} file(s) ·{" "}
+            {formatBytes(report.bytes_uploaded)} uploaded
+          </span>
+        )}
+      </div>
+      {report && report.errors.length > 0 && (
+        <div className="mt-2 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded p-2 max-h-32 overflow-auto">
+          <strong>{report.errors.length} error(s):</strong>
+          <ul className="font-mono mt-1 space-y-0.5">
+            {report.errors.slice(0, 20).map((e, i) => (
+              <li key={i} className="truncate">
+                {e}
+              </li>
+            ))}
+            {report.errors.length > 20 && (
+              <li>… {report.errors.length - 20} more</li>
+            )}
+          </ul>
+        </div>
+      )}
+      {error && (
+        <div className="mt-2 text-xs text-red-600 font-mono break-words bg-red-50 border border-red-200 rounded p-2">
+          {error}
+        </div>
+      )}
+    </div>
+  );
 }

@@ -37,3 +37,6 @@ zstd = { version = "0.13", default-features = false }
 # Rust so no native libs to ship.
 image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
 oxipng = { version = "9", default-features = false }
+# Deploy → FTP upload. Sync API, pure Rust, no native libssl dep. SFTP
+# lives behind a separate russh-sftp wiring (Phase 7.x) and isn't here yet.
+suppaftp = "6"

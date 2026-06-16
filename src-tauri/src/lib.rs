@@ -610,6 +610,25 @@ fn htdocs_path(state: tauri::State<AppState>) -> String {
 /// address (no packet actually sent), read the OS-selected local IP. That
 /// avoids pulling a network-interface crate just to enumerate adapters.
 #[tauri::command]
+fn ftp_upload(
+    host: String,
+    port: u16,
+    user: String,
+    password: String,
+    remote_dir: String,
+    local_dir: String,
+) -> Result<deploy::DeployReport, String> {
+    deploy::ftp_upload_folder(
+        host.trim(),
+        port,
+        user.trim(),
+        &password,
+        remote_dir.trim(),
+        Path::new(&local_dir),
+    )
+}
+
+#[tauri::command]
 fn compress_images(
     folder: String,
     jpeg_quality: u8,
@@ -848,6 +867,7 @@ pub fn run() {
             htdocs_path,
             lan_ip,
             compress_images,
+            ftp_upload,
             editor_open,
             binary_installed,
             binary_download,
