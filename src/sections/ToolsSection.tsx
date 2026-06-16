@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { IconType } from "react-icons";
-import { FiExternalLink, FiPackage, FiX, FiMail } from "react-icons/fi";
+import { FiExternalLink, FiPackage, FiX, FiMail, FiImage } from "react-icons/fi";
 import {
   SiPhpmyadmin,
   SiLaravel,
@@ -30,6 +30,10 @@ export function ToolsSection() {
 
         <Section title="Email">
           <MailHogCard />
+        </Section>
+
+        <Section title="Images">
+          <ImageOptimizerCard />
         </Section>
 
         <Section title="PHP">
@@ -649,4 +653,145 @@ function Field({
       <div className="flex items-center gap-2">{children}</div>
     </div>
   );
+}
+
+type CompressReport = {
+  files_total: number;
+  files_changed: number;
+  bytes_before: number;
+  bytes_after: number;
+  errors: string[];
+};
+
+function ImageOptimizerCard() {
+  const [folder, setFolder] = useState("");
+  const [quality, setQuality] = useState(80);
+  const [includeJpg, setIncludeJpg] = useState(true);
+  const [includePng, setIncludePng] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [report, setReport] = useState<CompressReport | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function run() {
+    setBusy(true);
+    setError(null);
+    setReport(null);
+    try {
+      const r = await invoke<CompressReport>("compress_images", {
+        folder: folder.trim(),
+        jpegQuality: quality,
+        includePng,
+        includeJpg,
+      });
+      setReport(r);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const saved = report ? report.bytes_before - report.bytes_after : 0;
+  const savedPct =
+    report && report.bytes_before > 0
+      ? Math.round((saved / report.bytes_before) * 100)
+      : 0;
+
+  return (
+    <div className="rounded-lg border border-neutral-200 bg-white p-4">
+      <div className="flex items-center gap-3 mb-3">
+        <FiImage className="text-emerald-600 text-xl" />
+        <h3 className="font-medium text-neutral-800">Image optimizer</h3>
+      </div>
+      <p className="text-xs text-neutral-500 mb-3">
+        Walk a folder, re-encode JPGs at the chosen quality and run oxipng on
+        PNGs. Files are only replaced if the new version is smaller — safe to
+        run repeatedly on the same folder.
+      </p>
+      <div className="space-y-2 text-sm">
+        <Field label="Folder">
+          <input
+            value={folder}
+            onChange={(e) => setFolder(e.target.value)}
+            placeholder="C:/path/to/images"
+            className="flex-1 min-w-0 px-3 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+          />
+        </Field>
+        <Field label={`JPG quality (${quality})`}>
+          <input
+            type="range"
+            min={40}
+            max={100}
+            value={quality}
+            onChange={(e) => setQuality(Number(e.target.value))}
+            className="w-48 accent-sky-500"
+          />
+        </Field>
+        <Field label="">
+          <label className="flex items-center gap-1.5 text-xs text-neutral-700">
+            <input
+              type="checkbox"
+              checked={includeJpg}
+              onChange={(e) => setIncludeJpg(e.target.checked)}
+              className="size-4"
+            />
+            JPG
+          </label>
+          <label className="flex items-center gap-1.5 text-xs text-neutral-700">
+            <input
+              type="checkbox"
+              checked={includePng}
+              onChange={(e) => setIncludePng(e.target.checked)}
+              className="size-4"
+            />
+            PNG
+          </label>
+        </Field>
+      </div>
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          onClick={run}
+          disabled={busy || !folder.trim() || (!includeJpg && !includePng)}
+          className="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium disabled:opacity-50"
+        >
+          {busy ? "Optimizing…" : "Optimize"}
+        </button>
+        {report && (
+          <span className="text-xs text-neutral-700">
+            {report.files_changed}/{report.files_total} shrunk · saved{" "}
+            <strong className="text-emerald-700">
+              {formatBytes(saved)} ({savedPct}%)
+            </strong>
+          </span>
+        )}
+      </div>
+      {report && report.errors.length > 0 && (
+        <div className="mt-2 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded p-2 max-h-32 overflow-auto">
+          <strong>{report.errors.length} error(s):</strong>
+          <ul className="font-mono mt-1 space-y-0.5">
+            {report.errors.slice(0, 20).map((e, i) => (
+              <li key={i} className="truncate">
+                {e}
+              </li>
+            ))}
+            {report.errors.length > 20 && (
+              <li>… {report.errors.length - 20} more</li>
+            )}
+          </ul>
+        </div>
+      )}
+      {error && (
+        <div className="mt-2 text-xs text-red-600 font-mono break-words bg-red-50 border border-red-200 rounded p-2">
+          {error}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatBytes(b: number): string {
+  if (b < 1024) return `${b} B`;
+  if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+  if (b < 1024 * 1024 * 1024) return `${(b / (1024 * 1024)).toFixed(1)} MB`;
+  return `${(b / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }

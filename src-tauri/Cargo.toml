@@ -32,3 +32,8 @@ zip = { version = "2", default-features = false, features = ["deflate"] }
 # Snapshots — tar.zst archive of a host's docroot
 tar = "0.4"
 zstd = { version = "0.13", default-features = false }
+# Image optimizer (Tools panel). `image` handles JPG re-encoding at a given
+# quality; `oxipng` does in-place lossless PNG optimisation. Both are pure
+# Rust so no native libs to ship.
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+oxipng = { version = "9", default-features = false }

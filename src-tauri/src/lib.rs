@@ -5,6 +5,7 @@ mod db;
 mod deploy;
 mod downloads;
 mod hosts;
+mod images;
 mod php;
 mod services;
 mod snapshots;
@@ -600,6 +601,17 @@ fn htdocs_path(state: tauri::State<AppState>) -> String {
 /// address (no packet actually sent), read the OS-selected local IP. That
 /// avoids pulling a network-interface crate just to enumerate adapters.
 #[tauri::command]
+fn compress_images(
+    folder: String,
+    jpeg_quality: u8,
+    include_png: bool,
+    include_jpg: bool,
+) -> Result<images::CompressReport, String> {
+    let q = jpeg_quality.clamp(40, 100);
+    images::compress_folder(Path::new(&folder), q, include_png, include_jpg)
+}
+
+#[tauri::command]
 fn lan_ip() -> Option<String> {
     use std::net::UdpSocket;
     let sock = UdpSocket::bind("0.0.0.0:0").ok()?;
@@ -826,6 +838,7 @@ pub fn run() {
             read_log,
             htdocs_path,
             lan_ip,
+            compress_images,
             editor_open,
             binary_installed,
             binary_download,
