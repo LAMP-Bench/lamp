@@ -1,11 +1,12 @@
 name: alpha-testing build
 
-# Builds Lamp Bench for Windows + Linux and pushes the artifacts to a rolling
-# `alpha-testing` pre-release on GitHub. There are no production "main"
-# releases yet — this is the only channel until the app stabilises.
+# Builds Lamp Bench on Windows, macOS (Apple Silicon) and Ubuntu, signs the
+# updater artifacts, and uploads everything to a DRAFT release tagged
+# `alpha-testing`. If every platform finishes cleanly the `publish` job
+# flips that draft to a public prerelease. If any platform fails the draft
+# stays hidden — so the in-app updater never sees a half-broken `latest.json`
+# and existing installs don't auto-update onto a partial build.
 
-# Manual-only. Push to main does NOT trigger a build — click "Run workflow"
-# from the Actions tab when you actually want to publish a new alpha.
 on:
   workflow_dispatch:
 
@@ -15,13 +16,21 @@ permissions:
 jobs:
   build:
     strategy:
+      # We want everyone's artifacts before publishing, so a failing
+      # platform shouldn't cancel its siblings — they still upload to the
+      # draft, the publish job below just won't flip it live.
       fail-fast: false
       matrix:
         include:
           - platform: windows-latest
-            label: windows-x64
+            label: windows-x86_64
+            args: ''
           - platform: ubuntu-22.04
-            label: linux-amd64
+            label: linux-x86_64
+            args: ''
+          - platform: macos-latest
+            label: darwin-aarch64
+            args: '--target aarch64-apple-darwin'
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -52,7 +61,10 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust (with macOS aarch64 target when needed)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || '' }}
 
       - uses: swatinem/rust-cache@v2
         with:
@@ -68,49 +80,76 @@ jobs:
           key: ${{ runner.os }}-resources-${{ hashFiles('scripts/binaries.json') }}
 
       # `--bundled-only` pulls just the essentials marked `bundled: true`
-      # in scripts/binaries.json (Apache, mod_fcgid, MySQL 8.0, PHP 8.4,
-      # Xdebug for 8.4, phpMyAdmin, Composer). Optional things — alt
-      # PHP/MySQL versions, Nginx, Redis, every CMS — are skipped at build
-      # time and meant to download on-demand from within the app.
+      # in scripts/binaries.json. Currently only Windows has binaries
+      # pinned — the script no-ops on macOS/Linux and the platform-specific
+      # tauri.windows.conf.json only adds the resources mapping on Win,
+      # so the macOS/Linux installers ship as a shell without bundled
+      # services until those binaries are added to the manifest.
       - name: Fetch bundled service binaries
         run: pnpm scripts:fetch-binaries -- --bundled-only
 
-      - name: Build Tauri app + upload to alpha-testing release
+      - name: Build Tauri app + upload to alpha-testing draft
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Updater signing — these come from repo secrets. The keypair was
-          # generated locally with `pnpm tauri signer generate`; the .pub
-          # half is checked into tauri.conf.json under plugins.updater.pubkey.
-          # Without these env vars tauri-action will still build but won't
-          # emit `latest.json` / `.sig` files, breaking the in-app updater.
+          # Updater signing — must be set or tauri-action skips emitting
+          # `latest.json` + `.sig` files and the in-app updater silently
+          # 404s. The keypair was generated locally with
+          # `pnpm tauri signer generate`; the .pub half is checked into
+          # tauri.conf.json under plugins.updater.pubkey.
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          # Fixed tag — every successful build replaces the artifacts here.
-          # No version bumps required until we cut a real release.
+          # Fixed tag — every successful run replaces the artifacts on
+          # this one release. No version bumps required until cutting a
+          # real stable release.
           tagName: alpha-testing
           releaseName: 'Lamp Bench — alpha testing'
           releaseBody: |
-            **Rolling alpha build** updated on every push to `main`.
+            **Rolling alpha build** for Lamp Bench.
 
             Pick the installer that matches your machine:
             - **Windows x64** — `.exe` (NSIS) or `.msi`
-            - **Linux amd64** — `.deb` or `.AppImage` (shell only for now —
-              Linux bundled services land in Phase 9)
+            - **macOS Apple Silicon** — `.dmg` or `.app.tar.gz`
+            - **Linux amd64** — `.deb` or `.AppImage`
 
             Last built from commit `${{ github.sha }}`.
-          releaseDraft: false
+          # Drafts let all platforms upload without the release going
+          # public; the `publish` job below flips this to a published
+          # prerelease only when every platform succeeded.
+          releaseDraft: true
           prerelease: true
+          args: ${{ matrix.args }}
 
-      - name: Upload artifacts (manual runs without a release)
-        if: github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@v4
+  publish:
+    needs: build
+    # success() is true only when EVERY matrix job in `needs` succeeded.
+    # If any platform failed the draft stays hidden until a human looks.
+    if: success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish the draft release
+        uses: actions/github-script@v7
         with:
-          name: lamp-bench-${{ matrix.label }}
-          path: |
-            src-tauri/target/release/bundle/nsis/*
-            src-tauri/target/release/bundle/msi/*
-            src-tauri/target/release/bundle/deb/*
-            src-tauri/target/release/bundle/appimage/*
-          if-no-files-found: ignore
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const releases = await github.paginate(
+              github.rest.repos.listReleases,
+              { owner, repo, per_page: 100 }
+            );
+            const draft = releases.find(
+              (r) => r.tag_name === 'alpha-testing' && r.draft === true
+            );
+            if (!draft) {
+              core.setFailed("no alpha-testing draft release to publish");
+              return;
+            }
+            await github.rest.repos.updateRelease({
+              owner,
+              repo,
+              release_id: draft.id,
+              draft: false,
+              prerelease: true,
+            });
+            core.notice(`Published release ${draft.id} (${draft.html_url}).`);
