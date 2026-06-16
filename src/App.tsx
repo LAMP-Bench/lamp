@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Sidebar } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
+import { UpdateBanner } from "./components/UpdateBanner";
 import { HomeSection } from "./sections/HomeSection";
 import { HostsSection } from "./sections/HostsSection";
 import { ToolsSection } from "./sections/ToolsSection";
@@ -58,6 +59,7 @@ function MainShell() {
     <div className="h-screen bg-white text-neutral-900 grid grid-cols-[240px_1fr] overflow-hidden">
       <Sidebar active={section} onSelect={setSection} version={version} />
       <div className="flex flex-col min-w-0 min-h-0">
+        <UpdateBanner />
         <TopBar title={TITLES[section]} />
         <main className="flex-1 min-h-0 overflow-hidden">
           {section === "home" && <HomeSection onNavigate={setSection} />}

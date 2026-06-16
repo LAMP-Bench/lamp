@@ -79,6 +79,13 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Updater signing — these come from repo secrets. The keypair was
+          # generated locally with `pnpm tauri signer generate`; the .pub
+          # half is checked into tauri.conf.json under plugins.updater.pubkey.
+          # Without these env vars tauri-action will still build but won't
+          # emit `latest.json` / `.sig` files, breaking the in-app updater.
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           # Fixed tag — every successful build replaces the artifacts here.
           # No version bumps required until we cut a real release.

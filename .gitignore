@@ -37,3 +37,7 @@ resources/
 # AI tooling — kept local, not part of the repo
 CLAUDE.md
 .claude/
+
+# Tauri updater signing keys — private key never commits; public key is in
+# tauri.conf.json plugins.updater.pubkey
+src-tauri/.updater-keys/*.key
