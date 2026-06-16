@@ -3,7 +3,7 @@
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::process::Command;
+use crate::services::hidden_command;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Host {
@@ -218,7 +218,7 @@ fn write_elevated_windows(new_content: &str) -> Result<(), String> {
         tmp_script.display().to_string().replace('\'', "''"),
     );
 
-    let output = Command::new("powershell")
+    let output = hidden_command("powershell")
         .args(["-NoProfile", "-NonInteractive", "-Command", &runner])
         .output()
         .map_err(|e| format!("spawn powershell: {e}"))?;

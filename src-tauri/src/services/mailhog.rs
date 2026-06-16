@@ -1,7 +1,7 @@
-use super::{kill_tree, Service, ServiceStatus};
+use super::{hidden_command, kill_tree, Service, ServiceStatus};
 use std::fs;
 use std::path::PathBuf;
-use std::process::{Child, Command};
+use std::process::Child;
 
 pub const SMTP_PORT: u16 = 1025;
 pub const UI_PORT: u16 = 8025;
@@ -48,7 +48,7 @@ impl Service for MailhogService {
             .map_err(|e| format!("open mailhog log: {e}"))?;
         let log_clone = log.try_clone().map_err(|e| e.to_string())?;
 
-        let child = Command::new(&bin)
+        let child = hidden_command(&bin)
             .arg("-smtp-bind-addr")
             .arg(format!("127.0.0.1:{SMTP_PORT}"))
             .arg("-ui-bind-addr")

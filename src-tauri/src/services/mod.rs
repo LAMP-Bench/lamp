@@ -8,13 +8,32 @@ pub mod nginx;
 pub mod redis;
 
 use serde::Serialize;
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
-use std::process::Child;
+use std::process::{Child, Command};
 
 /// Returns `<root>/bin/<name>` with `.exe` appended on Windows.
 pub fn bin_path(root: &Path, name: &str) -> PathBuf {
     root.join("bin")
         .join(format!("{name}{}", std::env::consts::EXE_SUFFIX))
+}
+
+/// Build a `Command` that won't pop a console window on Windows. Every
+/// long-running service (httpd, mysqld, nginx, php-cgi, redis, mailhog) and
+/// every one-shot helper (taskkill, PowerShell hosts/cert edits, php -l,
+/// composer, git) must be created through this so the user never sees a
+/// flashing black CMD on screen. No-op on non-Windows.
+pub fn hidden_command<S: AsRef<OsStr>>(program: S) -> Command {
+    let mut cmd = Command::new(program);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        // CREATE_NO_WINDOW — keep the spawned process detached from any
+        // console. Children inherit this too, so php-cgi pools stay quiet.
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+    cmd
 }
 
 /// Apache, MySQL and friends want forward slashes in their config files even
@@ -33,7 +52,7 @@ pub fn posix(p: &Path) -> String {
 pub fn kill_tree(child: &mut Child) {
     #[cfg(windows)]
     {
-        let _ = std::process::Command::new("taskkill")
+        let _ = hidden_command("taskkill")
             .args([
                 "/F",
                 "/T",

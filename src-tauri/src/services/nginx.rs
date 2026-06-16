@@ -1,10 +1,10 @@
-use super::{kill_tree, posix, Service, ServiceStatus};
+use super::{hidden_command, kill_tree, posix, Service, ServiceStatus};
 use crate::hosts::Host;
 use crate::services::apache::PhpInstall;
 use crate::ssl::LocalCa;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::{Child, Command};
+use std::process::Child;
 
 pub const HTTP_PORT: u16 = 8081;
 pub const SSL_PORT: u16 = 8444;
@@ -128,7 +128,7 @@ impl NginxService {
                     p.version
                 ));
             }
-            let child = Command::new(&php_cgi)
+            let child = hidden_command(&php_cgi)
                 .arg("-b")
                 .arg(format!("127.0.0.1:{port}"))
                 .spawn()
@@ -157,7 +157,7 @@ impl Service for NginxService {
             }
             return Err(format!("nginx.exe not found at {}", nginx.display()));
         }
-        let child = Command::new(&nginx)
+        let child = hidden_command(&nginx)
             .arg("-p")
             .arg(&self.nginx_dir)
             .arg("-c")

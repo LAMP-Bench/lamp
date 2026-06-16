@@ -21,10 +21,11 @@ use services::mailhog::MailhogService;
 use services::mysql::{MysqlInstall, MysqlService};
 use services::nginx::NginxService;
 use services::redis::RedisService;
-use services::{Service, ServiceStatus};
+use services::{hidden_command, Service, ServiceStatus};
 use ssl::LocalCa;
-use std::process::Command;
-use tauri::Manager;
+use tauri::menu::{Menu, MenuItem};
+use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
+use tauri::{Manager, WindowEvent};
 
 struct AppState {
     db: Mutex<Connection>,
@@ -120,7 +121,7 @@ fn seed_default_index(htdocs: &Path) {
     );
 }
 
-fn run_capture(cmd: &mut Command) -> Result<CommandResult, String> {
+fn run_capture(cmd: &mut std::process::Command) -> Result<CommandResult, String> {
     let output = cmd.output().map_err(|e| e.to_string())?;
     Ok(CommandResult {
         success: output.status.success(),
@@ -350,7 +351,7 @@ fn apply_host_changes(state: &AppState) -> Result<(), String> {
 
 #[tauri::command]
 fn git_available() -> bool {
-    Command::new("git")
+    hidden_command("git")
         .arg("--version")
         .output()
         .map(|o| o.status.success())
@@ -362,14 +363,14 @@ fn git_init(path: String) -> Result<CommandResult, String> {
     if !std::path::Path::new(&path).exists() {
         std::fs::create_dir_all(&path).map_err(|e| e.to_string())?;
     }
-    run_capture(Command::new("git").arg("init").current_dir(&path))
+    run_capture(hidden_command("git").arg("init").current_dir(&path))
 }
 
 #[tauri::command]
 fn composer_version(state: tauri::State<AppState>) -> Result<CommandResult, String> {
     let php = php_exe(&state, None)?;
     let phar = composer_phar(&state);
-    run_capture(Command::new(&php).arg(phar).arg("--version"))
+    run_capture(hidden_command(&php).arg(phar).arg("--version"))
 }
 
 #[tauri::command]
@@ -394,7 +395,7 @@ fn laravel_create(
     let php = php_exe(&state, php_version.as_deref())?;
     let phar = composer_phar(&state);
     let res = run_capture(
-        Command::new(&php)
+        hidden_command(&php)
             .arg(phar)
             .arg("create-project")
             .arg("laravel/laravel")
@@ -566,7 +567,7 @@ fn php_lint(
     state: tauri::State<AppState>,
 ) -> Result<CommandResult, String> {
     let php = php_exe(&state, php_version.as_deref())?;
-    run_capture(Command::new(&php).arg("-l").arg(&path))
+    run_capture(hidden_command(&php).arg("-l").arg(&path))
 }
 
 #[tauri::command]
@@ -658,17 +659,25 @@ pub fn run() {
 
             let conn = db::open(&runtime.join("lamp.db"))?;
 
-            let php_installs = vec![
-                PhpInstall {
-                    version: "8.3".into(),
-                    dir: resources.join("php-8.3"),
-                },
-                PhpInstall {
+            // Discover what's actually on disk instead of hardcoding the list.
+            // The installer only ships php-8.4; other versions are on-demand.
+            // Hardcoding them caused Apache to try to seed a php.ini for a
+            // version that didn't exist and blow up the whole service start.
+            let mut php_installs = downloads::discover_php_installs(&resources);
+            if php_installs.is_empty() {
+                // Bundled 8.4 should always exist; this is just a belt-and-
+                // suspenders fallback so the app still boots if discovery
+                // returns empty on a weird filesystem.
+                php_installs.push(PhpInstall {
                     version: "8.4".into(),
                     dir: resources.join("php-8.4"),
-                },
-            ];
-            let default_php = "8.4".to_string();
+                });
+            }
+            let default_php = if php_installs.iter().any(|p| p.version == "8.4") {
+                "8.4".to_string()
+            } else {
+                php_installs[0].version.clone()
+            };
 
             let ca_dir = runtime.join("ca");
             let ssl_dir = runtime.join("ssl");
@@ -726,7 +735,62 @@ pub fn run() {
             };
 
             app.manage(state);
+
+            // System tray + close-to-tray (Discord-style). Clicking the
+            // window's X hides instead of quitting; the user re-opens by
+            // left-clicking the tray icon, or quits cleanly from the menu.
+            let show_item = MenuItem::with_id(app, "show", "Show Lamp Bench", true, None::<&str>)?;
+            let quit_item = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+            let tray_menu = Menu::with_items(app, &[&show_item, &quit_item])?;
+            let tray_icon = app
+                .default_window_icon()
+                .cloned()
+                .ok_or_else(|| -> Box<dyn std::error::Error> {
+                    "no default window icon to use for tray".into()
+                })?;
+            TrayIconBuilder::with_id("main-tray")
+                .icon(tray_icon)
+                .tooltip("Lamp Bench")
+                .menu(&tray_menu)
+                .show_menu_on_left_click(false)
+                .on_menu_event(|app, event| match event.id.as_ref() {
+                    "show" => {
+                        if let Some(w) = app.get_webview_window("main") {
+                            let _ = w.show();
+                            let _ = w.unminimize();
+                            let _ = w.set_focus();
+                        }
+                    }
+                    "quit" => app.exit(0),
+                    _ => {}
+                })
+                .on_tray_icon_event(|tray, event| {
+                    if let TrayIconEvent::Click {
+                        button: MouseButton::Left,
+                        button_state: tauri::tray::MouseButtonState::Up,
+                        ..
+                    } = event
+                    {
+                        let app = tray.app_handle();
+                        if let Some(w) = app.get_webview_window("main") {
+                            let _ = w.show();
+                            let _ = w.unminimize();
+                            let _ = w.set_focus();
+                        }
+                    }
+                })
+                .build(app)?;
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            if let WindowEvent::CloseRequested { api, .. } = event {
+                // Only the main window minimises to the tray. Editor windows
+                // (label `editor-*`) close for real.
+                if window.label() == "main" {
+                    let _ = window.hide();
+                    api.prevent_close();
+                }
+            }
         })
         .invoke_handler(tauri::generate_handler![
             app_version,

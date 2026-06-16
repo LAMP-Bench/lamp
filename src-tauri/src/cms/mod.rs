@@ -8,10 +8,9 @@
 
 pub mod wordpress;
 
-use crate::services::bin_path;
+use crate::services::{bin_path, hidden_command};
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
 /// Build a clean MySQL identifier from a free-form site name. Non-alphanumeric
 /// characters become underscores. `prefix` separates CMS namespaces so a
@@ -33,7 +32,7 @@ pub fn create_database(mysql_dir: &Path, port: u16, db_name: &str) -> Result<(),
         "CREATE DATABASE IF NOT EXISTS `{db_name}` \
          CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
     );
-    let output = Command::new(&mysql)
+    let output = hidden_command(&mysql)
         .args([
             "--protocol=TCP",
             "-h",

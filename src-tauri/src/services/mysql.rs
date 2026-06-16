@@ -1,7 +1,7 @@
-use super::{bin_path, kill_tree, posix, Service, ServiceStatus};
+use super::{bin_path, hidden_command, kill_tree, posix, Service, ServiceStatus};
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::{Child, Command};
+use std::process::Child;
 
 pub const DEFAULT_PORT: u16 = 3306;
 
@@ -84,7 +84,7 @@ impl MysqlService {
         let basedir = posix(&install.dir);
         let datadir = posix(&data);
 
-        let output = Command::new(&mysqld)
+        let output = hidden_command(&mysqld)
             .arg(format!("--basedir={basedir}"))
             .arg(format!("--datadir={datadir}"))
             .arg("--initialize-insecure")
@@ -138,7 +138,7 @@ impl Service for MysqlService {
             .try_clone()
             .map_err(|e| format!("clone mysql log handle: {e}"))?;
 
-        let child = Command::new(&mysqld)
+        let child = hidden_command(&mysqld)
             .arg(format!("--defaults-file={}", conf.display()))
             .arg("--console")
             .stdout(log_file)

@@ -1,9 +1,9 @@
-use super::{bin_path, kill_tree, posix, Service, ServiceStatus};
+use super::{bin_path, hidden_command, kill_tree, posix, Service, ServiceStatus};
 use crate::hosts::Host;
 use crate::ssl::{LocalCa, SSL_PORT};
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::{Child, Command};
+use std::process::Child;
 
 pub const DEFAULT_PORT: u16 = 8080;
 
@@ -101,6 +101,14 @@ impl ApacheService {
                 continue;
             }
             let template = p.dir.join("php.ini-development");
+            if !template.exists() {
+                // PHP version is listed but the files aren't on disk yet
+                // (e.g. on-demand version that hasn't been downloaded).
+                // Skip it — failing the whole Apache start over a missing
+                // optional version is the bug that bricked the v0.1.0
+                // installer's service toggles.
+                continue;
+            }
             let mut content = fs::read_to_string(&template)
                 .map_err(|e| format!("read {}: {e}", template.display()))?;
             content.push_str(&format!(
@@ -216,7 +224,7 @@ impl Service for ApacheService {
         if !httpd.exists() {
             return Err(format!("httpd binary not found at {}", httpd.display()));
         }
-        let child = Command::new(&httpd)
+        let child = hidden_command(&httpd)
             .arg("-f")
             .arg(&conf)
             .arg("-d")

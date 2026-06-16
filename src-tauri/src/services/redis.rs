@@ -1,7 +1,7 @@
-use super::{kill_tree, posix, Service, ServiceStatus};
+use super::{hidden_command, kill_tree, posix, Service, ServiceStatus};
 use std::fs;
 use std::path::PathBuf;
-use std::process::{Child, Command};
+use std::process::Child;
 
 pub const DEFAULT_PORT: u16 = 6379;
 
@@ -60,7 +60,7 @@ impl Service for RedisService {
         if !server.exists() {
             return Err(format!("redis-server not found at {}", server.display()));
         }
-        let child = Command::new(&server)
+        let child = hidden_command(&server)
             .arg(&conf)
             .spawn()
             .map_err(|e| format!("failed to spawn redis-server: {e}"))?;

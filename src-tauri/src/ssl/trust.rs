@@ -7,9 +7,9 @@
 //! manipulate Firefox's profile.
 
 #[cfg(windows)]
-use std::path::Path;
+use crate::services::hidden_command;
 #[cfg(windows)]
-use std::process::Command;
+use std::path::Path;
 
 /// Idempotent. Returns `Ok(true)` when a new install happened, `Ok(false)`
 /// when the cert was already present, `Err` on failure.
@@ -33,7 +33,7 @@ pub fn ensure_trusted(ca_cert_path: &Path) -> Result<bool, String> {
          }}\r\n\
          $store.Close()"
     );
-    let output = Command::new("powershell")
+    let output = hidden_command("powershell")
         .args(["-NoProfile", "-NonInteractive", "-Command", &script])
         .output()
         .map_err(|e| format!("spawn powershell: {e}"))?;
