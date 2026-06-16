@@ -37,6 +37,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install Linux build deps
+        # The runner OS only matters for the build environment — the
+        # artifacts it emits target every desktop distro: .deb covers
+        # Debian/Ubuntu/Mint/Pop!/Elementary, .rpm covers Fedora/RHEL/
+        # openSUSE, and .AppImage runs on ANYTHING with glibc (Arch, void,
+        # etc.). `rpm` is what teaches the Tauri bundler to emit the .rpm.
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
@@ -50,7 +55,8 @@ jobs:
             libxdo-dev \
             libssl-dev \
             librsvg2-dev \
-            patchelf
+            patchelf \
+            rpm
 
       - uses: pnpm/action-setup@v3
         with:
@@ -111,7 +117,9 @@ jobs:
             Pick the installer that matches your machine:
             - **Windows x64** — `.exe` (NSIS) or `.msi`
             - **macOS Apple Silicon** — `.dmg` or `.app.tar.gz`
-            - **Linux amd64** — `.deb` or `.AppImage`
+            - **Linux Debian/Ubuntu/Mint** — `.deb`
+            - **Linux Fedora/RHEL/openSUSE** — `.rpm`
+            - **Any other Linux (Arch, etc.)** — `.AppImage`
 
             Last built from commit `${{ github.sha }}`.
           # Drafts let all platforms upload without the release going
