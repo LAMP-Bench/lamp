@@ -1,4 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { IconType } from "react-icons";
 import {
@@ -9,7 +10,7 @@ import {
   FiSliders,
   FiChevronDown,
   FiChevronUp,
-  FiHelpCircle,
+  FiSettings,
   FiDownload,
 } from "react-icons/fi";
 import { SiApache, SiNginx, SiMysql, SiRedis } from "react-icons/si";
@@ -19,14 +20,14 @@ import { Toggle } from "./Toggle";
 import { useService } from "../useService";
 import type { SectionId, ServiceName } from "../types";
 
-type NavItem = { id: SectionId; label: string; icon: ReactNode };
+type NavItem = { id: SectionId; icon: ReactNode };
 
 const NAV_ITEMS: NavItem[] = [
-  { id: "home", label: "Home", icon: <FiHome /> },
-  { id: "hosts", label: "Hosts", icon: <FiGlobe /> },
-  { id: "tools", label: "Tools", icon: <FiTool /> },
-  { id: "config", label: "Config", icon: <FiSliders /> },
-  { id: "logs", label: "Logs", icon: <FiTerminal /> },
+  { id: "home", icon: <FiHome /> },
+  { id: "hosts", icon: <FiGlobe /> },
+  { id: "tools", icon: <FiTool /> },
+  { id: "config", icon: <FiSliders /> },
+  { id: "logs", icon: <FiTerminal /> },
 ];
 
 type SvcSpec = {
@@ -86,6 +87,7 @@ export function Sidebar({
   onSelect: (id: SectionId) => void;
   version: string;
 }) {
+  const { t } = useTranslation();
   return (
     <aside className="bg-neutral-50 border-r border-neutral-200 flex flex-col text-sm">
       <div className="px-4 py-4 flex items-center gap-3">
@@ -102,7 +104,7 @@ export function Sidebar({
         </div>
       </div>
 
-      <Group label="Settings" defaultOpen>
+      <Group label={t("nav.settings")} defaultOpen>
         {NAV_ITEMS.map((item) => {
           const isActive = active === item.id;
           return (
@@ -119,13 +121,13 @@ export function Sidebar({
                 <span className="absolute inset-y-0 left-0 w-[3px] bg-sky-500" />
               )}
               <span className="text-[15px] text-neutral-500">{item.icon}</span>
-              <span>{item.label}</span>
+              <span>{t(`nav.${item.id}`)}</span>
             </button>
           );
         })}
       </Group>
 
-      <Group label="Servers & Services" defaultOpen>
+      <Group label={t("nav.servers")} defaultOpen>
         {SERVICES.map((s) => (
           <ServiceRow key={s.name} spec={s} />
         ))}
@@ -134,8 +136,16 @@ export function Sidebar({
       <div className="flex-1" />
 
       <div className="border-t border-neutral-200 px-3 py-2 flex items-center justify-between text-[11px] text-neutral-500">
-        <span className="font-mono">Phase 4 · MVP</span>
-        <FiHelpCircle className="text-neutral-400" />
+        <span className="font-mono">alpha · v{version || "…"}</span>
+        <button
+          onClick={() => onSelect("settings")}
+          className={`p-1 rounded hover:bg-neutral-200 transition ${
+            active === "settings" ? "text-sky-600" : "text-neutral-400"
+          }`}
+          title="Settings"
+        >
+          <FiSettings />
+        </button>
       </div>
     </aside>
   );

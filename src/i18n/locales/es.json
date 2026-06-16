@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "hosts": "Hosts",
+    "tools": "Herramientas",
+    "config": "Configuración",
+    "logs": "Logs",
+    "settings": "Ajustes",
+    "servers": "Servidores y servicios"
+  },
+  "topbar": {
+    "editor": "Editor",
+    "webstart": "Abrir web",
+    "start": "Iniciar",
+    "stop": "Detener"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "general": {
+      "title": "General",
+      "language": "Idioma",
+      "languageHint": "El cambio se aplica al instante y se recuerda para la siguiente sesión."
+    },
+    "updates": {
+      "title": "Actualizaciones",
+      "checkNow": "Buscar actualizaciones",
+      "checking": "Buscando…",
+      "upToDate": "Estás en la última versión ({{version}}).",
+      "available": "Hay una nueva versión: {{version}}.",
+      "installNow": "Instalar y reiniciar",
+      "error": "Error al buscar actualizaciones: {{message}}",
+      "autoHint": "Lamp Bench busca actualizaciones cada vez que arranca. Usa este botón para volver a comprobar manualmente."
+    },
+    "about": {
+      "title": "Acerca de",
+      "version": "Versión",
+      "build": "Build",
+      "github": "GitHub",
+      "license": "Licencia",
+      "openRepo": "Abrir repositorio"
+    }
+  },
+  "updateBanner": {
+    "available": "Lamp Bench <strong>{{version}}</strong> está disponible.",
+    "install": "Instalar y reiniciar",
+    "downloading": "Descargando actualización…",
+    "failed": "Error al actualizar: {{message}}"
+  }
+}

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { Sidebar } from "./components/Sidebar";
 import { TopBar } from "./components/TopBar";
@@ -9,15 +10,8 @@ import { ToolsSection } from "./sections/ToolsSection";
 import { ConfigSection } from "./sections/ConfigSection";
 import { EditorSection } from "./sections/EditorSection";
 import { LogsSection } from "./sections/LogsSection";
+import { SettingsSection } from "./sections/SettingsSection";
 import type { SectionId } from "./types";
-
-const TITLES: Record<SectionId, string> = {
-  home: "Home",
-  hosts: "Hosts",
-  tools: "Tools",
-  config: "Config",
-  logs: "Logs",
-};
 
 /// Detect editor-window mode from the URL hash. New editor windows are
 /// spawned by the Rust `editor_open` command with `#editor=<path>`.
@@ -48,6 +42,7 @@ function App() {
 }
 
 function MainShell() {
+  const { t } = useTranslation();
   const [section, setSection] = useState<SectionId>("home");
   const [version, setVersion] = useState("");
 
@@ -60,13 +55,14 @@ function MainShell() {
       <Sidebar active={section} onSelect={setSection} version={version} />
       <div className="flex flex-col min-w-0 min-h-0">
         <UpdateBanner />
-        <TopBar title={TITLES[section]} />
+        <TopBar title={t(`nav.${section}`)} />
         <main className="flex-1 min-h-0 overflow-hidden">
           {section === "home" && <HomeSection onNavigate={setSection} />}
           {section === "hosts" && <HostsSection />}
           {section === "tools" && <ToolsSection />}
           {section === "config" && <ConfigSection />}
           {section === "logs" && <LogsSection />}
+          {section === "settings" && <SettingsSection />}
         </main>
       </div>
     </div>
