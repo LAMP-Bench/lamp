@@ -24,6 +24,11 @@ pub fn bin_path(root: &Path, name: &str) -> PathBuf {
 /// composer, git) must be created through this so the user never sees a
 /// flashing black CMD on screen. No-op on non-Windows.
 pub fn hidden_command<S: AsRef<OsStr>>(program: S) -> Command {
+    // `mut` is only needed on Windows where we mutate `cmd` to set the
+    // creation_flags below. Non-Windows targets compile out that block,
+    // leaving the binding unmutated — `allow(unused_mut)` keeps both
+    // platforms warning-free without duplicating the let-binding.
+    #[allow(unused_mut)]
     let mut cmd = Command::new(program);
     #[cfg(windows)]
     {

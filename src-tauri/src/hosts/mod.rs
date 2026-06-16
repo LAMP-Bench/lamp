@@ -3,6 +3,7 @@
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::fs;
+#[cfg(windows)]
 use crate::services::hidden_command;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

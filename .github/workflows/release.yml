@@ -56,6 +56,7 @@ jobs:
             libssl-dev \
             librsvg2-dev \
             patchelf \
+            libayatana-appindicator3-dev \
             rpm
 
       - uses: pnpm/action-setup@v3

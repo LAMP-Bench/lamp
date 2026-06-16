@@ -130,7 +130,7 @@
     "platforms": {
       "windows-x64": {
         "filename": "php-8.4.21-nts-Win32-vs17-x64.zip",
-        "url": "https://windows.php.net/downloads/releases/php-8.4.21-nts-Win32-vs17-x64.zip",
+        "url": "https://windows.php.net/downloads/releases/archives/php-8.4.21-nts-Win32-vs17-x64.zip",
         "sha256": "2CB57D0D3A17B1248C6A53B600719D4B051E1C374373404D5031409C0725031D"
       }
     }
