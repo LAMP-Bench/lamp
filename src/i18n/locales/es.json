@@ -1,4 +1,17 @@
 {
+  "setup": {
+    "title": "Configurando Lamp Bench",
+    "subtitle": "Descarga inicial de los servicios. Solo ocurre la primera vez.",
+    "complete": "Listo. Lamp Bench ya está preparado.",
+    "getStarted": "Empezar",
+    "retry": "Reintentar",
+    "skip": "Saltar por ahora",
+    "errorTitle": "Algunas descargas fallaron",
+    "errorHint": "Lamp Bench funcionará, pero los servicios con descargas fallidas no arrancarán hasta que los reintentes.",
+    "unsupportedTitle": "Los servicios para esta plataforma todavía no están listos",
+    "unsupportedHint": "Los binarios de Lamp Bench (Apache, MySQL, PHP, …) sólo están empaquetados para Windows ahora mismo. La interfaz funciona; los toggles de servicio fallarán hasta que añadamos binarios al scripts/binaries.json.",
+    "continueAnyway": "Continuar a la app"
+  },
   "nav": {
     "home": "Inicio",
     "hosts": "Hosts",

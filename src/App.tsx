@@ -11,6 +11,7 @@ import { ConfigSection } from "./sections/ConfigSection";
 import { EditorSection } from "./sections/EditorSection";
 import { LogsSection } from "./sections/LogsSection";
 import { SettingsSection } from "./sections/SettingsSection";
+import { SetupWizard, setupNeeded } from "./components/SetupWizard";
 import type { SectionId } from "./types";
 
 /// Detect editor-window mode from the URL hash. New editor windows are
@@ -38,6 +39,41 @@ function App() {
     );
   }
 
+  return <Bootstrap />;
+}
+
+/// Gates the main app behind the first-launch setup wizard. The slim
+/// installer ships the binary alone; on the first run the wizard
+/// downloads Apache/MySQL/PHP/etc. into `<install>/resources/`. Every
+/// subsequent launch skips the wizard because the binaries are now on
+/// disk (binary_installed returns true).
+function Bootstrap() {
+  const [phase, setPhase] = useState<
+    | { kind: "checking" }
+    | { kind: "setup"; platformSupported: boolean }
+    | { kind: "ready" }
+  >({ kind: "checking" });
+
+  useEffect(() => {
+    setupNeeded()
+      .then(({ needed, platformSupported }) => {
+        if (needed) setPhase({ kind: "setup", platformSupported });
+        else setPhase({ kind: "ready" });
+      })
+      .catch(() => setPhase({ kind: "ready" }));
+  }, []);
+
+  if (phase.kind === "checking") {
+    return <div className="h-screen bg-neutral-50" />;
+  }
+  if (phase.kind === "setup") {
+    return (
+      <SetupWizard
+        platformSupported={phase.platformSupported}
+        onComplete={() => setPhase({ kind: "ready" })}
+      />
+    );
+  }
   return <MainShell />;
 }
 

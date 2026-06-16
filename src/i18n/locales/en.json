@@ -1,4 +1,17 @@
 {
+  "setup": {
+    "title": "Setting up Lamp Bench",
+    "subtitle": "First-launch download of the bundled services. This only happens once.",
+    "complete": "All set. Lamp Bench is ready to go.",
+    "getStarted": "Get started",
+    "retry": "Retry",
+    "skip": "Skip for now",
+    "errorTitle": "Some downloads failed",
+    "errorHint": "Lamp Bench will work, but services with failed downloads won't start until they're retried.",
+    "unsupportedTitle": "Bundled services for this platform aren't ready yet",
+    "unsupportedHint": "Lamp Bench's services (Apache, MySQL, PHP, …) are currently only packaged for Windows. The UI still works; service toggles will fail until pinned binaries land in scripts/binaries.json.",
+    "continueAnyway": "Continue to app"
+  },
   "nav": {
     "home": "Home",
     "hosts": "Hosts",

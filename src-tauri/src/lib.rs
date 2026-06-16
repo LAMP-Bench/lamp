@@ -639,6 +639,14 @@ fn compress_images(
     images::compress_folder(Path::new(&folder), q, include_png, include_jpg)
 }
 
+/// Identifier of the current OS+arch as written in `scripts/binaries.json`.
+/// Used by the React setup wizard to short-circuit on platforms that
+/// don't have bundled-service binaries pinned yet.
+#[tauri::command]
+fn current_platform() -> &'static str {
+    downloads::current_platform()
+}
+
 #[tauri::command]
 fn lan_ip() -> Option<String> {
     use std::net::UdpSocket;
@@ -867,6 +875,7 @@ pub fn run() {
             htdocs_path,
             lan_ip,
             compress_images,
+            current_platform,
             ftp_upload,
             editor_open,
             binary_installed,
