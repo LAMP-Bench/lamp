@@ -288,18 +288,27 @@ fn snapshot_list(
 fn snapshot_create(
     host_id: i64,
     label: String,
+    db_name: Option<String>,
     state: tauri::State<AppState>,
 ) -> Result<snapshots::Snapshot, String> {
+    let (mysql_dir, mysql_port) = mysql_active(&state);
     let conn = state.db.lock().unwrap();
     let host = hosts::list(&conn)?
         .into_iter()
         .find(|h| h.id == host_id)
         .ok_or_else(|| format!("host {host_id} not found"))?;
-    snapshots::create(&conn, &host, &label, &state.runtime_dir)
+    let trimmed = db_name.as_deref().map(str::trim).filter(|s| !s.is_empty());
+    let db_capture = trimmed.map(|name| snapshots::DbCapture {
+        mysql_dir: &mysql_dir,
+        port: mysql_port,
+        db_name: name,
+    });
+    snapshots::create(&conn, &host, &label, &state.runtime_dir, db_capture)
 }
 
 #[tauri::command]
 fn snapshot_restore(id: i64, state: tauri::State<AppState>) -> Result<(), String> {
+    let (mysql_dir, mysql_port) = mysql_active(&state);
     let conn = state.db.lock().unwrap();
     let host_id: i64 = conn
         .query_row(
@@ -312,7 +321,7 @@ fn snapshot_restore(id: i64, state: tauri::State<AppState>) -> Result<(), String
         .into_iter()
         .find(|h| h.id == host_id)
         .ok_or_else(|| format!("host {host_id} not found"))?;
-    snapshots::restore(&conn, id, &host)
+    snapshots::restore(&conn, id, &host, &mysql_dir, mysql_port)
 }
 
 #[tauri::command]

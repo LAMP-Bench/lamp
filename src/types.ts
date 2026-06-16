@@ -35,4 +35,5 @@ export type Snapshot = {
   path: string;
   size_bytes: number;
   created_at: string;
+  has_db: boolean;
 };

@@ -37,6 +37,11 @@ fn migrate(conn: &Connection) -> rusqlite::Result<()> {
     add_column_if_missing(conn, "hosts", "php_version", "TEXT NOT NULL DEFAULT '8.4'")?;
     add_column_if_missing(conn, "hosts", "apache_extra", "TEXT NOT NULL DEFAULT ''")?;
     add_column_if_missing(conn, "hosts", "nginx_extra", "TEXT NOT NULL DEFAULT ''")?;
+    // Marker that this snapshot's archive carries a mysqldump alongside the
+    // docroot files. Pre-existing rows default to 0 (files-only) and remain
+    // restorable — `restore` looks for `db.sql` inside the archive itself,
+    // so the column is informational, used by the UI to badge entries.
+    add_column_if_missing(conn, "snapshots", "has_db", "INTEGER NOT NULL DEFAULT 0")?;
     Ok(())
 }
 

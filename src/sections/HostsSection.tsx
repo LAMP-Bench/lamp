@@ -13,6 +13,7 @@ import {
   FiCamera,
   FiRefreshCw,
   FiTrash2,
+  FiDatabase,
 } from "react-icons/fi";
 import type { Host, PhpCatalogEntry, Snapshot } from "../types";
 
@@ -504,6 +505,8 @@ function Field({
 function SnapshotsTab({ host }: { host: Host }) {
   const [list, setList] = useState<Snapshot[]>([]);
   const [label, setLabel] = useState("");
+  const [dbName, setDbName] = useState("");
+  const [includeDb, setIncludeDb] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -530,8 +533,11 @@ function SnapshotsTab({ host }: { host: Host }) {
       await invoke<Snapshot>("snapshot_create", {
         hostId: host.id,
         label: label.trim() || "Untitled snapshot",
+        dbName: includeDb && dbName.trim() ? dbName.trim() : null,
       });
       setLabel("");
+      setDbName("");
+      setIncludeDb(false);
       await refresh();
     } catch (e) {
       setError(String(e));
@@ -540,13 +546,11 @@ function SnapshotsTab({ host }: { host: Host }) {
     }
   }
 
-  async function restore(id: number) {
-    if (
-      !confirm(
-        "Restore this snapshot? Files in the docroot will be overwritten with the snapshot's contents (existing files NOT in the snapshot are left alone)."
-      )
-    )
-      return;
+  async function restore(id: number, hasDb: boolean) {
+    const warning = hasDb
+      ? "Restore this snapshot? Docroot files will be overwritten AND the bundled MySQL database will be dropped and re-imported."
+      : "Restore this snapshot? Files in the docroot will be overwritten with the snapshot's contents (existing files NOT in the snapshot are left alone).";
+    if (!confirm(warning)) return;
     setBusy(true);
     setError(null);
     try {
@@ -577,29 +581,52 @@ function SnapshotsTab({ host }: { host: Host }) {
     <div className="max-w-3xl space-y-4 text-sm">
       <form
         onSubmit={create}
-        className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 flex items-center gap-2"
+        className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 space-y-2"
       >
-        <FiCamera className="text-neutral-500 ml-1 shrink-0" />
-        <input
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          placeholder='Label (e.g. "before plugin update")'
-          className="flex-1 px-3 py-1.5 rounded border border-neutral-300 bg-white text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-        />
-        <button
-          type="submit"
-          disabled={busy}
-          className="px-3 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium disabled:opacity-50"
-        >
-          {busy ? "…" : "Take snapshot"}
-        </button>
+        <div className="flex items-center gap-2">
+          <FiCamera className="text-neutral-500 ml-1 shrink-0" />
+          <input
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder='Label (e.g. "before plugin update")'
+            className="flex-1 px-3 py-1.5 rounded border border-neutral-300 bg-white text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+          />
+          <button
+            type="submit"
+            disabled={busy}
+            className="px-3 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium disabled:opacity-50"
+          >
+            {busy ? "…" : "Take snapshot"}
+          </button>
+        </div>
+        <div className="flex items-center gap-2 pl-7">
+          <label className="flex items-center gap-1.5 text-xs text-neutral-700">
+            <input
+              type="checkbox"
+              checked={includeDb}
+              onChange={(e) => setIncludeDb(e.target.checked)}
+              className="size-4"
+            />
+            <FiDatabase className="text-neutral-500" />
+            Include MySQL database
+          </label>
+          {includeDb && (
+            <input
+              value={dbName}
+              onChange={(e) => setDbName(e.target.value)}
+              placeholder="db name (e.g. wp_myproject)"
+              className="flex-1 px-2 py-1 rounded border border-neutral-300 bg-white text-xs font-mono focus:outline-none focus:border-sky-500"
+            />
+          )}
+        </div>
       </form>
 
       <p className="text-xs text-neutral-500">
         Snapshots capture <span className="font-mono">{host.docroot}</span> as
-        a single <span className="font-mono">.tar.zst</span> archive. The
-        database is <strong>not</strong> included yet — use phpMyAdmin's
-        export/import for that until Phase 7.x adds DB-aware snapshots.
+        a single <span className="font-mono">.tar.zst</span> archive. Tick{" "}
+        <em>Include MySQL database</em> to bundle a{" "}
+        <span className="font-mono">mysqldump --databases</span> alongside the
+        files; restore drops + re-imports the DB.
       </p>
 
       {list.length === 0 ? (
@@ -615,15 +642,24 @@ function SnapshotsTab({ host }: { host: Host }) {
             >
               <FiCamera className="text-neutral-400 shrink-0" />
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-neutral-900 truncate">
+                <div className="font-medium text-neutral-900 truncate flex items-center gap-2">
                   {s.label}
+                  {s.has_db && (
+                    <span
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-sky-100 text-sky-700"
+                      title="Bundles a mysqldump"
+                    >
+                      <FiDatabase className="text-[10px]" />
+                      DB
+                    </span>
+                  )}
                 </div>
                 <div className="text-[11px] text-neutral-500 font-mono">
                   {s.created_at} · {formatSize(s.size_bytes)}
                 </div>
               </div>
               <button
-                onClick={() => restore(s.id)}
+                onClick={() => restore(s.id, s.has_db)}
                 disabled={busy}
                 className="px-2.5 py-1 rounded border border-neutral-300 hover:bg-neutral-50 text-xs flex items-center gap-1.5 text-neutral-700 disabled:opacity-50"
               >
