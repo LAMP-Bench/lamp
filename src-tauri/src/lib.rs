@@ -595,6 +595,18 @@ fn htdocs_path(state: tauri::State<AppState>) -> String {
     state.htdocs_dir.to_string_lossy().replace('\\', "/")
 }
 
+/// LAN-routable IPv4 of this machine, for the "open on my phone" QR code.
+/// Uses the classic UDP-connect trick: bind ephemeral, connect to a public
+/// address (no packet actually sent), read the OS-selected local IP. That
+/// avoids pulling a network-interface crate just to enumerate adapters.
+#[tauri::command]
+fn lan_ip() -> Option<String> {
+    use std::net::UdpSocket;
+    let sock = UdpSocket::bind("0.0.0.0:0").ok()?;
+    sock.connect("8.8.8.8:80").ok()?;
+    sock.local_addr().ok().map(|a| a.ip().to_string())
+}
+
 #[tauri::command]
 fn editor_open(path: String, app: tauri::AppHandle) -> Result<(), String> {
     use tauri::{WebviewUrl, WebviewWindowBuilder};
@@ -813,6 +825,7 @@ pub fn run() {
             snapshot_delete,
             read_log,
             htdocs_path,
+            lan_ip,
             editor_open,
             binary_installed,
             binary_download,

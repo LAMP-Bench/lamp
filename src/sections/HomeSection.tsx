@@ -8,9 +8,11 @@ import {
   FiTerminal,
   FiFolder,
   FiExternalLink,
+  FiSmartphone,
 } from "react-icons/fi";
 import { SiApache, SiNginx, SiMysql, SiPhp } from "react-icons/si";
 import { useService } from "../useService";
+import { MobileQRModal } from "../components/MobileQRModal";
 import type { Host, SectionId } from "../types";
 
 export function HomeSection({
@@ -24,6 +26,7 @@ export function HomeSection({
   const redis = useService("redis");
   const [hosts, setHosts] = useState<Host[]>([]);
   const [htdocs, setHtdocs] = useState<string>("");
+  const [qrOpen, setQrOpen] = useState(false);
 
   useEffect(() => {
     invoke<Host[]>("host_list").then(setHosts).catch(() => {});
@@ -175,9 +178,15 @@ export function HomeSection({
               label="phpMyAdmin"
               onClick={() => openUrl("http://localhost:8080/phpmyadmin/")}
             />
+            <QuickAction
+              icon={<FiSmartphone />}
+              label="Mobile QR"
+              onClick={() => setQrOpen(true)}
+            />
           </div>
         </section>
       </div>
+      <MobileQRModal open={qrOpen} onClose={() => setQrOpen(false)} />
     </div>
   );
 }
