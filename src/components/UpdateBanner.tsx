@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { check, type Update } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { FiDownload, FiX } from "react-icons/fi";
@@ -16,6 +17,7 @@ type State =
 /// devtools only) — a missing/unreachable update server shouldn't yell at
 /// the user every launch.
 export function UpdateBanner() {
+  const { t } = useTranslation();
   const [state, setState] = useState<State>({ kind: "idle" });
 
   useEffect(() => {
@@ -64,7 +66,7 @@ export function UpdateBanner() {
   if (state.kind === "error") {
     return (
       <Bar tone="error">
-        <span>Update failed: {state.message}</span>
+        <span>{t("updateBanner.failed", { message: state.message })}</span>
         <button
           onClick={() => setState({ kind: "dismissed" })}
           className="ml-auto p-1 rounded hover:bg-black/10"
@@ -84,7 +86,8 @@ export function UpdateBanner() {
     return (
       <Bar tone="info">
         <span>
-          Downloading update…{pct !== null ? ` ${pct}%` : ""}
+          {t("updateBanner.downloading")}
+          {pct !== null ? ` ${pct}%` : ""}
         </span>
       </Bar>
     );
@@ -96,13 +99,17 @@ export function UpdateBanner() {
     <Bar tone="info">
       <FiDownload />
       <span>
-        Lamp Bench <strong>{v}</strong> is available.
+        <Trans
+          i18nKey="updateBanner.available"
+          values={{ version: v }}
+          components={{ strong: <strong /> }}
+        />
       </span>
       <button
         onClick={install}
         className="ml-2 px-2 py-0.5 rounded bg-sky-600 text-white text-[12px] hover:bg-sky-700"
       >
-        Install &amp; Restart
+        {t("updateBanner.install")}
       </button>
       <button
         onClick={() => setState({ kind: "dismissed" })}

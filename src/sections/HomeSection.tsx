@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import {
@@ -20,6 +21,7 @@ export function HomeSection({
 }: {
   onNavigate: (id: SectionId) => void;
 }) {
+  const { t } = useTranslation();
   const apache = useService("apache");
   const nginx = useService("nginx");
   const mysql = useService("mysql");
@@ -38,7 +40,7 @@ export function HomeSection({
       <div className="p-6 max-w-4xl space-y-6">
         <section>
           <h2 className="text-xs uppercase tracking-wider text-neutral-500 font-medium mb-2">
-            Services
+            {t("home.services")}
           </h2>
           <div className="grid grid-cols-2 gap-3">
             <StatusBox
@@ -70,7 +72,7 @@ export function HomeSection({
 
         <section>
           <h2 className="text-xs uppercase tracking-wider text-neutral-500 font-medium mb-2">
-            Default htdocs
+            {t("home.defaultHtdocs")}
           </h2>
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 flex items-center gap-3">
             <FiFolder className="text-neutral-500 shrink-0" />
@@ -86,32 +88,32 @@ export function HomeSection({
             </button>
           </div>
           <p className="text-xs text-neutral-500 mt-2">
-            Drop project folders here, or use{" "}
+            {t("home.htdocsHint")}{" "}
             <button
               onClick={() => onNavigate("tools")}
               className="text-sky-600 hover:underline"
             >
-              Tools → CMS Extras
+              {t("home.htdocsHintLink")}
             </button>{" "}
-            to install one with a click.
+            {t("home.htdocsHintTail")}
           </p>
         </section>
 
         <section>
           <div className="flex items-baseline justify-between mb-2">
             <h2 className="text-xs uppercase tracking-wider text-neutral-500 font-medium">
-              Virtual hosts
+              {t("home.virtualHosts")}
             </h2>
             <button
               onClick={() => onNavigate("hosts")}
               className="text-xs text-sky-600 hover:underline"
             >
-              Manage →
+              {t("home.manage")}
             </button>
           </div>
           {hosts.length === 0 ? (
             <div className="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-4 text-center text-sm text-neutral-500">
-              No virtual hosts yet. The default htdocs above already works at
+              {t("home.noHosts")}
               <code className="ml-1 text-neutral-700">localhost:8080</code>.
             </div>
           ) : (
@@ -141,7 +143,7 @@ export function HomeSection({
                   onClick={() => onNavigate("hosts")}
                   className="w-full px-3 py-2 text-xs text-sky-600 hover:bg-neutral-50"
                 >
-                  + {hosts.length - 5} more
+                  {t("home.moreHosts", { count: hosts.length - 5 })}
                 </button>
               )}
             </div>
@@ -150,37 +152,37 @@ export function HomeSection({
 
         <section>
           <h2 className="text-xs uppercase tracking-wider text-neutral-500 font-medium mb-2">
-            Quick access
+            {t("home.quickAccess")}
           </h2>
           <div className="grid grid-cols-3 gap-3">
             <QuickAction
               icon={<FiGlobe />}
-              label="Hosts"
+              label={t("home.quickHosts")}
               onClick={() => onNavigate("hosts")}
             />
             <QuickAction
               icon={<FiTool />}
-              label="Tools"
+              label={t("home.quickTools")}
               onClick={() => onNavigate("tools")}
             />
             <QuickAction
               icon={<FiSliders />}
-              label="Config"
+              label={t("home.quickConfig")}
               onClick={() => onNavigate("config")}
             />
             <QuickAction
               icon={<FiTerminal />}
-              label="Logs"
+              label={t("home.quickLogs")}
               onClick={() => onNavigate("logs")}
             />
             <QuickAction
               icon={<FiExternalLink />}
-              label="phpMyAdmin"
+              label={t("home.quickPhpMyAdmin")}
               onClick={() => openUrl("http://localhost:8080/phpmyadmin/")}
             />
             <QuickAction
               icon={<FiSmartphone />}
-              label="Mobile QR"
+              label={t("home.quickMobileQR")}
               onClick={() => setQrOpen(true)}
             />
           </div>
@@ -202,6 +204,7 @@ function StatusBox({
   icon: React.ReactNode;
   status: any;
 }) {
+  const { t } = useTranslation();
   const running = status?.kind === "running";
   return (
     <div className="rounded-lg border border-neutral-200 bg-white px-4 py-3 flex items-center gap-3">
@@ -216,7 +219,7 @@ function StatusBox({
             ? "bg-emerald-500 shadow shadow-emerald-500/50"
             : "bg-neutral-300"
         }`}
-        title={running ? "running" : "stopped"}
+        title={running ? t("home.statusRunning") : t("home.statusStopped")}
       />
     </div>
   );

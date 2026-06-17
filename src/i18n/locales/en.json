@@ -59,5 +59,25 @@
     "install": "Install & Restart",
     "downloading": "Downloading update…",
     "failed": "Update failed: {{message}}"
+  },
+  "home": {
+    "services": "Services",
+    "defaultHtdocs": "Default htdocs",
+    "htdocsHint": "Drop project folders here, or use",
+    "htdocsHintLink": "Tools → CMS Extras",
+    "htdocsHintTail": "to install one with a click.",
+    "virtualHosts": "Virtual hosts",
+    "manage": "Manage →",
+    "noHosts": "No virtual hosts yet. The default htdocs above already works at",
+    "moreHosts": "+ {{count}} more",
+    "quickAccess": "Quick access",
+    "quickHosts": "Hosts",
+    "quickTools": "Tools",
+    "quickConfig": "Config",
+    "quickLogs": "Logs",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "Mobile QR",
+    "statusRunning": "running",
+    "statusStopped": "stopped"
   }
 }

@@ -59,5 +59,25 @@
     "install": "Instalar y reiniciar",
     "downloading": "Descargando actualización…",
     "failed": "Error al actualizar: {{message}}"
+  },
+  "home": {
+    "services": "Servicios",
+    "defaultHtdocs": "htdocs predeterminado",
+    "htdocsHint": "Coloca aquí carpetas de proyecto, o usa",
+    "htdocsHintLink": "Herramientas → CMS Extras",
+    "htdocsHintTail": "para instalar uno con un clic.",
+    "virtualHosts": "Hosts virtuales",
+    "manage": "Gestionar →",
+    "noHosts": "Aún no hay hosts virtuales. El htdocs predeterminado ya funciona en",
+    "moreHosts": "+ {{count}} más",
+    "quickAccess": "Acceso rápido",
+    "quickHosts": "Hosts",
+    "quickTools": "Herramientas",
+    "quickConfig": "Configuración",
+    "quickLogs": "Logs",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "QR móvil",
+    "statusRunning": "en ejecución",
+    "statusStopped": "detenido"
   }
 }

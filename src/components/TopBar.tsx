@@ -1,8 +1,10 @@
 import { FiEdit2, FiGlobe, FiPower } from "react-icons/fi";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { useTranslation } from "react-i18next";
 import { useService } from "../useService";
 
 export function TopBar({ title }: { title: string }) {
+  const { t } = useTranslation();
   const apache = useService("apache");
   const nginx = useService("nginx");
   const mysql = useService("mysql");
@@ -31,11 +33,11 @@ export function TopBar({ title }: { title: string }) {
         {title}
       </h1>
       <div className="flex items-center gap-1">
-        <ActionButton icon={<FiEdit2 />} label="Editor" disabled />
-        <ActionButton icon={<FiGlobe />} label="WebStart" onClick={webStart} />
+        <ActionButton icon={<FiEdit2 />} label={t("topbar.editor")} disabled />
+        <ActionButton icon={<FiGlobe />} label={t("topbar.webstart")} onClick={webStart} />
         <ActionButton
           icon={<FiPower />}
-          label={anyRunning ? "Stop" : "Start"}
+          label={anyRunning ? t("topbar.stop") : t("topbar.start")}
           tone={anyRunning ? "danger" : "primary"}
           onClick={anyRunning ? stopAll : startCore}
         />
