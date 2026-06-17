@@ -3,6 +3,7 @@ import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import en from "./locales/en.json";
 import es from "./locales/es.json";
+import fr from "./locales/fr.json";
 
 /// i18n bootstrap. Detected language order:
 ///  1. localStorage `lamp-bench-lang` if the user has explicitly picked one.
@@ -17,6 +18,7 @@ i18n
     resources: {
       en: { translation: en },
       es: { translation: es },
+      fr: { translation: fr },
     },
     fallbackLng: "en",
     supportedLngs: ["en", "es", "fr"],

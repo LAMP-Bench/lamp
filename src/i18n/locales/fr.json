@@ -1,0 +1,254 @@
+{
+  "setup": {
+    "title": "Configuration de Lamp Bench",
+    "subtitle": "Premier lancement : téléchargement des services. Ne se produit qu'une fois.",
+    "complete": "Prêt. Lamp Bench est opérationnel.",
+    "getStarted": "Commencer",
+    "retry": "Réessayer",
+    "skip": "Passer pour l'instant",
+    "errorTitle": "Certains téléchargements ont échoué",
+    "errorHint": "Lamp Bench fonctionnera, mais les services dont le téléchargement a échoué ne démarreront pas tant qu'ils ne seront pas réessayés.",
+    "unsupportedTitle": "Les services pour cette plateforme ne sont pas encore prêts",
+    "unsupportedHint": "Les binaires de Lamp Bench (Apache, MySQL, PHP, …) ne sont actuellement empaquetés que pour Windows. L'interface fonctionne ; les commutateurs de service échoueront jusqu'à ce que les binaires soient ajoutés à scripts/binaries.json.",
+    "continueAnyway": "Continuer vers l'app"
+  },
+  "nav": {
+    "home": "Accueil",
+    "hosts": "Hôtes",
+    "tools": "Outils",
+    "config": "Configuration",
+    "logs": "Logs",
+    "settings": "Réglages",
+    "navigation": "Navigation",
+    "servers": "Serveurs et services"
+  },
+  "topbar": {
+    "editor": "Éditeur",
+    "webstart": "Ouvrir site",
+    "start": "Démarrer",
+    "stop": "Arrêter"
+  },
+  "settings": {
+    "title": "Réglages",
+    "general": {
+      "title": "Général",
+      "language": "Langue",
+      "languageHint": "Effet immédiat. Le choix est mémorisé pour le prochain lancement."
+    },
+    "updates": {
+      "title": "Mises à jour",
+      "checkNow": "Vérifier les mises à jour",
+      "checking": "Vérification…",
+      "upToDate": "Vous utilisez la dernière version ({{version}}).",
+      "available": "La version {{version}} est disponible.",
+      "installNow": "Installer et redémarrer",
+      "error": "Échec de la vérification : {{message}}",
+      "autoHint": "Lamp Bench vérifie les mises à jour à chaque lancement. Utilisez ce bouton pour vérifier manuellement."
+    },
+    "about": {
+      "title": "À propos",
+      "version": "Version",
+      "build": "Build",
+      "github": "GitHub",
+      "license": "Licence",
+      "openRepo": "Ouvrir le dépôt"
+    }
+  },
+  "updateBanner": {
+    "available": "Lamp Bench <strong>{{version}}</strong> est disponible.",
+    "install": "Installer et redémarrer",
+    "downloading": "Téléchargement de la mise à jour…",
+    "failed": "Échec de la mise à jour : {{message}}"
+  },
+  "tools": {
+    "section": {
+      "database": "Base de données",
+      "email": "Email",
+      "images": "Images",
+      "deploy": "Déploiement",
+      "php": "PHP",
+      "cms": "CMS"
+    },
+    "open": "Ouvrir",
+    "pma": {
+      "title": "phpMyAdmin",
+      "subtitle": "Admin de la base — Apache + MySQL doivent être en cours d'exécution"
+    },
+    "mailhog": {
+      "title": "Boîte MailHog",
+      "subtitle": "Capture les mail() de PHP et les affiche dans une UI web. Démarrez MailHog d'abord."
+    },
+    "composer": {
+      "title": "Composer",
+      "checking": "vérification…"
+    },
+    "laravel": {
+      "title": "Laravel",
+      "subtitle": "Génère un nouveau projet Laravel avec composer create-project",
+      "newProject": "Nouveau projet"
+    },
+    "cms": {
+      "wordpressTitle": "WordPress",
+      "wordpressSubtitle": "Installation en un clic. BDD, wp-config.php avec de nouveaux salts, fichiers copiés dans htdocs.",
+      "joomlaTitle": "Joomla",
+      "joomlaSubtitle": "Installation en un clic. BDD créée. Terminez la configuration dans l'installateur web.",
+      "drupalTitle": "Drupal",
+      "drupalSubtitle": "Drupal 11. BDD créée. Terminez dans l'installateur web.",
+      "mediawikiTitle": "MediaWiki",
+      "mediawikiSubtitle": "BDD créée. Visitez /mw-config/ pour terminer.",
+      "install": "Installer"
+    },
+    "checking": "vérification…",
+    "images": {
+      "title": "Optimiseur d'images",
+      "subtitle": "Ré-encode les JPG à une qualité donnée et réduit les PNG sans perte. Atomique — n'agrandit jamais un fichier.",
+      "folder": "Dossier",
+      "folderPlaceholder": "C:/chemin/vers/images",
+      "jpegQuality": "Qualité JPEG (1–100)",
+      "includeJpg": "Ré-encoder .jpg/.jpeg",
+      "includePng": "Optimiser .png",
+      "run": "Lancer",
+      "running": "Traitement…",
+      "summary": "{{files}} fichiers traités · {{bytes}} économisés"
+    },
+    "deployTool": {
+      "title": "Déploiement FTP",
+      "subtitle": "Upload récursif d'un dossier local vers un serveur FTP. SFTP plus tard.",
+      "host": "Hôte",
+      "hostPlaceholder": "ftp.exemple.com",
+      "port": "Port",
+      "user": "Utilisateur",
+      "password": "Mot de passe",
+      "remoteDir": "Dossier distant",
+      "remoteDirPlaceholder": "/public_html",
+      "localDir": "Dossier local",
+      "localDirPlaceholder": "C:/chemin/vers/site",
+      "upload": "Envoyer",
+      "uploading": "Envoi en cours…",
+      "result": "{{files}} fichiers · {{bytes}} envoyés"
+    }
+  },
+  "config": {
+    "loading": "Chargement des chemins…",
+    "php": "PHP",
+    "servers": "Serveurs",
+    "phpIni": "php.ini — PHP {{version}}",
+    "apacheHttpd": "Apache httpd.conf",
+    "apacheHint": "Régénéré à chaque démarrage d'Apache — les modifications manuelles sont écrasées. Utilisez l'onglet Apache d'un hôte pour les directives par hôte.",
+    "nginxConf": "Nginx nginx.conf",
+    "nginxHint": "Régénéré à chaque démarrage de Nginx. Utilisez l'onglet Nginx d'un hôte pour les directives par hôte.",
+    "mysqlCnf": "MySQL my.cnf",
+    "mysqlHint": "Le chemin dépend de la version active de MySQL. Modifiez après Démarrer pour que le fichier existe.",
+    "edit": "Modifier",
+    "footer": "Les modifications ouvrent une fenêtre Monaco séparée. Utilisez Ctrl+S pour enregistrer. Les processus serveur nécessitent un Stop + Start pour que les changements de php.ini prennent effet — ils sont chargés au démarrage du processus.",
+    "openError": "Impossible d'ouvrir l'éditeur : {{message}}"
+  },
+  "logs": {
+    "noContent": "(aucun contenu de log pour l'instant)",
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "pauseTitle": "Mettre en pause le polling",
+    "resumeTitle": "Reprendre le polling"
+  },
+  "editor": {
+    "open": "Ouvrir",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "dirty": "Enregistrer *",
+    "checkSyntax": "Vérifier la syntaxe",
+    "pathPlaceholder": "C:/chemin/vers/fichier.php (Entrée pour ouvrir)",
+    "savedMessage": "Enregistré.",
+    "noErrors": "Aucune erreur de syntaxe détectée.",
+    "lintFailed": "Lint a échoué.",
+    "empty": "Saisissez un chemin de fichier ci-dessus et appuyez sur Entrée (ou cliquez sur Ouvrir)."
+  },
+  "hosts": {
+    "columns": { "name": "Nom", "php": "PHP", "extras": "Extras" },
+    "empty": "Aucun hôte pour l'instant. Cliquez sur + pour en ajouter un.",
+    "add": "Ajouter un hôte",
+    "deleteSelected": "Supprimer l'hôte sélectionné",
+    "noneSelected": "Aucun hôte sélectionné.",
+    "tab": {
+      "general": "Général",
+      "apache": "Apache",
+      "nginx": "Nginx",
+      "ssl": "SSL",
+      "snapshots": "Snapshots",
+      "extras": "Extras"
+    },
+    "tabDisabled": "Arrive dans une phase ultérieure",
+    "saved": "Enregistré.",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "savedShort": "Enregistré",
+    "revert": "Annuler",
+    "general": {
+      "hostName": "Nom d'hôte",
+      "phpVersion": "Version de PHP",
+      "phpDownloadHint": "Les versions marquées « download » sont téléchargées à l'enregistrement.",
+      "docroot": "Document root",
+      "open": "Ouvrir",
+      "ports": "Ports",
+      "portsValue": "Apache :8080 (HTTP) · :8443 (HTTPS) · Nginx :8081 / :8444"
+    },
+    "extrasTab": {
+      "apacheLabel": "Directives Apache supplémentaires (injectées dans le <VirtualHost> de cet hôte)",
+      "apachePlaceholder": "# Exemple :\nDirectoryIndex index.php\n<Directory \".../public\">\n    AllowOverride All\n</Directory>",
+      "nginxLabel": "Directives Nginx supplémentaires (injectées dans le bloc server { } de cet hôte)",
+      "nginxPlaceholder": "# Exemple :\nclient_max_body_size 50m;\nrewrite ^/old-page$ /new-page permanent;",
+      "footer": "Enregistré avec cet hôte. Les lignes sont injectées telles quelles. Apache redémarre après Enregistrer."
+    },
+    "ssl": {
+      "intro": "Chaque hôte reçoit un certificat auto-généré signé par la CA locale Lamp Bench. La CA est installée dans le magasin de confiance utilisateur de votre plateforme au premier démarrage d'Apache.",
+      "certFile": "Fichier de certificat",
+      "keyFile": "Fichier de clé",
+      "httpsUrl": "URL HTTPS",
+      "firefoxNote": "Firefox utilise son propre magasin NSS. Activez {{pref}} dans {{about}}, ou importez la CA à {{path}} manuellement."
+    },
+    "snapshots": {
+      "labelPlaceholder": "Libellé (ex. « avant maj plugin »)",
+      "take": "Prendre un snapshot",
+      "includeDb": "Inclure la base MySQL",
+      "dbPlaceholder": "nom de la BDD (ex. wp_monprojet)",
+      "intro": "Les snapshots capturent {{docroot}} dans une archive .tar.zst unique. Cochez « Inclure la base MySQL » pour empaqueter un mysqldump --databases avec les fichiers.",
+      "noSnapshots": "Aucun snapshot pour l'instant.",
+      "restore": "Restaurer",
+      "deleteSnap": "Supprimer le snapshot",
+      "withDb": "Inclut un mysqldump",
+      "confirmRestoreFiles": "Restaurer ce snapshot ? Les fichiers du docroot seront écrasés par le contenu du snapshot (les fichiers ABSENTS du snapshot sont conservés).",
+      "confirmRestoreDb": "Restaurer ce snapshot ? Les fichiers du docroot seront écrasés ET la base MySQL incluse sera supprimée puis réimportée.",
+      "confirmDelete": "Supprimer ce snapshot ? Le fichier .tar.zst est effacé.",
+      "restored": "Restauré."
+    },
+    "addForm": {
+      "title": "Ajouter un hôte",
+      "hostnamePlaceholder": "monprojet.local",
+      "docrootPlaceholder": "C:/chemin/vers/projet",
+      "create": "Créer",
+      "creating": "Création…",
+      "cancel": "Annuler",
+      "gitInit": "git init dans ce dossier après création",
+      "phpDownloadOnSave": "PHP {{version}} sera téléchargé lors de l'enregistrement."
+    }
+  },
+  "home": {
+    "services": "Services",
+    "defaultHtdocs": "htdocs par défaut",
+    "htdocsHint": "Déposez ici vos dossiers de projet, ou utilisez",
+    "htdocsHintLink": "Outils → CMS",
+    "htdocsHintTail": "pour en installer un en un clic.",
+    "virtualHosts": "Hôtes virtuels",
+    "manage": "Gérer →",
+    "noHosts": "Aucun hôte virtuel pour l'instant. Le htdocs par défaut ci-dessus fonctionne déjà à",
+    "moreHosts": "+ {{count}} de plus",
+    "quickAccess": "Accès rapide",
+    "quickHosts": "Hôtes",
+    "quickTools": "Outils",
+    "quickConfig": "Configuration",
+    "quickLogs": "Logs",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "QR mobile",
+    "statusRunning": "en cours",
+    "statusStopped": "arrêté"
+  }
+}
