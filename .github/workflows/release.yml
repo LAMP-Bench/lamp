@@ -67,6 +67,13 @@ jobs:
           - platform: macos-latest
             label: darwin-aarch64
             args: '--target aarch64-apple-darwin'
+          # macos-13 is the last Intel-host runner on GitHub Actions; macOS
+          # 14+ runners are Apple Silicon and can cross-compile but the
+          # universal binary story is finicky, so we keep them as two
+          # separate matrix entries.
+          - platform: macos-13
+            label: darwin-x86_64
+            args: '--target x86_64-apple-darwin'
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -104,10 +111,12 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Install Rust (with macOS aarch64 target when needed)
+      - name: Install Rust (with macOS target when needed)
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || '' }}
+          targets: |
+            ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || '' }}
+            ${{ matrix.platform == 'macos-13' && 'x86_64-apple-darwin' || '' }}
 
       - uses: swatinem/rust-cache@v2
         with:
@@ -153,7 +162,8 @@ jobs:
 
             Pick the installer that matches your machine:
             - **Windows x64** — `.exe` (NSIS) or `.msi`
-            - **macOS Apple Silicon** — `.dmg` or `.app.tar.gz`
+            - **macOS Apple Silicon (M1/M2/M3/M4)** — `.dmg` or `.app.tar.gz` (aarch64)
+            - **macOS Intel** — `.dmg` or `.app.tar.gz` (x86_64)
             - **Linux Debian/Ubuntu/Mint** — `.deb`
             - **Linux Fedora/RHEL/openSUSE** — `.rpm`
             - **Any other Linux (Arch, etc.)** — `.AppImage`
