@@ -50,15 +50,14 @@ function App() {
 function Bootstrap() {
   const [phase, setPhase] = useState<
     | { kind: "checking" }
-    | { kind: "setup"; platformSupported: boolean }
+    | { kind: "setup" }
     | { kind: "ready" }
   >({ kind: "checking" });
 
   useEffect(() => {
     setupNeeded()
-      .then(({ needed, platformSupported }) => {
-        if (needed) setPhase({ kind: "setup", platformSupported });
-        else setPhase({ kind: "ready" });
+      .then(({ needed }) => {
+        setPhase({ kind: needed ? "setup" : "ready" });
       })
       .catch(() => setPhase({ kind: "ready" }));
   }, []);
@@ -67,12 +66,7 @@ function Bootstrap() {
     return <div className="h-screen bg-neutral-50" />;
   }
   if (phase.kind === "setup") {
-    return (
-      <SetupWizard
-        platformSupported={phase.platformSupported}
-        onComplete={() => setPhase({ kind: "ready" })}
-      />
-    );
+    return <SetupWizard onComplete={() => setPhase({ kind: "ready" })} />;
   }
   return <MainShell />;
 }

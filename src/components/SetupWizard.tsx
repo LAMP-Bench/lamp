@@ -28,9 +28,11 @@ export async function setupNeeded(): Promise<{
   needed: boolean;
   platformSupported: boolean;
 }> {
-  const platform = await invoke<string>("current_platform").catch(() => "unsupported");
-  const platformSupported = platform === "windows-x64";
-  if (!platformSupported) return { needed: true, platformSupported: false };
+  // Try to download on every platform — if `binaries.json` doesn't have an
+  // entry for the current OS the individual rows will surface a per-binary
+  // error and the user can Skip. This is more honest than the old
+  // platform-supported gate that pretended Linux/macOS users had nothing to
+  // download even though the app then refused to start any service.
   const checks = await Promise.all(
     ESSENTIALS.map((e) =>
       invoke<boolean>("binary_installed", { name: e.name }).catch(() => false),
@@ -47,10 +49,8 @@ type ItemStatus =
 
 export function SetupWizard({
   onComplete,
-  platformSupported,
 }: {
   onComplete: () => void;
-  platformSupported: boolean;
 }) {
   const { t } = useTranslation();
   const [statuses, setStatuses] = useState<ItemStatus[]>(
@@ -93,11 +93,10 @@ export function SetupWizard({
     }
   }
 
-  // Auto-run on mount when supported.
+  // Auto-run on mount. Per-binary errors are surfaced inline and the user
+  // can Skip if their platform doesn't have entries in `binaries.json` yet.
   useEffect(() => {
-    if (platformSupported) {
-      run();
-    }
+    run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -112,78 +111,61 @@ export function SetupWizard({
           </div>
           <div>
             <div className="text-lg font-semibold text-neutral-900">
-              {platformSupported
-                ? t("setup.title")
-                : t("setup.unsupportedTitle")}
+              {t("setup.title")}
             </div>
             <div className="text-xs text-neutral-500">
-              {platformSupported
-                ? t("setup.subtitle")
-                : t("setup.unsupportedHint")}
+              {t("setup.subtitle")}
             </div>
           </div>
         </div>
 
-        {platformSupported ? (
-          <>
-            <ul className="space-y-1 mb-5">
-              {ESSENTIALS.map((e, i) => (
-                <li
-                  key={e.name}
-                  className="flex items-center gap-3 px-3 py-2 rounded text-sm"
-                >
-                  <span className="text-neutral-500 text-lg shrink-0">
-                    {e.icon}
-                  </span>
-                  <span className="flex-1 text-neutral-800">{e.label}</span>
-                  <StatusBadge status={statuses[i]} />
-                </li>
-              ))}
-            </ul>
+        <ul className="space-y-1 mb-5">
+          {ESSENTIALS.map((e, i) => (
+            <li
+              key={e.name}
+              className="flex items-center gap-3 px-3 py-2 rounded text-sm"
+            >
+              <span className="text-neutral-500 text-lg shrink-0">
+                {e.icon}
+              </span>
+              <span className="flex-1 text-neutral-800">{e.label}</span>
+              <StatusBadge status={statuses[i]} />
+            </li>
+          ))}
+        </ul>
 
-            {anyErrors && !running && (
-              <div className="mb-4 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded p-2">
-                <strong>{t("setup.errorTitle")}.</strong>{" "}
-                {t("setup.errorHint")}
-              </div>
-            )}
+        {anyErrors && !running && (
+          <div className="mb-4 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded p-2">
+            <strong>{t("setup.errorTitle")}.</strong>{" "}
+            {t("setup.errorHint")}
+          </div>
+        )}
 
-            <div className="flex items-center gap-2 justify-end">
-              {done ? (
-                <button
-                  onClick={onComplete}
-                  className="px-4 py-2 rounded bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium"
-                >
-                  {t("setup.getStarted")}
-                </button>
-              ) : anyErrors && !running ? (
-                <>
-                  <button
-                    onClick={onComplete}
-                    className="px-3 py-2 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm"
-                  >
-                    {t("setup.skip")}
-                  </button>
-                  <button
-                    onClick={run}
-                    className="px-4 py-2 rounded bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium"
-                  >
-                    {t("setup.retry")}
-                  </button>
-                </>
-              ) : null}
-            </div>
-          </>
-        ) : (
-          <div className="flex justify-end">
+        <div className="flex items-center gap-2 justify-end">
+          {done ? (
             <button
               onClick={onComplete}
               className="px-4 py-2 rounded bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium"
             >
-              {t("setup.continueAnyway")}
+              {t("setup.getStarted")}
             </button>
-          </div>
-        )}
+          ) : anyErrors && !running ? (
+            <>
+              <button
+                onClick={onComplete}
+                className="px-3 py-2 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm"
+              >
+                {t("setup.skip")}
+              </button>
+              <button
+                onClick={run}
+                className="px-4 py-2 rounded bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium"
+              >
+                {t("setup.retry")}
+              </button>
+            </>
+          ) : null}
+        </div>
       </div>
     </div>
   );
