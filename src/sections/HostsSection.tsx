@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import {
@@ -100,11 +101,18 @@ export function HostsSection() {
             onSaved={(updated) => refresh(updated.id)}
           />
         ) : (
-          <div className="h-full flex items-center justify-center text-sm text-neutral-400">
-            No host selected.
-          </div>
+          <NoneSelected />
         )}
       </div>
+    </div>
+  );
+}
+
+function NoneSelected() {
+  const { t } = useTranslation();
+  return (
+    <div className="h-full flex items-center justify-center text-sm text-neutral-400">
+      {t("hosts.noneSelected")}
     </div>
   );
 }
@@ -122,17 +130,18 @@ function HostList({
   onAdd: () => void;
   onDelete: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="w-[320px] shrink-0 border-r border-neutral-200 bg-white flex flex-col">
       <div className="px-4 py-2 grid grid-cols-[1fr_70px_50px] gap-3 text-[11px] uppercase tracking-wider text-neutral-500 border-b border-neutral-200">
-        <span>Name</span>
-        <span>PHP</span>
-        <span>Extras</span>
+        <span>{t("hosts.columns.name")}</span>
+        <span>{t("hosts.columns.php")}</span>
+        <span>{t("hosts.columns.extras")}</span>
       </div>
       <div className="flex-1 overflow-auto">
         {hosts.length === 0 ? (
           <div className="p-6 text-center text-xs text-neutral-400">
-            No hosts yet. Click + to add one.
+            {t("hosts.empty")}
           </div>
         ) : (
           hosts.map((h) => {
@@ -174,7 +183,7 @@ function HostList({
         <button
           onClick={onAdd}
           className="p-1.5 rounded hover:bg-neutral-100 text-neutral-600"
-          title="Add host"
+          title={t("hosts.add")}
         >
           <FiPlus />
         </button>
@@ -182,7 +191,7 @@ function HostList({
           onClick={onDelete}
           disabled={selectedId == null}
           className="p-1.5 rounded hover:bg-neutral-100 text-neutral-600 disabled:opacity-30 disabled:cursor-not-allowed"
-          title="Delete selected host"
+          title={t("hosts.deleteSelected")}
         >
           <FiMinus />
         </button>
@@ -200,6 +209,7 @@ function HostDetail({
   catalog: PhpCatalogEntry[];
   onSaved: (updated: Host) => void;
 }) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("general");
   const [draft, setDraft] = useState<Host>(host);
   const [busy, setBusy] = useState(false);
@@ -234,7 +244,7 @@ function HostDetail({
         apacheExtra: draft.apache_extra,
         nginxExtra: draft.nginx_extra,
       });
-      setInfo("Saved.");
+      setInfo(t("hosts.saved"));
       onSaved(updated);
     } catch (e) {
       setError(String(e));
@@ -250,34 +260,34 @@ function HostDetail({
   }
 
   const tabs: Array<{ id: Tab; label: string; enabled: boolean }> = [
-    { id: "general", label: "General", enabled: true },
-    { id: "apache", label: "Apache", enabled: true },
-    { id: "nginx", label: "Nginx", enabled: true },
-    { id: "ssl", label: "SSL", enabled: true },
-    { id: "snapshots", label: "Snapshots", enabled: true },
-    { id: "extras", label: "Extras", enabled: false },
+    { id: "general", label: t("hosts.tab.general"), enabled: true },
+    { id: "apache", label: t("hosts.tab.apache"), enabled: true },
+    { id: "nginx", label: t("hosts.tab.nginx"), enabled: true },
+    { id: "ssl", label: t("hosts.tab.ssl"), enabled: true },
+    { id: "snapshots", label: t("hosts.tab.snapshots"), enabled: true },
+    { id: "extras", label: t("hosts.tab.extras"), enabled: false },
   ];
 
   return (
     <div className="h-full flex flex-col">
       <div className="border-b border-neutral-200 px-6 flex items-end gap-5">
-        {tabs.map((t) => {
-          const isActive = tab === t.id;
+        {tabs.map((tt) => {
+          const isActive = tab === tt.id;
           return (
             <button
-              key={t.id}
-              onClick={() => t.enabled && setTab(t.id)}
-              disabled={!t.enabled}
+              key={tt.id}
+              onClick={() => tt.enabled && setTab(tt.id)}
+              disabled={!tt.enabled}
               className={`pb-2 pt-3 text-sm border-b-2 transition ${
                 isActive
                   ? "border-sky-500 text-sky-600 font-medium"
-                  : t.enabled
+                  : tt.enabled
                   ? "border-transparent text-neutral-600 hover:text-neutral-900"
                   : "border-transparent text-neutral-300 cursor-not-allowed"
               }`}
-              title={t.enabled ? "" : "Comes in a later phase"}
+              title={tt.enabled ? "" : t("hosts.tabDisabled")}
             >
-              {t.label}
+              {tt.label}
             </button>
           );
         })}
@@ -289,16 +299,16 @@ function HostDetail({
         )}
         {tab === "apache" && (
           <ExtrasTab
-            label="Extra Apache directives (injected inside this host's <VirtualHost>)"
-            placeholder={`# Example:\nDirectoryIndex index.php\n<Directory ".../public">\n    AllowOverride All\n</Directory>`}
+            label={t("hosts.extrasTab.apacheLabel")}
+            placeholder={t("hosts.extrasTab.apachePlaceholder")}
             value={draft.apache_extra}
             onChange={(v) => setDraft({ ...draft, apache_extra: v })}
           />
         )}
         {tab === "nginx" && (
           <ExtrasTab
-            label="Extra Nginx directives (injected inside this host's server { } block)"
-            placeholder={`# Example:\nclient_max_body_size 50m;\nrewrite ^/old-page$ /new-page permanent;`}
+            label={t("hosts.extrasTab.nginxLabel")}
+            placeholder={t("hosts.extrasTab.nginxPlaceholder")}
             value={draft.nginx_extra}
             onChange={(v) => setDraft({ ...draft, nginx_extra: v })}
           />
@@ -323,7 +333,7 @@ function HostDetail({
             className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5 disabled:opacity-40"
           >
             <FiRotateCcw />
-            Revert
+            {t("hosts.revert")}
           </button>
           <button
             onClick={save}
@@ -331,7 +341,7 @@ function HostDetail({
             className="px-4 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium flex items-center gap-1.5 disabled:opacity-40"
           >
             <FiSave />
-            {busy ? "Saving…" : dirty ? "Save" : "Saved"}
+            {busy ? t("hosts.saving") : dirty ? t("hosts.save") : t("hosts.savedShort")}
           </button>
         </div>
       </div>
@@ -348,9 +358,10 @@ function GeneralTab({
   setDraft: (h: Host) => void;
   catalog: PhpCatalogEntry[];
 }) {
+  const { t } = useTranslation();
   return (
     <div className="max-w-2xl space-y-4 text-sm">
-      <Field label="Host name">
+      <Field label={t("hosts.general.hostName")}>
         <input
           value={draft.name}
           onChange={(e) => setDraft({ ...draft, name: e.target.value })}
@@ -374,7 +385,7 @@ function GeneralTab({
         </button>
       </Field>
 
-      <Field label="PHP version">
+      <Field label={t("hosts.general.phpVersion")}>
         <select
           value={draft.php_version}
           onChange={(e) => setDraft({ ...draft, php_version: e.target.value })}
@@ -388,11 +399,11 @@ function GeneralTab({
           ))}
         </select>
         <span className="text-xs text-neutral-500">
-          Versions marked "download" are fetched on save.
+          {t("hosts.general.phpDownloadHint")}
         </span>
       </Field>
 
-      <Field label="Document root">
+      <Field label={t("hosts.general.docroot")}>
         <input
           value={draft.docroot}
           onChange={(e) => setDraft({ ...draft, docroot: e.target.value })}
@@ -404,13 +415,13 @@ function GeneralTab({
           className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 flex items-center gap-1.5 text-xs disabled:opacity-50"
         >
           <FiFolder />
-          Open
+          {t("hosts.general.open")}
         </button>
       </Field>
 
-      <Field label="Ports">
+      <Field label={t("hosts.general.ports")}>
         <span className="text-neutral-600 font-mono text-xs">
-          Apache :8080 (HTTP) · :8443 (HTTPS) · Nginx :8081 / :8444
+          {t("hosts.general.portsValue")}
         </span>
       </Field>
     </div>
@@ -428,6 +439,7 @@ function ExtrasTab({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="h-full flex flex-col gap-2">
       <div className="text-xs text-neutral-600">{label}</div>
@@ -439,33 +451,28 @@ function ExtrasTab({
         className="flex-1 min-h-[280px] p-3 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 resize-none"
       />
       <div className="text-[11px] text-neutral-500">
-        Saved as part of this host. Lines are injected verbatim. Apache restarts
-        after Save.
+        {t("hosts.extrasTab.footer")}
       </div>
     </div>
   );
 }
 
 function SslTab({ host }: { host: Host }) {
+  const { t } = useTranslation();
   return (
     <div className="max-w-2xl space-y-3 text-sm">
-      <p className="text-neutral-600">
-        Each host gets an auto-generated cert signed by the local Lamp Bench
-        CA. The CA is installed to your{" "}
-        <span className="font-mono">CurrentUser\\Root</span> trust store on
-        first Apache start.
-      </p>
-      <Field label="Cert file">
+      <p className="text-neutral-600">{t("hosts.ssl.intro")}</p>
+      <Field label={t("hosts.ssl.certFile")}>
         <code className="font-mono text-xs text-neutral-700 break-all">
-          .lamp-bench/ssl/{host.name}.crt
+          ssl/{host.name}.crt
         </code>
       </Field>
-      <Field label="Key file">
+      <Field label={t("hosts.ssl.keyFile")}>
         <code className="font-mono text-xs text-neutral-700 break-all">
-          .lamp-bench/ssl/{host.name}.key
+          ssl/{host.name}.key
         </code>
       </Field>
-      <Field label="HTTPS URL">
+      <Field label={t("hosts.ssl.httpsUrl")}>
         <a
           href="#"
           onClick={(e) => {
@@ -478,10 +485,12 @@ function SslTab({ host }: { host: Host }) {
         </a>
       </Field>
       <div className="rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-        <strong>Firefox:</strong> set{" "}
-        <span className="font-mono">security.enterprise_roots.enabled = true</span>{" "}
-        in <span className="font-mono">about:config</span>, or import the CA at{" "}
-        <span className="font-mono">.lamp-bench/ca/ca.crt</span> manually.
+        <strong>Firefox:</strong>{" "}
+        {t("hosts.ssl.firefoxNote", {
+          pref: "security.enterprise_roots.enabled = true",
+          about: "about:config",
+          path: "ca/ca.crt",
+        })}
       </div>
     </div>
   );
@@ -503,6 +512,7 @@ function Field({
 }
 
 function SnapshotsTab({ host }: { host: Host }) {
+  const { t } = useTranslation();
   const [list, setList] = useState<Snapshot[]>([]);
   const [label, setLabel] = useState("");
   const [dbName, setDbName] = useState("");
@@ -548,14 +558,14 @@ function SnapshotsTab({ host }: { host: Host }) {
 
   async function restore(id: number, hasDb: boolean) {
     const warning = hasDb
-      ? "Restore this snapshot? Docroot files will be overwritten AND the bundled MySQL database will be dropped and re-imported."
-      : "Restore this snapshot? Files in the docroot will be overwritten with the snapshot's contents (existing files NOT in the snapshot are left alone).";
+      ? t("hosts.snapshots.confirmRestoreDb")
+      : t("hosts.snapshots.confirmRestoreFiles");
     if (!confirm(warning)) return;
     setBusy(true);
     setError(null);
     try {
       await invoke("snapshot_restore", { id });
-      alert("Restored.");
+      alert(t("hosts.snapshots.restored"));
     } catch (e) {
       setError(String(e));
     } finally {
@@ -564,7 +574,7 @@ function SnapshotsTab({ host }: { host: Host }) {
   }
 
   async function remove(id: number) {
-    if (!confirm("Delete this snapshot? The .tar.zst file is removed.")) return;
+    if (!confirm(t("hosts.snapshots.confirmDelete"))) return;
     setBusy(true);
     setError(null);
     try {
@@ -588,7 +598,7 @@ function SnapshotsTab({ host }: { host: Host }) {
           <input
             value={label}
             onChange={(e) => setLabel(e.target.value)}
-            placeholder='Label (e.g. "before plugin update")'
+            placeholder={t("hosts.snapshots.labelPlaceholder")}
             className="flex-1 px-3 py-1.5 rounded border border-neutral-300 bg-white text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
           />
           <button
@@ -596,7 +606,7 @@ function SnapshotsTab({ host }: { host: Host }) {
             disabled={busy}
             className="px-3 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium disabled:opacity-50"
           >
-            {busy ? "…" : "Take snapshot"}
+            {busy ? "…" : t("hosts.snapshots.take")}
           </button>
         </div>
         <div className="flex items-center gap-2 pl-7">
@@ -608,13 +618,13 @@ function SnapshotsTab({ host }: { host: Host }) {
               className="size-4"
             />
             <FiDatabase className="text-neutral-500" />
-            Include MySQL database
+            {t("hosts.snapshots.includeDb")}
           </label>
           {includeDb && (
             <input
               value={dbName}
               onChange={(e) => setDbName(e.target.value)}
-              placeholder="db name (e.g. wp_myproject)"
+              placeholder={t("hosts.snapshots.dbPlaceholder")}
               className="flex-1 px-2 py-1 rounded border border-neutral-300 bg-white text-xs font-mono focus:outline-none focus:border-sky-500"
             />
           )}
@@ -622,16 +632,12 @@ function SnapshotsTab({ host }: { host: Host }) {
       </form>
 
       <p className="text-xs text-neutral-500">
-        Snapshots capture <span className="font-mono">{host.docroot}</span> as
-        a single <span className="font-mono">.tar.zst</span> archive. Tick{" "}
-        <em>Include MySQL database</em> to bundle a{" "}
-        <span className="font-mono">mysqldump --databases</span> alongside the
-        files; restore drops + re-imports the DB.
+        {t("hosts.snapshots.intro", { docroot: host.docroot })}
       </p>
 
       {list.length === 0 ? (
         <div className="rounded-lg border border-dashed border-neutral-300 p-6 text-center text-neutral-500 text-sm">
-          No snapshots yet.
+          {t("hosts.snapshots.noSnapshots")}
         </div>
       ) : (
         <div className="rounded-lg border border-neutral-200 bg-white overflow-hidden divide-y divide-neutral-100">
@@ -647,7 +653,7 @@ function SnapshotsTab({ host }: { host: Host }) {
                   {s.has_db && (
                     <span
                       className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-sky-100 text-sky-700"
-                      title="Bundles a mysqldump"
+                      title={t("hosts.snapshots.withDb")}
                     >
                       <FiDatabase className="text-[10px]" />
                       DB
@@ -664,13 +670,13 @@ function SnapshotsTab({ host }: { host: Host }) {
                 className="px-2.5 py-1 rounded border border-neutral-300 hover:bg-neutral-50 text-xs flex items-center gap-1.5 text-neutral-700 disabled:opacity-50"
               >
                 <FiRefreshCw />
-                Restore
+                {t("hosts.snapshots.restore")}
               </button>
               <button
                 onClick={() => remove(s.id)}
                 disabled={busy}
                 className="p-1.5 rounded text-red-500 hover:bg-red-50 disabled:opacity-50"
-                title="Delete snapshot"
+                title={t("hosts.snapshots.deleteSnap")}
               >
                 <FiTrash2 />
               </button>
@@ -709,6 +715,7 @@ function AddHostForm({
   error: string | null;
   setError: (s: string | null) => void;
 }) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [docroot, setDocroot] = useState("");
   // Default to the latest INSTALLED version. If everything is missing
@@ -764,7 +771,7 @@ function AddHostForm({
   return (
     <div className="h-full flex flex-col">
       <div className="border-b border-neutral-200 px-6 py-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-neutral-800">Add host</h2>
+        <h2 className="text-sm font-semibold text-neutral-800">{t("hosts.addForm.title")}</h2>
         <button
           onClick={onCancel}
           className="p-1 rounded hover:bg-neutral-100 text-neutral-500"
@@ -774,17 +781,17 @@ function AddHostForm({
       </div>
       <form onSubmit={submit} className="flex-1 overflow-auto p-6 space-y-4 text-sm">
         <div className="max-w-2xl space-y-4">
-          <Field label="Host name">
+          <Field label={t("hosts.general.hostName")}>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="myproject.local"
+              placeholder={t("hosts.addForm.hostnamePlaceholder")}
               autoFocus
               className="w-72 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
             />
           </Field>
 
-          <Field label="PHP version">
+          <Field label={t("hosts.general.phpVersion")}>
             <select
               value={phpVersion}
               onChange={(e) => setPhpVersion(e.target.value)}
@@ -798,15 +805,15 @@ function AddHostForm({
               ))}
             </select>
             <span className="text-xs text-neutral-500">
-              Versions marked "download" are fetched on Save.
+              {t("hosts.general.phpDownloadHint")}
             </span>
           </Field>
 
-          <Field label="Document root">
+          <Field label={t("hosts.general.docroot")}>
             <input
               value={docroot}
               onChange={(e) => setDocroot(e.target.value)}
-              placeholder="C:/path/to/project"
+              placeholder={t("hosts.addForm.docrootPlaceholder")}
               className="flex-1 min-w-0 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
             />
           </Field>
@@ -821,7 +828,7 @@ function AddHostForm({
                   className="size-4"
                 />
                 <FiGitBranch className="text-neutral-500" />
-                <span>Initialize git repo in the document root</span>
+                <span>{t("hosts.addForm.gitInit")}</span>
               </label>
             </Field>
           )}
@@ -840,21 +847,18 @@ function AddHostForm({
             className="px-4 py-2 rounded bg-sky-500 hover:bg-sky-600 text-white font-medium disabled:opacity-50"
           >
             {stage === "downloading"
-              ? "Downloading PHP…"
+              ? t("hosts.addForm.phpDownloadOnSave", { version: phpVersion })
               : busy
-              ? "Saving…"
-              : "Save"}
+              ? t("hosts.saving")
+              : t("hosts.save")}
           </button>
           <button
             type="button"
             onClick={onCancel}
             className="px-4 py-2 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50"
           >
-            Cancel
+            {t("hosts.addForm.cancel")}
           </button>
-          <span className="ml-auto text-xs text-neutral-500">
-            Triggers a UAC prompt to update <span className="font-mono">hosts</span>.
-          </span>
         </div>
       </form>
     </div>

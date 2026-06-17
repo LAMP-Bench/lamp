@@ -60,6 +60,75 @@
     "downloading": "Descargando actualización…",
     "failed": "Error al actualizar: {{message}}"
   },
+  "hosts": {
+    "columns": { "name": "Nombre", "php": "PHP", "extras": "Extras" },
+    "empty": "Aún no hay hosts. Pulsa + para añadir uno.",
+    "add": "Añadir host",
+    "deleteSelected": "Eliminar host seleccionado",
+    "noneSelected": "Ningún host seleccionado.",
+    "tab": {
+      "general": "General",
+      "apache": "Apache",
+      "nginx": "Nginx",
+      "ssl": "SSL",
+      "snapshots": "Snapshots",
+      "extras": "Extras"
+    },
+    "tabDisabled": "Llega en una fase posterior",
+    "saved": "Guardado.",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "savedShort": "Guardado",
+    "revert": "Revertir",
+    "general": {
+      "hostName": "Nombre del host",
+      "phpVersion": "Versión de PHP",
+      "phpDownloadHint": "Las versiones marcadas con \"descargar\" se obtienen al guardar.",
+      "docroot": "Document root",
+      "open": "Abrir",
+      "ports": "Puertos",
+      "portsValue": "Apache :8080 (HTTP) · :8443 (HTTPS) · Nginx :8081 / :8444"
+    },
+    "extrasTab": {
+      "apacheLabel": "Directivas extra de Apache (inyectadas dentro de este <VirtualHost>)",
+      "apachePlaceholder": "# Ejemplo:\nDirectoryIndex index.php\n<Directory \".../public\">\n    AllowOverride All\n</Directory>",
+      "nginxLabel": "Directivas extra de Nginx (inyectadas dentro del server { } de este host)",
+      "nginxPlaceholder": "# Ejemplo:\nclient_max_body_size 50m;\nrewrite ^/old-page$ /new-page permanent;",
+      "footer": "Se guarda como parte de este host. Las líneas se inyectan literalmente. Apache reinicia al Guardar."
+    },
+    "ssl": {
+      "intro": "Cada host recibe un certificado autogenerado firmado por la CA local de Lamp Bench. La CA se instala en el almacén de confianza del usuario al iniciar Apache la primera vez.",
+      "certFile": "Archivo del certificado",
+      "keyFile": "Archivo de la clave",
+      "httpsUrl": "URL HTTPS",
+      "firefoxNote": "Firefox usa su propio almacén NSS. Activa {{pref}} en {{about}}, o importa la CA en {{path}} manualmente."
+    },
+    "snapshots": {
+      "labelPlaceholder": "Etiqueta (ej. \"antes de actualizar plugin\")",
+      "take": "Hacer snapshot",
+      "includeDb": "Incluir base de datos MySQL",
+      "dbPlaceholder": "nombre db (ej. wp_miproyecto)",
+      "intro": "Los snapshots capturan {{docroot}} como un único archivo .tar.zst. Marca \"Incluir base de datos MySQL\" para empaquetar un mysqldump --databases junto a los archivos.",
+      "noSnapshots": "Aún no hay snapshots.",
+      "restore": "Restaurar",
+      "deleteSnap": "Eliminar snapshot",
+      "withDb": "Incluye un mysqldump",
+      "confirmRestoreFiles": "¿Restaurar este snapshot? Los archivos del docroot serán sobrescritos con el contenido del snapshot (los archivos que NO estén en el snapshot se conservan).",
+      "confirmRestoreDb": "¿Restaurar este snapshot? Los archivos del docroot serán sobrescritos Y la base de datos MySQL incluida será borrada y reimportada.",
+      "confirmDelete": "¿Eliminar este snapshot? Se borra el archivo .tar.zst.",
+      "restored": "Restaurado."
+    },
+    "addForm": {
+      "title": "Añadir host",
+      "hostnamePlaceholder": "miproyecto.local",
+      "docrootPlaceholder": "C:/ruta/al/proyecto",
+      "create": "Crear",
+      "creating": "Creando…",
+      "cancel": "Cancelar",
+      "gitInit": "git init en esta carpeta tras crear",
+      "phpDownloadOnSave": "Se descargará PHP {{version}} al guardar."
+    }
+  },
   "home": {
     "services": "Servicios",
     "defaultHtdocs": "htdocs predeterminado",
