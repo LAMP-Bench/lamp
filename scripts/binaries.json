@@ -211,8 +211,27 @@
     "version": "6.8.2",
     "extract_to": "wordpress",
     "bundled": false,
+    "_note": "Same PHP source archive on every OS — cloned per platform key so the downloader's per-platform lookup succeeds without a schema change.",
     "platforms": {
       "windows-x64": {
+        "filename": "wordpress-6.8.2.zip",
+        "url": "https://wordpress.org/wordpress-6.8.2.zip",
+        "sha256": "46BBC3D5807E7ABA4FB64AADA0D5D99E41B4E80C4373B5CE0269898ECA798AC7",
+        "strip_root_dir": "wordpress"
+      },
+      "linux-x64": {
+        "filename": "wordpress-6.8.2.zip",
+        "url": "https://wordpress.org/wordpress-6.8.2.zip",
+        "sha256": "46BBC3D5807E7ABA4FB64AADA0D5D99E41B4E80C4373B5CE0269898ECA798AC7",
+        "strip_root_dir": "wordpress"
+      },
+      "macos-arm64": {
+        "filename": "wordpress-6.8.2.zip",
+        "url": "https://wordpress.org/wordpress-6.8.2.zip",
+        "sha256": "46BBC3D5807E7ABA4FB64AADA0D5D99E41B4E80C4373B5CE0269898ECA798AC7",
+        "strip_root_dir": "wordpress"
+      },
+      "macos-x64": {
         "filename": "wordpress-6.8.2.zip",
         "url": "https://wordpress.org/wordpress-6.8.2.zip",
         "sha256": "46BBC3D5807E7ABA4FB64AADA0D5D99E41B4E80C4373B5CE0269898ECA798AC7",
@@ -229,6 +248,21 @@
         "filename": "Joomla_5-2-3.zip",
         "url": "https://downloads.joomla.org/cms/joomla5/5-2-3/Joomla_5-2-3-Stable-Full_Package.zip",
         "sha256": "5A06C946A132EB00B9090816D32A7E3280CF1840A2A5329CCCACB52B923FBED5"
+      },
+      "linux-x64": {
+        "filename": "Joomla_5-2-3.zip",
+        "url": "https://downloads.joomla.org/cms/joomla5/5-2-3/Joomla_5-2-3-Stable-Full_Package.zip",
+        "sha256": "5A06C946A132EB00B9090816D32A7E3280CF1840A2A5329CCCACB52B923FBED5"
+      },
+      "macos-arm64": {
+        "filename": "Joomla_5-2-3.zip",
+        "url": "https://downloads.joomla.org/cms/joomla5/5-2-3/Joomla_5-2-3-Stable-Full_Package.zip",
+        "sha256": "5A06C946A132EB00B9090816D32A7E3280CF1840A2A5329CCCACB52B923FBED5"
+      },
+      "macos-x64": {
+        "filename": "Joomla_5-2-3.zip",
+        "url": "https://downloads.joomla.org/cms/joomla5/5-2-3/Joomla_5-2-3-Stable-Full_Package.zip",
+        "sha256": "5A06C946A132EB00B9090816D32A7E3280CF1840A2A5329CCCACB52B923FBED5"
       }
     }
   },
@@ -238,6 +272,24 @@
     "bundled": false,
     "platforms": {
       "windows-x64": {
+        "filename": "drupal-11.0.7.zip",
+        "url": "https://ftp.drupal.org/files/projects/drupal-11.0.7.zip",
+        "sha256": "DE12DCCAE940C144A0AF0DD68BBF92E85783C4A4F04C8D6064A5C1478AF600A8",
+        "strip_root_dir": "drupal-11.0.7"
+      },
+      "linux-x64": {
+        "filename": "drupal-11.0.7.zip",
+        "url": "https://ftp.drupal.org/files/projects/drupal-11.0.7.zip",
+        "sha256": "DE12DCCAE940C144A0AF0DD68BBF92E85783C4A4F04C8D6064A5C1478AF600A8",
+        "strip_root_dir": "drupal-11.0.7"
+      },
+      "macos-arm64": {
+        "filename": "drupal-11.0.7.zip",
+        "url": "https://ftp.drupal.org/files/projects/drupal-11.0.7.zip",
+        "sha256": "DE12DCCAE940C144A0AF0DD68BBF92E85783C4A4F04C8D6064A5C1478AF600A8",
+        "strip_root_dir": "drupal-11.0.7"
+      },
+      "macos-x64": {
         "filename": "drupal-11.0.7.zip",
         "url": "https://ftp.drupal.org/files/projects/drupal-11.0.7.zip",
         "sha256": "DE12DCCAE940C144A0AF0DD68BBF92E85783C4A4F04C8D6064A5C1478AF600A8",
@@ -255,6 +307,24 @@
         "url": "https://releases.wikimedia.org/mediawiki/1.43/mediawiki-1.43.1.zip",
         "sha256": "AC1C4DDA9EF70DF66D16339542461EC93545B57BEC916361C862054ED59BD13C",
         "strip_root_dir": "mediawiki-1.43.1"
+      },
+      "linux-x64": {
+        "filename": "mediawiki-1.43.1.zip",
+        "url": "https://releases.wikimedia.org/mediawiki/1.43/mediawiki-1.43.1.zip",
+        "sha256": "AC1C4DDA9EF70DF66D16339542461EC93545B57BEC916361C862054ED59BD13C",
+        "strip_root_dir": "mediawiki-1.43.1"
+      },
+      "macos-arm64": {
+        "filename": "mediawiki-1.43.1.zip",
+        "url": "https://releases.wikimedia.org/mediawiki/1.43/mediawiki-1.43.1.zip",
+        "sha256": "AC1C4DDA9EF70DF66D16339542461EC93545B57BEC916361C862054ED59BD13C",
+        "strip_root_dir": "mediawiki-1.43.1"
+      },
+      "macos-x64": {
+        "filename": "mediawiki-1.43.1.zip",
+        "url": "https://releases.wikimedia.org/mediawiki/1.43/mediawiki-1.43.1.zip",
+        "sha256": "AC1C4DDA9EF70DF66D16339542461EC93545B57BEC916361C862054ED59BD13C",
+        "strip_root_dir": "mediawiki-1.43.1"
       }
     }
   },
@@ -262,8 +332,24 @@
     "version": "2.9.7",
     "raw_file": "composer/composer.phar",
     "bundled": true,
+    "_note": "composer.phar is OS-agnostic bytecode — same file, same SHA, every platform.",
     "platforms": {
       "windows-x64": {
+        "filename": "composer.phar",
+        "url": "https://getcomposer.org/download/2.9.7/composer.phar",
+        "sha256": "D3C6801EA6E5DD291D0F149295A4D0F1539A74D5231958FE8FDAA889A497E6CF"
+      },
+      "linux-x64": {
+        "filename": "composer.phar",
+        "url": "https://getcomposer.org/download/2.9.7/composer.phar",
+        "sha256": "D3C6801EA6E5DD291D0F149295A4D0F1539A74D5231958FE8FDAA889A497E6CF"
+      },
+      "macos-arm64": {
+        "filename": "composer.phar",
+        "url": "https://getcomposer.org/download/2.9.7/composer.phar",
+        "sha256": "D3C6801EA6E5DD291D0F149295A4D0F1539A74D5231958FE8FDAA889A497E6CF"
+      },
+      "macos-x64": {
         "filename": "composer.phar",
         "url": "https://getcomposer.org/download/2.9.7/composer.phar",
         "sha256": "D3C6801EA6E5DD291D0F149295A4D0F1539A74D5231958FE8FDAA889A497E6CF"
@@ -276,6 +362,24 @@
     "bundled": true,
     "platforms": {
       "windows-x64": {
+        "filename": "phpMyAdmin-5.2.3-all-languages.zip",
+        "url": "https://files.phpmyadmin.net/phpMyAdmin/5.2.3/phpMyAdmin-5.2.3-all-languages.zip",
+        "sha256": "2D2E13C735366D318425C78E4EE2CC8FC648D77FABA3DDEA2CD516E43885733F",
+        "strip_root_dir": "phpMyAdmin-5.2.3-all-languages"
+      },
+      "linux-x64": {
+        "filename": "phpMyAdmin-5.2.3-all-languages.zip",
+        "url": "https://files.phpmyadmin.net/phpMyAdmin/5.2.3/phpMyAdmin-5.2.3-all-languages.zip",
+        "sha256": "2D2E13C735366D318425C78E4EE2CC8FC648D77FABA3DDEA2CD516E43885733F",
+        "strip_root_dir": "phpMyAdmin-5.2.3-all-languages"
+      },
+      "macos-arm64": {
+        "filename": "phpMyAdmin-5.2.3-all-languages.zip",
+        "url": "https://files.phpmyadmin.net/phpMyAdmin/5.2.3/phpMyAdmin-5.2.3-all-languages.zip",
+        "sha256": "2D2E13C735366D318425C78E4EE2CC8FC648D77FABA3DDEA2CD516E43885733F",
+        "strip_root_dir": "phpMyAdmin-5.2.3-all-languages"
+      },
+      "macos-x64": {
         "filename": "phpMyAdmin-5.2.3-all-languages.zip",
         "url": "https://files.phpmyadmin.net/phpMyAdmin/5.2.3/phpMyAdmin-5.2.3-all-languages.zip",
         "sha256": "2D2E13C735366D318425C78E4EE2CC8FC648D77FABA3DDEA2CD516E43885733F",
