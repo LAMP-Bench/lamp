@@ -60,6 +60,108 @@
     "downloading": "Descargando actualización…",
     "failed": "Error al actualizar: {{message}}"
   },
+  "tools": {
+    "section": {
+      "database": "Base de datos",
+      "email": "Correo",
+      "images": "Imágenes",
+      "deploy": "Despliegue",
+      "php": "PHP",
+      "cms": "CMS"
+    },
+    "open": "Abrir",
+    "pma": {
+      "title": "phpMyAdmin",
+      "subtitle": "Admin de la base de datos — requiere apache + mysql en ejecución"
+    },
+    "mailhog": {
+      "title": "Bandeja MailHog",
+      "subtitle": "Captura los mail() de PHP y los muestra en una UI web. Arranca MailHog antes."
+    },
+    "composer": {
+      "title": "Composer",
+      "checking": "comprobando…"
+    },
+    "laravel": {
+      "title": "Laravel",
+      "subtitle": "Crea un proyecto Laravel nuevo con composer create-project",
+      "newProject": "Nuevo proyecto"
+    },
+    "cms": {
+      "wordpressTitle": "WordPress",
+      "wordpressSubtitle": "Instalación en un clic. BD, wp-config.php con salts nuevos, archivos copiados a htdocs.",
+      "joomlaTitle": "Joomla",
+      "joomlaSubtitle": "Instalación en un clic. BD creada. Termina la configuración en el instalador web.",
+      "drupalTitle": "Drupal",
+      "drupalSubtitle": "Drupal 11. BD creada. Termina en el instalador web.",
+      "mediawikiTitle": "MediaWiki",
+      "mediawikiSubtitle": "BD creada. Visita /mw-config/ para terminar.",
+      "install": "Instalar"
+    },
+    "checking": "comprobando…",
+    "images": {
+      "title": "Optimizador de imágenes",
+      "subtitle": "Recodifica JPG a una calidad determinada y comprime PNG sin pérdida in-place. Atómico — nunca aumenta el tamaño.",
+      "folder": "Carpeta",
+      "folderPlaceholder": "C:/ruta/a/imagenes",
+      "jpegQuality": "Calidad JPEG (1–100)",
+      "includeJpg": "Recodificar .jpg/.jpeg",
+      "includePng": "Optimizar .png",
+      "run": "Ejecutar",
+      "running": "Procesando…",
+      "summary": "{{files}} archivos procesados · ahorrados {{bytes}}"
+    },
+    "deployTool": {
+      "title": "Despliegue FTP",
+      "subtitle": "Sube recursivamente una carpeta local a un servidor FTP remoto. SFTP llegará después.",
+      "host": "Host",
+      "hostPlaceholder": "ftp.ejemplo.com",
+      "port": "Puerto",
+      "user": "Usuario",
+      "password": "Contraseña",
+      "remoteDir": "Carpeta remota",
+      "remoteDirPlaceholder": "/public_html",
+      "localDir": "Carpeta local",
+      "localDirPlaceholder": "C:/ruta/al/sitio",
+      "upload": "Subir",
+      "uploading": "Subiendo…",
+      "result": "{{files}} archivos · {{bytes}} subidos"
+    }
+  },
+  "config": {
+    "loading": "Cargando rutas…",
+    "php": "PHP",
+    "servers": "Servidores",
+    "phpIni": "php.ini — PHP {{version}}",
+    "apacheHttpd": "Apache httpd.conf",
+    "apacheHint": "Se regenera al arrancar Apache — las ediciones manuales se sobrescriben. Usa la pestaña Apache del host para directivas por host.",
+    "nginxConf": "Nginx nginx.conf",
+    "nginxHint": "Se regenera al arrancar Nginx. Usa la pestaña Nginx del host para directivas por host.",
+    "mysqlCnf": "MySQL my.cnf",
+    "mysqlHint": "La ruta depende de la versión activa de MySQL. Edita tras pulsar Iniciar para que el archivo exista.",
+    "edit": "Editar",
+    "footer": "Las ediciones abren una ventana Monaco aparte. Usa Ctrl+S para guardar. Los procesos del servidor necesitan un Detener + Iniciar para que los cambios en php.ini tengan efecto — se cargan al arrancar el proceso.",
+    "openError": "No se pudo abrir el editor: {{message}}"
+  },
+  "logs": {
+    "noContent": "(aún sin contenido en el log)",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "pauseTitle": "Pausar el sondeo",
+    "resumeTitle": "Reanudar el sondeo"
+  },
+  "editor": {
+    "open": "Abrir",
+    "save": "Guardar",
+    "saved": "Guardado",
+    "dirty": "Guardar *",
+    "checkSyntax": "Comprobar sintaxis",
+    "pathPlaceholder": "C:/ruta/al/archivo.php (Enter para abrir)",
+    "savedMessage": "Guardado.",
+    "noErrors": "Sin errores de sintaxis.",
+    "lintFailed": "Lint falló.",
+    "empty": "Escribe una ruta arriba y pulsa Enter (o haz clic en Abrir)."
+  },
   "hosts": {
     "columns": { "name": "Nombre", "php": "PHP", "extras": "Extras" },
     "empty": "Aún no hay hosts. Pulsa + para añadir uno.",

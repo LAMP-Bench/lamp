@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import Editor, { OnMount } from "@monaco-editor/react";
 import { FiFolder, FiSave, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
@@ -50,6 +51,7 @@ export function EditorSection({
   /// in the API so the parent doesn't have to know we ignore it for now.
   fullscreen?: boolean;
 } = {}) {
+  const { t } = useTranslation();
   const [path, setPath] = useState("");
   const [content, setContent] = useState("");
   const [originalContent, setOriginalContent] = useState("");
@@ -95,7 +97,7 @@ export function EditorSection({
     try {
       await invoke("file_write", { path, content });
       setOriginalContent(content);
-      setInfo("Saved.");
+      setInfo(t("editor.savedMessage"));
     } catch (e) {
       setError(String(e));
     } finally {
@@ -142,7 +144,7 @@ export function EditorSection({
           onKeyDown={(e) => {
             if (e.key === "Enter") open(path);
           }}
-          placeholder="C:/path/to/file.php (Enter to open)"
+          placeholder={t("editor.pathPlaceholder")}
           className="flex-1 px-2 py-1 rounded border border-neutral-300 bg-white font-mono text-sm focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
         />
         <button
@@ -150,7 +152,7 @@ export function EditorSection({
           disabled={!path || busy}
           className="px-3 py-1 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm disabled:opacity-40"
         >
-          Open
+          {t("editor.open")}
         </button>
         <button
           onClick={save}
@@ -159,7 +161,7 @@ export function EditorSection({
           title="Ctrl+S"
         >
           <FiSave />
-          {dirty ? "Save *" : "Saved"}
+          {dirty ? t("editor.dirty") : t("editor.saved")}
         </button>
         {isPhp && (
           <button
@@ -167,7 +169,7 @@ export function EditorSection({
             disabled={!path || busy}
             className="px-3 py-1 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm disabled:opacity-40"
           >
-            Check syntax
+            {t("editor.checkSyntax")}
           </button>
         )}
       </div>
@@ -195,7 +197,7 @@ export function EditorSection({
               {lint.success ? <FiCheckCircle /> : <FiAlertCircle />}
               <span className="break-words">
                 {(lint.stdout + lint.stderr).trim() ||
-                  (lint.success ? "No syntax errors detected." : "Lint failed.")}
+                  (lint.success ? t("editor.noErrors") : t("editor.lintFailed"))}
               </span>
             </span>
           )}
@@ -223,7 +225,7 @@ export function EditorSection({
           />
         ) : (
           <div className="h-full flex items-center justify-center text-sm text-neutral-400">
-            Type a file path above and press Enter (or click Open).
+            {t("editor.empty")}
           </div>
         )}
       </div>

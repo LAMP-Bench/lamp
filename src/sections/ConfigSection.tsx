@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { FiEdit3, FiFileText } from "react-icons/fi";
 import { SiPhp, SiApache, SiNginx, SiMysql } from "react-icons/si";
 
 export function ConfigSection() {
+  const { t } = useTranslation();
   const [versions, setVersions] = useState<string[]>([]);
   const [htdocs, setHtdocs] = useState<string>("");
 
@@ -20,13 +22,13 @@ export function ConfigSection() {
     try {
       await invoke("editor_open", { path });
     } catch (e) {
-      alert(`Could not open editor: ${e}`);
+      alert(t("config.openError", { message: String(e) }));
     }
   }
 
   if (!htdocs) {
     return (
-      <div className="p-6 text-sm text-neutral-500">Loading paths…</div>
+      <div className="p-6 text-sm text-neutral-500">{t("config.loading")}</div>
     );
   }
 
@@ -35,14 +37,14 @@ export function ConfigSection() {
       <div className="p-6 max-w-3xl space-y-6">
         <section>
           <h2 className="text-xs uppercase tracking-wider text-neutral-500 font-medium mb-2">
-            PHP
+            {t("config.php")}
           </h2>
           <div className="rounded-lg border border-neutral-200 bg-white overflow-hidden divide-y divide-neutral-100">
             {versions.map((v) => (
               <ConfigRow
                 key={v}
                 icon={<SiPhp className="text-indigo-500" />}
-                title={`php.ini — PHP ${v}`}
+                title={t("config.phpIni", { version: v })}
                 subtitle={`${resources}/php-${v}/php.ini`}
                 onEdit={() => open(`${resources}/php-${v}/php.ini`)}
               />
@@ -52,28 +54,28 @@ export function ConfigSection() {
 
         <section>
           <h2 className="text-xs uppercase tracking-wider text-neutral-500 font-medium mb-2">
-            Servers
+            {t("config.servers")}
           </h2>
           <div className="rounded-lg border border-neutral-200 bg-white overflow-hidden divide-y divide-neutral-100">
             <ConfigRow
               icon={<SiApache className="text-red-500" />}
-              title="Apache httpd.conf"
+              title={t("config.apacheHttpd")}
               subtitle={`${runtime}/apache/httpd.conf`}
-              hint="Regenerated on each Apache start — manual edits get clobbered. Use the Apache tab on a host for per-host directives."
+              hint={t("config.apacheHint")}
               onEdit={() => open(`${runtime}/apache/httpd.conf`)}
             />
             <ConfigRow
               icon={<SiNginx className="text-emerald-500" />}
-              title="Nginx nginx.conf"
+              title={t("config.nginxConf")}
               subtitle={`${runtime}/nginx/nginx.conf`}
-              hint="Regenerated on each Nginx start. Use the Nginx tab on a host for per-host directives."
+              hint={t("config.nginxHint")}
               onEdit={() => open(`${runtime}/nginx/nginx.conf`)}
             />
             <ConfigRow
               icon={<SiMysql className="text-sky-500" />}
-              title="MySQL my.cnf"
+              title={t("config.mysqlCnf")}
               subtitle={`${runtime}/mysql-<version>/my.cnf`}
-              hint="Path depends on the active MySQL version. Edit after Start so the file exists."
+              hint={t("config.mysqlHint")}
               onEdit={() => {
                 // Best effort — try 8.0, fall back to 5.7.
                 open(`${runtime}/mysql-8.0/my.cnf`).catch(() =>
@@ -85,15 +87,7 @@ export function ConfigSection() {
         </section>
 
         <section>
-          <p className="text-xs text-neutral-500">
-            Edits open in a separate Monaco window. Use{" "}
-            <kbd className="px-1 py-0.5 rounded bg-neutral-100 border border-neutral-300 font-mono text-[10px]">
-              Ctrl+S
-            </kbd>{" "}
-            to save. Server processes need a Stop + Start for changes to{" "}
-            <code>php.ini</code> to take effect — they're loaded at process
-            spawn time.
-          </p>
+          <p className="text-xs text-neutral-500">{t("config.footer")}</p>
         </section>
       </div>
     </div>
@@ -113,6 +107,7 @@ function ConfigRow({
   hint?: string;
   onEdit: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="px-4 py-3 flex items-center gap-4">
       <div className="text-xl shrink-0">{icon}</div>
@@ -133,7 +128,7 @@ function ConfigRow({
         className="px-3 py-1.5 rounded border border-neutral-300 hover:bg-neutral-50 text-sm flex items-center gap-1.5 text-neutral-700"
       >
         <FiEdit3 />
-        Edit
+        {t("config.edit")}
       </button>
     </div>
   );

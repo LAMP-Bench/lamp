@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { IconType } from "react-icons";
@@ -21,60 +22,61 @@ type CommandResult = {
 };
 
 export function ToolsSection() {
+  const { t } = useTranslation();
   return (
     <div className="h-full overflow-y-auto">
       <div className="p-6 space-y-6 max-w-3xl">
-        <Section title="Database">
+        <Section title={t("tools.section.database")}>
           <PhpMyAdminCard />
         </Section>
 
-        <Section title="Email">
+        <Section title={t("tools.section.email")}>
           <MailHogCard />
         </Section>
 
-        <Section title="Images">
+        <Section title={t("tools.section.images")}>
           <ImageOptimizerCard />
         </Section>
 
-        <Section title="Deploy">
+        <Section title={t("tools.section.deploy")}>
           <FtpDeployCard />
         </Section>
 
-        <Section title="PHP">
+        <Section title={t("tools.section.php")}>
           <ComposerCard />
           <LaravelCard />
         </Section>
 
-        <Section title="CMS Extras">
+        <Section title={t("tools.section.cms")}>
           <CmsCard
             icon={SiWordpress}
             iconColor="text-blue-600"
-            title="WordPress"
-            subtitle="One-click install. DB, wp-config.php with fresh salts, files copied to htdocs."
+            title={t("tools.cms.wordpressTitle")}
+            subtitle={t("tools.cms.wordpressSubtitle")}
             command="wordpress_install"
             binaryName="wordpress"
           />
           <CmsCard
             icon={SiJoomla}
             iconColor="text-sky-600"
-            title="Joomla"
-            subtitle="One-click install. DB created. Finish setup in the web installer."
+            title={t("tools.cms.joomlaTitle")}
+            subtitle={t("tools.cms.joomlaSubtitle")}
             command="joomla_install"
             binaryName="joomla"
           />
           <CmsCard
             icon={SiDrupal}
             iconColor="text-blue-500"
-            title="Drupal"
-            subtitle="Drupal 11. DB created. Finish in the web installer."
+            title={t("tools.cms.drupalTitle")}
+            subtitle={t("tools.cms.drupalSubtitle")}
             command="drupal_install"
             binaryName="drupal"
           />
           <CmsCard
             icon={SiWikipedia}
             iconColor="text-amber-600"
-            title="MediaWiki"
-            subtitle="DB created. Visit /mw-config/ to finish setup."
+            title={t("tools.cms.mediawikiTitle")}
+            subtitle={t("tools.cms.mediawikiSubtitle")}
             command="mediawiki_install"
             binaryName="mediawiki"
           />
@@ -102,19 +104,20 @@ function Section({
 }
 
 function PhpMyAdminCard() {
+  const { t } = useTranslation();
   return (
     <ToolCard
       icon={SiPhpmyadmin}
       iconColor="text-amber-500"
-      title="phpMyAdmin"
-      subtitle="Database admin — requires apache + mysql running"
+      title={t("tools.pma.title")}
+      subtitle={t("tools.pma.subtitle")}
       action={
         <button
           onClick={() => openUrl("http://localhost:8080/phpmyadmin/")}
           className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5"
         >
           <FiExternalLink />
-          Open
+          {t("tools.open")}
         </button>
       }
     />
@@ -122,19 +125,20 @@ function PhpMyAdminCard() {
 }
 
 function MailHogCard() {
+  const { t } = useTranslation();
   return (
     <ToolCard
       icon={FiMail}
       iconColor="text-amber-500"
-      title="MailHog inbox"
-      subtitle="Catches PHP mail() and shows them in a web UI. Start MailHog first."
+      title={t("tools.mailhog.title")}
+      subtitle={t("tools.mailhog.subtitle")}
       action={
         <button
           onClick={() => openUrl("http://localhost:8025/")}
           className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5"
         >
           <FiExternalLink />
-          Open
+          {t("tools.open")}
         </button>
       }
     />
@@ -142,6 +146,7 @@ function MailHogCard() {
 }
 
 function ComposerCard() {
+  const { t } = useTranslation();
   const [version, setVersion] = useState<string | null>(null);
 
   useEffect(() => {
@@ -160,29 +165,30 @@ function ComposerCard() {
     <ToolCard
       icon={SiComposer}
       iconColor="text-amber-700"
-      title="Composer"
-      subtitle={version ?? "checking…"}
+      title={t("tools.composer.title")}
+      subtitle={version ?? t("tools.checking")}
       action={null}
     />
   );
 }
 
 function LaravelCard() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
     <>
       <ToolCard
         icon={SiLaravel}
         iconColor="text-red-500"
-        title="Laravel"
-        subtitle="Scaffold a new Laravel app with composer create-project"
+        title={t("tools.laravel.title")}
+        subtitle={t("tools.laravel.subtitle")}
         action={
           <button
             onClick={() => setOpen(true)}
             className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5"
           >
             <FiPackage />
-            New project
+            {t("tools.laravel.newProject")}
           </button>
         }
       />

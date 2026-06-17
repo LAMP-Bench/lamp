@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { FiPause, FiPlay } from "react-icons/fi";
 import { SiApache, SiNginx, SiMysql } from "react-icons/si";
@@ -16,6 +17,7 @@ const TABS: Array<{
 ];
 
 export function LogsSection() {
+  const { t } = useTranslation();
   const [service, setService] = useState<LogName>("apache");
   const [log, setLog] = useState("");
   const [paused, setPaused] = useState(false);
@@ -72,10 +74,10 @@ export function LogsSection() {
         <button
           onClick={() => setPaused((p) => !p)}
           className="px-3 py-1 rounded text-sm flex items-center gap-1.5 border border-neutral-300 hover:bg-neutral-50 text-neutral-700"
-          title={paused ? "Resume polling" : "Pause polling"}
+          title={paused ? t("logs.resumeTitle") : t("logs.pauseTitle")}
         >
           {paused ? <FiPlay /> : <FiPause />}
-          {paused ? "Resume" : "Pause"}
+          {paused ? t("logs.resume") : t("logs.pause")}
         </button>
       </div>
 
@@ -83,7 +85,7 @@ export function LogsSection() {
         ref={preRef}
         className="flex-1 rounded-md border border-neutral-200 bg-neutral-950 text-neutral-200 p-3 text-xs font-mono overflow-auto whitespace-pre-wrap break-words"
       >
-        {log || <span className="text-neutral-500">(no log content yet)</span>}
+        {log || <span className="text-neutral-500">{t("logs.noContent")}</span>}
       </pre>
     </div>
   );

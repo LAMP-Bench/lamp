@@ -60,6 +60,108 @@
     "downloading": "Downloading update…",
     "failed": "Update failed: {{message}}"
   },
+  "tools": {
+    "section": {
+      "database": "Database",
+      "email": "Email",
+      "images": "Images",
+      "deploy": "Deploy",
+      "php": "PHP",
+      "cms": "CMS Extras"
+    },
+    "open": "Open",
+    "pma": {
+      "title": "phpMyAdmin",
+      "subtitle": "Database admin — requires apache + mysql running"
+    },
+    "mailhog": {
+      "title": "MailHog inbox",
+      "subtitle": "Catches PHP mail() and shows them in a web UI. Start MailHog first."
+    },
+    "composer": {
+      "title": "Composer",
+      "checking": "checking…"
+    },
+    "laravel": {
+      "title": "Laravel",
+      "subtitle": "Scaffold a new Laravel app with composer create-project",
+      "newProject": "New project"
+    },
+    "cms": {
+      "wordpressTitle": "WordPress",
+      "wordpressSubtitle": "One-click install. DB, wp-config.php with fresh salts, files copied to htdocs.",
+      "joomlaTitle": "Joomla",
+      "joomlaSubtitle": "One-click install. DB created. Finish setup in the web installer.",
+      "drupalTitle": "Drupal",
+      "drupalSubtitle": "Drupal 11. DB created. Finish in the web installer.",
+      "mediawikiTitle": "MediaWiki",
+      "mediawikiSubtitle": "DB created. Visit /mw-config/ to finish setup.",
+      "install": "Install"
+    },
+    "checking": "checking…",
+    "images": {
+      "title": "Image optimizer",
+      "subtitle": "Re-encode JPGs at a target quality and losslessly shrink PNGs in place. Atomic — never grows a file.",
+      "folder": "Folder",
+      "folderPlaceholder": "C:/path/to/images",
+      "jpegQuality": "JPEG quality (1–100)",
+      "includeJpg": "Re-encode .jpg/.jpeg",
+      "includePng": "Optimize .png",
+      "run": "Run",
+      "running": "Working…",
+      "summary": "{{files}} files processed · saved {{bytes}}"
+    },
+    "deployTool": {
+      "title": "FTP deploy",
+      "subtitle": "Recursively upload a local folder to a remote FTP server. SFTP coming later.",
+      "host": "Host",
+      "hostPlaceholder": "ftp.example.com",
+      "port": "Port",
+      "user": "User",
+      "password": "Password",
+      "remoteDir": "Remote folder",
+      "remoteDirPlaceholder": "/public_html",
+      "localDir": "Local folder",
+      "localDirPlaceholder": "C:/path/to/site",
+      "upload": "Upload",
+      "uploading": "Uploading…",
+      "result": "{{files}} files · {{bytes}} uploaded"
+    }
+  },
+  "config": {
+    "loading": "Loading paths…",
+    "php": "PHP",
+    "servers": "Servers",
+    "phpIni": "php.ini — PHP {{version}}",
+    "apacheHttpd": "Apache httpd.conf",
+    "apacheHint": "Regenerated on each Apache start — manual edits get clobbered. Use the Apache tab on a host for per-host directives.",
+    "nginxConf": "Nginx nginx.conf",
+    "nginxHint": "Regenerated on each Nginx start. Use the Nginx tab on a host for per-host directives.",
+    "mysqlCnf": "MySQL my.cnf",
+    "mysqlHint": "Path depends on the active MySQL version. Edit after Start so the file exists.",
+    "edit": "Edit",
+    "footer": "Edits open in a separate Monaco window. Use Ctrl+S to save. Server processes need a Stop + Start for changes to php.ini to take effect — they're loaded at process spawn time.",
+    "openError": "Could not open editor: {{message}}"
+  },
+  "logs": {
+    "noContent": "(no log content yet)",
+    "pause": "Pause",
+    "resume": "Resume",
+    "pauseTitle": "Pause polling",
+    "resumeTitle": "Resume polling"
+  },
+  "editor": {
+    "open": "Open",
+    "save": "Save",
+    "saved": "Saved",
+    "dirty": "Save *",
+    "checkSyntax": "Check syntax",
+    "pathPlaceholder": "C:/path/to/file.php (Enter to open)",
+    "savedMessage": "Saved.",
+    "noErrors": "No syntax errors detected.",
+    "lintFailed": "Lint failed.",
+    "empty": "Type a file path above and press Enter (or click Open)."
+  },
   "hosts": {
     "columns": { "name": "Name", "php": "PHP", "extras": "Extras" },
     "empty": "No hosts yet. Click + to add one.",
