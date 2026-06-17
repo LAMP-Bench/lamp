@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import {
   FiCheck,
   FiDownload,
@@ -43,9 +44,15 @@ export async function setupNeeded(): Promise<{
 
 type ItemStatus =
   | { kind: "pending" }
-  | { kind: "downloading" }
+  | { kind: "downloading"; pct: number | null }
   | { kind: "done" }
   | { kind: "error"; message: string };
+
+type ProgressEvent = {
+  name: string;
+  downloaded: number;
+  total: number | null;
+};
 
 export function SetupWizard({
   onComplete,
@@ -76,7 +83,7 @@ export function SetupWizard({
         setStatuses([...next]);
         continue;
       }
-      next[i] = { kind: "downloading" };
+      next[i] = { kind: "downloading", pct: null };
       setStatuses([...next]);
       try {
         await invoke("binary_download", { name: ESSENTIALS[i].name });
@@ -98,6 +105,29 @@ export function SetupWizard({
   useEffect(() => {
     run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Listen for streaming download progress and update the matching row.
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    listen<ProgressEvent>("binary-download-progress", (event) => {
+      const { name, downloaded, total } = event.payload;
+      const idx = ESSENTIALS.findIndex((e) => e.name === name);
+      if (idx < 0) return;
+      const pct = total && total > 0 ? Math.round((downloaded / total) * 100) : null;
+      setStatuses((prev) => {
+        const cur = prev[idx];
+        if (cur?.kind !== "downloading") return prev;
+        const next = [...prev];
+        next[idx] = { kind: "downloading", pct };
+        return next;
+      });
+    }).then((un) => {
+      unlisten = un;
+    });
+    return () => {
+      if (unlisten) unlisten();
+    };
   }, []);
 
   const anyErrors = statuses.some((s) => s.kind === "error");
@@ -179,9 +209,9 @@ function StatusBadge({ status }: { status: ItemStatus }) {
       );
     case "downloading":
       return (
-        <span className="text-sky-600 inline-flex items-center gap-1 text-xs">
+        <span className="text-sky-600 inline-flex items-center gap-1 text-xs font-mono">
           <FiLoader className="animate-spin" />
-          <FiDownload />
+          {status.pct !== null ? `${status.pct}%` : <FiDownload />}
         </span>
       );
     case "done":

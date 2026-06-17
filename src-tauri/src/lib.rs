@@ -26,7 +26,7 @@ use services::{hidden_command, Service, ServiceStatus};
 use ssl::LocalCa;
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
-use tauri::{Manager, WindowEvent};
+use tauri::{Emitter, Manager, WindowEvent};
 
 struct AppState {
     db: Mutex<Connection>,
@@ -586,8 +586,26 @@ fn binary_installed(name: &str, state: tauri::State<AppState>) -> bool {
 }
 
 #[tauri::command]
-fn binary_download(name: &str, state: tauri::State<AppState>) -> Result<(), String> {
-    downloads::download(name, &state.resources_dir)
+fn binary_download(
+    name: String,
+    app: tauri::AppHandle,
+    state: tauri::State<AppState>,
+) -> Result<(), String> {
+    // Streaming progress is forwarded as Tauri events. Frontend subscribes
+    // to `binary-download-progress` and filters on the `name` field.
+    let resources = state.resources_dir.clone();
+    let emit_name = name.clone();
+    let mut cb = move |downloaded: u64, total: Option<u64>| {
+        let _ = app.emit(
+            "binary-download-progress",
+            serde_json::json!({
+                "name": emit_name,
+                "downloaded": downloaded,
+                "total": total,
+            }),
+        );
+    };
+    downloads::download(&name, &resources, Some(&mut cb))
 }
 
 #[tauri::command]

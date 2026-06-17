@@ -112,8 +112,8 @@ pub fn discover_php_installs(resources_dir: &Path) -> Vec<PhpInstall> {
 /// download the matching Xdebug DLL too if present in the manifest. Failing
 /// to find an Xdebug build for a future PHP version is non-fatal.
 pub fn install_php_with_xdebug(version: &str, resources_dir: &Path) -> Result<(), String> {
-    download(&format!("php-{version}"), resources_dir)?;
-    let _ = download(&format!("xdebug-{version}"), resources_dir);
+    download(&format!("php-{version}"), resources_dir, None)?;
+    let _ = download(&format!("xdebug-{version}"), resources_dir, None);
     Ok(())
 }
 
@@ -196,10 +196,19 @@ pub fn is_installed(name: &str, resources_dir: &Path) -> bool {
     }
 }
 
+/// Streaming progress event for `download`. Callers pass a closure that
+/// gets called periodically with `(downloaded_bytes, total_bytes_or_none)`.
+pub type ProgressCb<'a> = &'a mut dyn FnMut(u64, Option<u64>);
+
 /// Fetch + verify + extract a manifest entry into `resources_dir`. Synchronous
-/// (blocks the Tauri command). The caller is expected to update a "busy"
-/// flag in the UI so the user knows something's happening.
-pub fn download(name: &str, resources_dir: &Path) -> Result<(), String> {
+/// (blocks the Tauri command). The optional progress callback is invoked
+/// periodically during the HTTP fetch so the UI can show a percentage instead
+/// of an indeterminate spinner.
+pub fn download(
+    name: &str,
+    resources_dir: &Path,
+    mut progress: Option<ProgressCb<'_>>,
+) -> Result<(), String> {
     let manifest = load_manifest()?;
     let entry = manifest
         .entries
@@ -210,17 +219,42 @@ pub fn download(name: &str, resources_dir: &Path) -> Result<(), String> {
         format!("no {platform} binary configured for {name}")
     })?;
 
-    // 1. HTTP fetch (rustls TLS, no system OpenSSL needed).
+    // 1. HTTP fetch (rustls TLS, no system OpenSSL needed). Stream into a
+    // Vec so we can both SHA256-verify and report progress mid-flight.
     let resp = ureq::get(&pe.url)
         .call()
         .map_err(|e| format!("HTTP {name}: {e}"))?;
     if resp.status() != 200 {
         return Err(format!("HTTP {} fetching {name}", resp.status()));
     }
-    let mut buf = Vec::new();
-    resp.into_reader()
-        .read_to_end(&mut buf)
-        .map_err(|e| format!("read body: {e}"))?;
+    let content_len: Option<u64> = resp
+        .header("Content-Length")
+        .and_then(|s| s.parse::<u64>().ok());
+    if let Some(cb) = progress.as_deref_mut() {
+        cb(0, content_len);
+    }
+    let mut reader = resp.into_reader();
+    let mut buf: Vec<u8> = Vec::with_capacity(content_len.unwrap_or(0) as usize);
+    let mut chunk = [0u8; 65536];
+    let mut last_reported: u64 = 0;
+    loop {
+        let n = reader.read(&mut chunk).map_err(|e| format!("read body: {e}"))?;
+        if n == 0 {
+            break;
+        }
+        buf.extend_from_slice(&chunk[..n]);
+        if let Some(cb) = progress.as_deref_mut() {
+            // Throttle to ~64 KB granularity so we don't flood the IPC bridge
+            // with millions of tiny events for a fast download.
+            if buf.len() as u64 - last_reported >= 65536 {
+                cb(buf.len() as u64, content_len);
+                last_reported = buf.len() as u64;
+            }
+        }
+    }
+    if let Some(cb) = progress.as_deref_mut() {
+        cb(buf.len() as u64, content_len);
+    }
 
     // 2. SHA256 verify against the pinned manifest.
     let mut hasher = Sha256::new();
