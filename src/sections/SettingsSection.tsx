@@ -452,16 +452,34 @@ function UpdatesRow() {
 
 function AboutRow() {
   const { t } = useTranslation();
-  const [version, setVersion] = useState<string>("");
+  const [info, setInfo] = useState<{
+    version: string;
+    git_sha: string;
+    build_epoch: number;
+  } | null>(null);
 
   useEffect(() => {
-    invoke<string>("app_version").then(setVersion).catch(() => {});
+    invoke<{ version: string; git_sha: string; build_epoch: number }>("build_info")
+      .then(setInfo)
+      .catch(() => {});
   }, []);
+
+  const buildDate =
+    info && info.build_epoch > 0
+      ? new Date(info.build_epoch * 1000).toISOString().slice(0, 19).replace("T", " ")
+      : null;
 
   return (
     <>
       <Row icon={<FiInfo />} label={t("settings.about.version")}>
-        <code className="text-xs text-neutral-700">{version || "…"}</code>
+        <code className="text-xs text-neutral-700">{info?.version || "…"}</code>
+      </Row>
+      <Row
+        icon={<FiInfo />}
+        label={t("settings.about.build")}
+        hint={buildDate ? `${buildDate} UTC` : undefined}
+      >
+        <code className="text-xs text-neutral-700">{info?.git_sha || "…"}</code>
       </Row>
       <Row icon={<FiExternalLink />} label={t("settings.about.github")}>
         <button

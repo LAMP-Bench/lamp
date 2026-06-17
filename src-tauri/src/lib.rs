@@ -154,6 +154,22 @@ fn app_version() -> &'static str {
     env!("CARGO_PKG_VERSION")
 }
 
+#[derive(Serialize)]
+struct BuildInfo {
+    version: &'static str,
+    git_sha: &'static str,
+    build_epoch: u64,
+}
+
+#[tauri::command]
+fn build_info() -> BuildInfo {
+    BuildInfo {
+        version: env!("CARGO_PKG_VERSION"),
+        git_sha: env!("LAMP_BENCH_GIT_SHA"),
+        build_epoch: env!("LAMP_BENCH_BUILD_EPOCH").parse().unwrap_or(0),
+    }
+}
+
 fn load_hosts(state: &AppState) -> Result<Vec<Host>, String> {
     let conn = state.db.lock().unwrap();
     hosts::list(&conn)
@@ -884,6 +900,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             app_version,
+            build_info,
             service_start,
             service_stop,
             service_status,
