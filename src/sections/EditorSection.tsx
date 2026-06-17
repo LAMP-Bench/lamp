@@ -133,6 +133,20 @@ export function EditorSection({
     return () => window.removeEventListener("keydown", onKey);
   }, [path, dirty, busy, content]);
 
+  // beforeunload dirty-guard: close-window with unsaved changes used to
+  // silently drop the buffer. The native dialog yields control back to the
+  // user so they can re-open the editor and save first.
+  useEffect(() => {
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      if (dirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    }
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [dirty]);
+
   return (
     <div className="h-full flex flex-col bg-white">
       <div className="border-b border-neutral-200 px-5 py-2.5 flex items-center gap-2">
