@@ -157,6 +157,14 @@ jobs:
           # real stable release.
           tagName: alpha-testing
           releaseName: 'Lamp Bench — alpha testing'
+          # IMPORTANT: this body is set ONLY on the first build of each
+          # alpha-testing release (the prepare job wipes the old release +
+          # tag, then the first build matrix entry creates the draft with
+          # this body). Subsequent matrix entries reuse the same draft and
+          # tauri-action skips the body update if a release already exists.
+          # That means anything we type in here is the canonical body for
+          # the whole release; manual edits on GitHub stick until the next
+          # workflow run.
           releaseBody: |
             **Rolling alpha build** for Lamp Bench.
 
@@ -168,7 +176,7 @@ jobs:
             - **Linux Fedora/RHEL/openSUSE** — `.rpm`
             - **Any other Linux (Arch, etc.)** — `.AppImage`
 
-            Last built from commit `${{ github.sha }}`.
+            Built from commit `${{ github.sha }}`.
           # Drafts let all platforms upload without the release going
           # public; the `publish` job below flips this to a published
           # prerelease only when every platform succeeded.
