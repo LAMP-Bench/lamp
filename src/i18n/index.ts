@@ -19,7 +19,7 @@ i18n
       es: { translation: es },
     },
     fallbackLng: "en",
-    supportedLngs: ["en", "es"],
+    supportedLngs: ["en", "es", "fr"],
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "navigator"],
@@ -28,9 +28,21 @@ i18n
     },
   });
 
+/// Keep the document language attribute in sync so screen readers, browser
+/// spellcheck, and other a11y tooling pick up the change. i18next normalises
+/// to short codes ("en", "es", "fr") — those are valid BCP-47 lang values.
+function syncHtmlLang(lng: string) {
+  if (typeof document !== "undefined") {
+    document.documentElement.lang = lng.slice(0, 2);
+  }
+}
+syncHtmlLang(i18n.language);
+i18n.on("languageChanged", syncHtmlLang);
+
 export const LANGUAGES = [
   { code: "en", label: "English" },
   { code: "es", label: "Español" },
+  { code: "fr", label: "Français" },
 ] as const;
 
 export default i18n;
