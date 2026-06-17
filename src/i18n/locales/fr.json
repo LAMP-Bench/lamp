@@ -43,7 +43,12 @@
       "available": "La version {{version}} est disponible.",
       "installNow": "Installer et redémarrer",
       "error": "Échec de la vérification : {{message}}",
-      "autoHint": "Lamp Bench vérifie les mises à jour à chaque lancement. Utilisez ce bouton pour vérifier manuellement."
+      "autoHint": "Lamp Bench vérifie les mises à jour à chaque lancement. Utilisez ce bouton pour vérifier manuellement.",
+      "channel": "Canal de version",
+      "channelHint": "Seul le canal alpha existe pour l'instant. Choisir beta ou stable commencera à sonder ces tags quand ils seront publiés.",
+      "channelAlpha": "Alpha (continu)",
+      "channelBeta": "Beta",
+      "channelStable": "Stable"
     },
     "about": {
       "title": "À propos",

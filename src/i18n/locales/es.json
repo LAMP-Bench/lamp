@@ -43,7 +43,12 @@
       "available": "Hay una nueva versión: {{version}}.",
       "installNow": "Instalar y reiniciar",
       "error": "Error al buscar actualizaciones: {{message}}",
-      "autoHint": "Lamp Bench busca actualizaciones cada vez que arranca. Usa este botón para volver a comprobar manualmente."
+      "autoHint": "Lamp Bench busca actualizaciones cada vez que arranca. Usa este botón para volver a comprobar manualmente.",
+      "channel": "Canal de versiones",
+      "channelHint": "Sólo existe el canal alpha por ahora. Elegir beta o stable empezará a sondear esos tags cuando se publiquen.",
+      "channelAlpha": "Alpha (continuo)",
+      "channelBeta": "Beta",
+      "channelStable": "Estable"
     },
     "about": {
       "title": "Acerca de",

@@ -45,6 +45,7 @@ export function SettingsSection() {
         </Card>
 
         <Card title={t("settings.updates.title")}>
+          <ChannelRow />
           <UpdatesRow />
         </Card>
 
@@ -347,6 +348,39 @@ function LanguageRow() {
             {l.label}
           </option>
         ))}
+      </select>
+    </Row>
+  );
+}
+
+type Channel = "alpha" | "beta" | "stable";
+const CHANNEL_KEY = "lamp-bench-update-channel";
+
+function ChannelRow() {
+  const { t } = useTranslation();
+  const [channel, setChannel] = useState<Channel>(
+    () => (localStorage.getItem(CHANNEL_KEY) as Channel | null) ?? "alpha",
+  );
+
+  function pick(c: Channel) {
+    setChannel(c);
+    localStorage.setItem(CHANNEL_KEY, c);
+  }
+
+  return (
+    <Row
+      icon={<FiRefreshCw />}
+      label={t("settings.updates.channel")}
+      hint={t("settings.updates.channelHint")}
+    >
+      <select
+        value={channel}
+        onChange={(e) => pick(e.target.value as Channel)}
+        className="px-3 py-1.5 rounded border border-neutral-300 text-sm bg-white focus:outline-none focus:border-sky-500"
+      >
+        <option value="alpha">{t("settings.updates.channelAlpha")}</option>
+        <option value="beta">{t("settings.updates.channelBeta")}</option>
+        <option value="stable">{t("settings.updates.channelStable")}</option>
       </select>
     </Row>
   );
