@@ -3,7 +3,7 @@
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::fs;
-#[cfg(windows)]
+#[cfg(any(target_os = "windows", target_os = "linux", target_os = "macos"))]
 use crate::services::hidden_command;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -144,10 +144,18 @@ pub fn apply_to_system(hosts: &[Host]) -> Result<(), String> {
     {
         write_elevated_windows(&desired)
     }
-    #[cfg(not(windows))]
+    #[cfg(target_os = "macos")]
+    {
+        write_elevated_macos(&desired)
+    }
+    #[cfg(target_os = "linux")]
+    {
+        write_elevated_linux(&desired)
+    }
+    #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
     {
         let _ = desired;
-        Err("hosts-file editing on this OS is not implemented until Phase 9".into())
+        Err("hosts-file editing is not supported on this OS".into())
     }
 }
 
@@ -236,4 +244,75 @@ fn write_elevated_windows(new_content: &str) -> Result<(), String> {
         ));
     }
     Ok(())
+}
+
+#[cfg(target_os = "macos")]
+fn write_elevated_macos(new_content: &str) -> Result<(), String> {
+    // macOS path: write to a tmp file we own, then have osascript run `cp`
+    // with administrator privileges. The single Touch ID / password prompt
+    // is the macOS equivalent of UAC; cached per app for ~5 min.
+    let tmp = std::env::temp_dir().join("lamp-bench-hosts.tmp");
+    fs::write(&tmp, new_content).map_err(|e| format!("write tmp hosts: {e}"))?;
+    let src = tmp.display().to_string().replace('"', "\\\"");
+    let script = format!(
+        "do shell script \"cp '{src}' '{HOSTS_PATH}'\" with administrator privileges"
+    );
+    let output = hidden_command("osascript")
+        .args(["-e", &script])
+        .output()
+        .map_err(|e| format!("spawn osascript: {e}"))?;
+    let _ = fs::remove_file(&tmp);
+    if !output.status.success() {
+        return Err(format!(
+            "hosts file update rejected or failed: {}",
+            String::from_utf8_lossy(&output.stderr).trim()
+        ));
+    }
+    Ok(())
+}
+
+#[cfg(target_os = "linux")]
+fn write_elevated_linux(new_content: &str) -> Result<(), String> {
+    // Linux path: prefer pkexec (graphical polkit prompt, no terminal needed).
+    // Fall back to sudo -n in case we're being run in a CLI context where the
+    // user already authenticated. Both invoke `cp` rather than a redirect so
+    // we don't have to worry about shell quoting.
+    let tmp = std::env::temp_dir().join("lamp-bench-hosts.tmp");
+    fs::write(&tmp, new_content).map_err(|e| format!("write tmp hosts: {e}"))?;
+
+    let runners: [&str; 2] = ["pkexec", "sudo"];
+    let mut last_err = String::from("no privilege escalation tool found (need pkexec or sudo)");
+    for runner in runners {
+        // `which` check
+        if hidden_command("which")
+            .arg(runner)
+            .output()
+            .map(|o| !o.status.success())
+            .unwrap_or(true)
+        {
+            continue;
+        }
+        let mut cmd = hidden_command(runner);
+        if runner == "sudo" {
+            cmd.arg("-n"); // non-interactive — fail fast if cached creds expired
+        }
+        cmd.arg("cp").arg(&tmp).arg(HOSTS_PATH);
+        match cmd.output() {
+            Ok(out) if out.status.success() => {
+                let _ = fs::remove_file(&tmp);
+                return Ok(());
+            }
+            Ok(out) => {
+                last_err = format!(
+                    "{runner} failed: {}",
+                    String::from_utf8_lossy(&out.stderr).trim()
+                );
+            }
+            Err(e) => {
+                last_err = format!("{runner} spawn error: {e}");
+            }
+        }
+    }
+    let _ = fs::remove_file(&tmp);
+    Err(format!("hosts file update failed: {last_err}"))
 }
