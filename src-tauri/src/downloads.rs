@@ -117,6 +117,42 @@ pub fn install_php_with_xdebug(version: &str, resources_dir: &Path) -> Result<()
     Ok(())
 }
 
+/// Remove an installed binary. Idempotent — returns Ok even if nothing was
+/// on disk. Used by the Settings → Versions panel to reclaim disk for PHP
+/// versions, optional services, etc. that the user is done with.
+pub fn remove(name: &str, resources_dir: &Path) -> Result<(), String> {
+    let manifest = load_manifest()?;
+    let entry = manifest
+        .entries
+        .get(name)
+        .ok_or_else(|| format!("unknown binary: {name}"))?;
+    if let Some(raw) = &entry.raw_file {
+        let target = resources_dir.join(raw);
+        if target.exists() {
+            fs::remove_file(&target).map_err(|e| e.to_string())?;
+        }
+    }
+    if let Some(extract_to) = &entry.extract_to {
+        let target = resources_dir.join(extract_to);
+        if target.exists() {
+            fs::remove_dir_all(&target).map_err(|e| e.to_string())?;
+        }
+    }
+    Ok(())
+}
+
+/// List every name in the manifest. Used by the Versions UI so we can show
+/// everything that COULD be installed, not just what currently is.
+pub fn list_manifest_entries() -> Vec<String> {
+    let manifest = match load_manifest() {
+        Ok(m) => m,
+        Err(_) => return Vec::new(),
+    };
+    let mut names: Vec<String> = manifest.entries.keys().cloned().collect();
+    names.sort();
+    names
+}
+
 #[allow(dead_code)]
 fn _path_used() -> PathBuf {
     PathBuf::new()

@@ -591,6 +591,16 @@ fn binary_download(name: &str, state: tauri::State<AppState>) -> Result<(), Stri
 }
 
 #[tauri::command]
+fn binary_remove(name: &str, state: tauri::State<AppState>) -> Result<(), String> {
+    downloads::remove(name, &state.resources_dir)
+}
+
+#[tauri::command]
+fn binary_list() -> Vec<String> {
+    downloads::list_manifest_entries()
+}
+
+#[tauri::command]
 fn php_catalog(state: tauri::State<AppState>) -> Vec<downloads::PhpCatalogEntry> {
     downloads::php_catalog(&state.resources_dir)
 }
@@ -880,6 +890,8 @@ pub fn run() {
             editor_open,
             binary_installed,
             binary_download,
+            binary_remove,
+            binary_list,
             php_catalog,
             php_install,
             git_available,

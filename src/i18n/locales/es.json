@@ -62,6 +62,16 @@
       "mysqlHint": "Servidor MySQL activo. Cambiar detiene el actual y arranca el seleccionado. Los directorios de datos son independientes por versión.",
       "mysqlSwitching": "Cambiando MySQL…",
       "download": " — descargar"
+    },
+    "versions": {
+      "title": "Componentes instalados",
+      "hint": "Cada binario que conoce la app. Instala o elimina para gestionar el uso de disco. Eliminar el MySQL activo o el PHP por defecto detendrá los servicios.",
+      "install": "Instalar",
+      "installing": "Instalando…",
+      "remove": "Eliminar",
+      "removing": "Eliminando…",
+      "installed": "Instalado",
+      "confirmRemove": "¿Eliminar {{name}}? Se libera disco y el servicio no podrá arrancar hasta reinstalarlo."
     }
   },
   "updateBanner": {

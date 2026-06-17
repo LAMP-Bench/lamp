@@ -62,6 +62,16 @@
       "mysqlHint": "Active MySQL server. Switching stops the current one and starts the picked version. Data directories are kept separate per version.",
       "mysqlSwitching": "Switching MySQL…",
       "download": " — download"
+    },
+    "versions": {
+      "title": "Installed components",
+      "hint": "Every binary the app knows about. Install or remove to manage disk usage. Removing the active MySQL or default PHP will stop services.",
+      "install": "Install",
+      "installing": "Installing…",
+      "remove": "Remove",
+      "removing": "Removing…",
+      "installed": "Installed",
+      "confirmRemove": "Remove {{name}}? Disk is freed and the service can't start until re-installed."
     }
   },
   "updateBanner": {

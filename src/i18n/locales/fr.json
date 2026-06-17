@@ -62,6 +62,16 @@
       "mysqlHint": "Serveur MySQL actif. Changer arrête le serveur actuel et démarre celui choisi. Les répertoires de données sont séparés par version.",
       "mysqlSwitching": "Changement de MySQL…",
       "download": " — télécharger"
+    },
+    "versions": {
+      "title": "Composants installés",
+      "hint": "Tous les binaires connus de l'app. Installez ou supprimez pour gérer l'espace disque. Supprimer le MySQL actif ou le PHP par défaut arrêtera les services.",
+      "install": "Installer",
+      "installing": "Installation…",
+      "remove": "Supprimer",
+      "removing": "Suppression…",
+      "installed": "Installé",
+      "confirmRemove": "Supprimer {{name}} ? L'espace disque est libéré et le service ne pourra pas démarrer tant qu'il n'est pas réinstallé."
     }
   },
   "updateBanner": {
