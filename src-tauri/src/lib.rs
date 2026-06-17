@@ -755,6 +755,10 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        // Persists main-window size + position to a JSON file under the OS
+        // app-data dir, restoring it on next launch. Editor child windows
+        // (label `editor-*`) opt out via the per-window builder when needed.
+        .plugin(tauri_plugin_window_state::Builder::new().build())
         .setup(|app| {
             let resources = resources_root(&app.handle());
             let runtime = runtime_root(&app.handle())
