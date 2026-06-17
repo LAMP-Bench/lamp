@@ -104,7 +104,7 @@ export function Sidebar({
         </div>
       </div>
 
-      <Group label={t("nav.settings")} defaultOpen>
+      <Group label={t("nav.navigation")} defaultOpen>
         {NAV_ITEMS.map((item) => {
           const isActive = active === item.id;
           return (

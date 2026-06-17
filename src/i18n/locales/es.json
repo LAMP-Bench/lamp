@@ -19,6 +19,7 @@
     "config": "Configuración",
     "logs": "Logs",
     "settings": "Ajustes",
+    "navigation": "Navegación",
     "servers": "Servidores y servicios"
   },
   "topbar": {
