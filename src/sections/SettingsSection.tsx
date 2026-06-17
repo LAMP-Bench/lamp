@@ -16,6 +16,7 @@ import {
 } from "react-icons/fi";
 import { SiPhp, SiMysql } from "react-icons/si";
 import { LANGUAGES } from "../i18n";
+import { useConfirm } from "../components/Toast";
 import type { PhpCatalogEntry } from "../types";
 
 type UpdateState =
@@ -218,6 +219,7 @@ function ServicesRows() {
 
 function VersionsRows() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const [names, setNames] = useState<string[]>([]);
   const [installed, setInstalled] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState<string | null>(null);
@@ -258,7 +260,12 @@ function VersionsRows() {
   }
 
   async function remove(name: string) {
-    if (!confirm(t("settings.versions.confirmRemove", { name }))) return;
+    const ok = await confirm({
+      message: t("settings.versions.confirmRemove", { name }),
+      confirmLabel: t("settings.versions.remove"),
+      tone: "danger",
+    });
+    if (!ok) return;
     setError(null);
     setBusy(name);
     try {

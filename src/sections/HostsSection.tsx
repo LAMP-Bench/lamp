@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { useConfirm, useToast } from "../components/Toast";
 import {
   FiPlus,
   FiMinus,
@@ -513,6 +514,8 @@ function Field({
 
 function SnapshotsTab({ host }: { host: Host }) {
   const { t } = useTranslation();
+  const toast = useToast();
+  const confirm = useConfirm();
   const [list, setList] = useState<Snapshot[]>([]);
   const [label, setLabel] = useState("");
   const [dbName, setDbName] = useState("");
@@ -560,12 +563,17 @@ function SnapshotsTab({ host }: { host: Host }) {
     const warning = hasDb
       ? t("hosts.snapshots.confirmRestoreDb")
       : t("hosts.snapshots.confirmRestoreFiles");
-    if (!confirm(warning)) return;
+    const ok = await confirm({
+      message: warning,
+      confirmLabel: t("hosts.snapshots.restore"),
+      tone: "danger",
+    });
+    if (!ok) return;
     setBusy(true);
     setError(null);
     try {
       await invoke("snapshot_restore", { id });
-      alert(t("hosts.snapshots.restored"));
+      toast("success", t("hosts.snapshots.restored"));
     } catch (e) {
       setError(String(e));
     } finally {
@@ -574,7 +582,12 @@ function SnapshotsTab({ host }: { host: Host }) {
   }
 
   async function remove(id: number) {
-    if (!confirm(t("hosts.snapshots.confirmDelete"))) return;
+    const ok = await confirm({
+      message: t("hosts.snapshots.confirmDelete"),
+      confirmLabel: t("hosts.snapshots.deleteSnap"),
+      tone: "danger",
+    });
+    if (!ok) return;
     setBusy(true);
     setError(null);
     try {

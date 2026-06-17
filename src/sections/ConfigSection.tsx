@@ -3,9 +3,11 @@ import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { FiEdit3, FiFileText } from "react-icons/fi";
 import { SiPhp, SiApache, SiNginx, SiMysql } from "react-icons/si";
+import { useToast } from "../components/Toast";
 
 export function ConfigSection() {
   const { t } = useTranslation();
+  const toast = useToast();
   const [versions, setVersions] = useState<string[]>([]);
   const [htdocs, setHtdocs] = useState<string>("");
 
@@ -22,7 +24,7 @@ export function ConfigSection() {
     try {
       await invoke("editor_open", { path });
     } catch (e) {
-      alert(t("config.openError", { message: String(e) }));
+      toast("error", t("config.openError", { message: String(e) }));
     }
   }
 

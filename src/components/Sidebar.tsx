@@ -17,6 +17,7 @@ import { SiApache, SiNginx, SiMysql, SiRedis } from "react-icons/si";
 import { FiMail } from "react-icons/fi";
 import { LuLamp } from "react-icons/lu";
 import { Toggle } from "./Toggle";
+import { useToast } from "./Toast";
 import { useService } from "../useService";
 import type { SectionId, ServiceName } from "../types";
 
@@ -181,6 +182,7 @@ function Group({
 
 function ServiceRow({ spec }: { spec: SvcSpec }) {
   const { status, busy, toggle } = useService(spec.name);
+  const toast = useToast();
   const running = status?.kind === "running";
   const Icon = spec.icon;
 
@@ -204,7 +206,7 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
       await invoke("binary_download", { name: spec.binaryName });
       setInstalled(true);
     } catch (e) {
-      alert(`Install failed: ${e}`);
+      toast("error", `Install failed: ${e}`);
     } finally {
       setInstalling(false);
     }
