@@ -52,6 +52,16 @@
       "github": "GitHub",
       "license": "Licencia",
       "openRepo": "Abrir repositorio"
+    },
+    "services": {
+      "title": "Servicios",
+      "phpVersion": "Versión de PHP por defecto",
+      "phpHint": "Los hosts nuevos usan esta versión de PHP. Elegir una no instalada la descargará ahora.",
+      "phpInstalling": "Descargando PHP {{version}}…",
+      "mysqlVersion": "Versión de MySQL",
+      "mysqlHint": "Servidor MySQL activo. Cambiar detiene el actual y arranca el seleccionado. Los directorios de datos son independientes por versión.",
+      "mysqlSwitching": "Cambiando MySQL…",
+      "download": " — descargar"
     }
   },
   "updateBanner": {

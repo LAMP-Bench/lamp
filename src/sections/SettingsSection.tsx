@@ -12,7 +12,9 @@ import {
   FiExternalLink,
   FiCheck,
 } from "react-icons/fi";
+import { SiPhp, SiMysql } from "react-icons/si";
 import { LANGUAGES } from "../i18n";
+import type { PhpCatalogEntry } from "../types";
 
 type UpdateState =
   | { kind: "idle" }
@@ -29,6 +31,10 @@ export function SettingsSection() {
       <div className="p-6 max-w-3xl space-y-6">
         <Card title={t("settings.general.title")}>
           <LanguageRow />
+        </Card>
+
+        <Card title={t("settings.services.title")}>
+          <ServicesRows />
         </Card>
 
         <Card title={t("settings.updates.title")}>
@@ -78,6 +84,129 @@ function Row({
       </div>
       <div className="shrink-0">{children}</div>
     </div>
+  );
+}
+
+function ServicesRows() {
+  const { t } = useTranslation();
+  const [catalog, setCatalog] = useState<PhpCatalogEntry[]>([]);
+  const [phpDefault, setPhpDefault] = useState<string>("");
+  const [mysqlList, setMysqlList] = useState<string[]>([]);
+  const [mysqlActive, setMysqlActive] = useState<string>("");
+  const [phpBusy, setPhpBusy] = useState<string | null>(null);
+  const [mysqlBusy, setMysqlBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  async function refresh() {
+    try {
+      const [cat, versions, active] = await Promise.all([
+        invoke<PhpCatalogEntry[]>("php_catalog"),
+        invoke<string[]>("mysql_versions"),
+        invoke<string>("mysql_active_version"),
+      ]);
+      setCatalog(cat);
+      setMysqlList(versions);
+      setMysqlActive(active);
+      // Default PHP isn't a stored value yet — pick the highest installed one
+      // as a best-effort display value. Adding a persistent setting is a
+      // follow-up; the picker still acts as a one-shot installer.
+      const installed = cat.filter((c) => c.installed);
+      setPhpDefault(installed[installed.length - 1]?.version ?? "");
+    } catch (e) {
+      setError(String(e));
+    }
+  }
+
+  async function pickPhp(version: string) {
+    setError(null);
+    const entry = catalog.find((c) => c.version === version);
+    if (!entry) return;
+    if (!entry.installed) {
+      setPhpBusy(version);
+      try {
+        await invoke("php_install", { version });
+      } catch (e) {
+        setError(String(e));
+        setPhpBusy(null);
+        return;
+      }
+      setPhpBusy(null);
+    }
+    setPhpDefault(version);
+    await refresh();
+  }
+
+  async function pickMysql(version: string) {
+    if (version === mysqlActive) return;
+    setError(null);
+    setMysqlBusy(true);
+    try {
+      await invoke("mysql_set_version", { version });
+      setMysqlActive(version);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setMysqlBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <Row
+        icon={<SiPhp />}
+        label={t("settings.services.phpVersion")}
+        hint={
+          phpBusy
+            ? t("settings.services.phpInstalling", { version: phpBusy })
+            : t("settings.services.phpHint")
+        }
+      >
+        <select
+          value={phpDefault}
+          onChange={(e) => pickPhp(e.target.value)}
+          disabled={phpBusy !== null}
+          className="px-3 py-1.5 rounded border border-neutral-300 text-sm bg-white focus:outline-none focus:border-sky-500 disabled:opacity-50"
+        >
+          {catalog.map((c) => (
+            <option key={c.version} value={c.version}>
+              {c.version}
+              {c.installed ? "" : t("settings.services.download")}
+            </option>
+          ))}
+        </select>
+      </Row>
+      <Row
+        icon={<SiMysql />}
+        label={t("settings.services.mysqlVersion")}
+        hint={
+          mysqlBusy
+            ? t("settings.services.mysqlSwitching")
+            : t("settings.services.mysqlHint")
+        }
+      >
+        <select
+          value={mysqlActive}
+          onChange={(e) => pickMysql(e.target.value)}
+          disabled={mysqlBusy || mysqlList.length === 0}
+          className="px-3 py-1.5 rounded border border-neutral-300 text-sm bg-white focus:outline-none focus:border-sky-500 disabled:opacity-50"
+        >
+          {mysqlList.map((v) => (
+            <option key={v} value={v}>
+              {v}
+            </option>
+          ))}
+        </select>
+      </Row>
+      {error && (
+        <div className="px-4 py-2 text-xs text-red-600 font-mono break-words bg-red-50">
+          {error}
+        </div>
+      )}
+    </>
   );
 }
 
