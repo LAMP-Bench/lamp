@@ -803,10 +803,10 @@ pub fn run() {
         // (label `editor-*`) opt out via the per-window builder when needed.
         .plugin(tauri_plugin_window_state::Builder::new().build())
         .setup(|app| {
-            let resources = resources_root(&app.handle());
-            let runtime = runtime_root(&app.handle())
+            let resources = resources_root(app.handle());
+            let runtime = runtime_root(app.handle())
                 .map_err(|e| -> Box<dyn std::error::Error> { e.into() })?;
-            let htdocs = htdocs_root(&app.handle())
+            let htdocs = htdocs_root(app.handle())
                 .map_err(|e| -> Box<dyn std::error::Error> { e.into() })?;
             seed_default_index(&htdocs);
 

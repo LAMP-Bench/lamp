@@ -49,8 +49,53 @@ jobs:
               core.notice('Tag alpha-testing did not exist or could not be deleted.');
             }
 
+  lint:
+    # Cheap, fast gates that catch the usual breakage before we burn 20+
+    # minutes on a three-OS native build matrix. TypeScript typecheck +
+    # Rust clippy with warnings denied. Runs in parallel with prepare.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libsoup-3.0-dev \
+            libxdo-dev \
+            librsvg2-dev \
+            libayatana-appindicator3-dev
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install Rust + clippy
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ./src-tauri -> target
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript typecheck
+        run: pnpm exec tsc --noEmit
+
+      - name: Rust clippy (warnings denied)
+        run: cargo clippy --manifest-path src-tauri/Cargo.toml --no-deps -- -D warnings
+
   build:
-    needs: prepare
+    needs: [prepare, lint]
     strategy:
       # We want everyone's artifacts before publishing, so a failing
       # platform shouldn't cancel its siblings — they still upload to the

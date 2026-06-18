@@ -31,6 +31,7 @@ pub struct ApacheService {
 }
 
 impl ApacheService {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         apache_dir: PathBuf,
         pma_dir: PathBuf,
@@ -259,6 +260,7 @@ impl Service for ApacheService {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn build_conf(
     apache_dir: &Path,
     pma_dir: &Path,

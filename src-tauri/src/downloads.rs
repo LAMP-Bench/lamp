@@ -69,8 +69,8 @@ pub fn php_catalog(resources_dir: &Path) -> Vec<PhpCatalogEntry> {
     };
     let mut out: Vec<PhpCatalogEntry> = manifest
         .entries
-        .iter()
-        .filter_map(|(name, _)| {
+        .keys()
+        .filter_map(|name| {
             name.strip_prefix("php-").map(|v| PhpCatalogEntry {
                 version: v.to_string(),
                 installed: is_installed(name, resources_dir),
@@ -230,7 +230,7 @@ pub fn download(
     let content_len: Option<u64> = resp
         .header("Content-Length")
         .and_then(|s| s.parse::<u64>().ok());
-    if let Some(cb) = progress.as_deref_mut() {
+    if let Some(cb) = progress.as_mut() {
         cb(0, content_len);
     }
     let mut reader = resp.into_reader();
@@ -243,7 +243,7 @@ pub fn download(
             break;
         }
         buf.extend_from_slice(&chunk[..n]);
-        if let Some(cb) = progress.as_deref_mut() {
+        if let Some(cb) = progress.as_mut() {
             // Throttle to ~64 KB granularity so we don't flood the IPC bridge
             // with millions of tiny events for a fast download.
             if buf.len() as u64 - last_reported >= 65536 {
@@ -252,7 +252,7 @@ pub fn download(
             }
         }
     }
-    if let Some(cb) = progress.as_deref_mut() {
+    if let Some(cb) = progress.as_mut() {
         cb(buf.len() as u64, content_len);
     }
 
