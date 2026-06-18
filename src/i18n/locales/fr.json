@@ -199,9 +199,27 @@
       "nginx": "Nginx",
       "ssl": "SSL",
       "snapshots": "Snapshots",
-      "extras": "Extras"
+      "deploy": "Déploiement"
     },
     "tabDisabled": "Arrive dans une phase ultérieure",
+    "deploy": {
+      "intro": "Envoie le document root de cet hôte vers un serveur distant. Les réglages sont enregistrés par hôte. Le mot de passe est stocké en clair dans la base locale.",
+      "protocol": "Protocole",
+      "host": "Hôte",
+      "hostPlaceholder": "ftp.exemple.com",
+      "port": "Port",
+      "user": "Utilisateur",
+      "password": "Mot de passe",
+      "remoteDir": "Dossier distant",
+      "remoteDirPlaceholder": "/public_html",
+      "save": "Enregistrer le profil",
+      "saved": "Profil enregistré.",
+      "deployNow": "Déployer maintenant",
+      "deploying": "Envoi…",
+      "result": "{{files}} fichiers · {{bytes}} envoyés",
+      "withErrors": "{{files}} fichiers envoyés, {{errors}} erreurs (voir ci-dessous)",
+      "ftpsNote": "FTPS chiffre la connexion. Le FTP simple envoie les identifiants en clair."
+    },
     "saved": "Enregistré.",
     "save": "Enregistrer",
     "saving": "Enregistrement…",

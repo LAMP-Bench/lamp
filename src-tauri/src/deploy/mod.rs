@@ -6,9 +6,10 @@
 //! still only get FTPS at best, which `suppaftp` handles via the same API
 //! when the feature is enabled.
 
+use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use suppaftp::FtpStream;
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -16,6 +17,67 @@ pub struct DeployReport {
     pub files_uploaded: usize,
     pub bytes_uploaded: u64,
     pub errors: Vec<String>,
+}
+
+/// Stored per-host deploy target. One row per host (host_id is the PK).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DeployProfile {
+    pub host_id: i64,
+    pub protocol: String,
+    pub ftp_host: String,
+    pub ftp_port: u16,
+    pub ftp_user: String,
+    pub ftp_password: String,
+    pub remote_dir: String,
+}
+
+pub fn get_profile(conn: &Connection, host_id: i64) -> Result<Option<DeployProfile>, String> {
+    let mut stmt = conn
+        .prepare(
+            "SELECT host_id, protocol, ftp_host, ftp_port, ftp_user, ftp_password, remote_dir \
+             FROM deploy_profiles WHERE host_id = ?1",
+        )
+        .map_err(|e| e.to_string())?;
+    let mut rows = stmt
+        .query_map(params![host_id], |row| {
+            Ok(DeployProfile {
+                host_id: row.get(0)?,
+                protocol: row.get(1)?,
+                ftp_host: row.get(2)?,
+                ftp_port: row.get::<_, i64>(3)? as u16,
+                ftp_user: row.get(4)?,
+                ftp_password: row.get(5)?,
+                remote_dir: row.get(6)?,
+            })
+        })
+        .map_err(|e| e.to_string())?;
+    match rows.next() {
+        Some(r) => Ok(Some(r.map_err(|e| e.to_string())?)),
+        None => Ok(None),
+    }
+}
+
+pub fn save_profile(conn: &Connection, p: &DeployProfile) -> Result<(), String> {
+    conn.execute(
+        "INSERT INTO deploy_profiles \
+            (host_id, protocol, ftp_host, ftp_port, ftp_user, ftp_password, remote_dir) \
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7) \
+         ON CONFLICT(host_id) DO UPDATE SET \
+            protocol=excluded.protocol, ftp_host=excluded.ftp_host, \
+            ftp_port=excluded.ftp_port, ftp_user=excluded.ftp_user, \
+            ftp_password=excluded.ftp_password, remote_dir=excluded.remote_dir",
+        params![
+            p.host_id,
+            p.protocol,
+            p.ftp_host,
+            p.ftp_port as i64,
+            p.ftp_user,
+            p.ftp_password,
+            p.remote_dir,
+        ],
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(())
 }
 
 pub fn ftp_upload_folder(
@@ -119,9 +181,4 @@ fn normalise_remote(p: &str) -> String {
     } else {
         format!("/{trimmed}")
     }
-}
-
-#[allow(dead_code)]
-fn _unused_path_used() -> PathBuf {
-    PathBuf::new()
 }

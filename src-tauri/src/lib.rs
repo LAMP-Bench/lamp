@@ -682,6 +682,24 @@ fn ftp_upload(
 }
 
 #[tauri::command]
+fn deploy_profile_get(
+    host_id: i64,
+    state: tauri::State<AppState>,
+) -> Result<Option<deploy::DeployProfile>, String> {
+    let conn = state.db.lock().unwrap();
+    deploy::get_profile(&conn, host_id)
+}
+
+#[tauri::command]
+fn deploy_profile_save(
+    profile: deploy::DeployProfile,
+    state: tauri::State<AppState>,
+) -> Result<(), String> {
+    let conn = state.db.lock().unwrap();
+    deploy::save_profile(&conn, &profile)
+}
+
+#[tauri::command]
 fn compress_images(
     folder: String,
     jpeg_quality: u8,
@@ -969,6 +987,8 @@ pub fn run() {
             compress_images,
             current_platform,
             ftp_upload,
+            deploy_profile_get,
+            deploy_profile_save,
             editor_open,
             binary_installed,
             binary_download,

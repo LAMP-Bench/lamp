@@ -199,9 +199,27 @@
       "nginx": "Nginx",
       "ssl": "SSL",
       "snapshots": "Snapshots",
-      "extras": "Extras"
+      "deploy": "Deploy"
     },
     "tabDisabled": "Comes in a later phase",
+    "deploy": {
+      "intro": "Upload this host's document root to a remote server. Settings are saved per host. The password is stored in plain text in the local app database.",
+      "protocol": "Protocol",
+      "host": "Host",
+      "hostPlaceholder": "ftp.example.com",
+      "port": "Port",
+      "user": "User",
+      "password": "Password",
+      "remoteDir": "Remote folder",
+      "remoteDirPlaceholder": "/public_html",
+      "save": "Save profile",
+      "saved": "Profile saved.",
+      "deployNow": "Deploy now",
+      "deploying": "Uploading…",
+      "result": "{{files}} files · {{bytes}} uploaded",
+      "withErrors": "{{files}} files uploaded, {{errors}} errors (see below)",
+      "ftpsNote": "FTPS encrypts the connection. Plain FTP sends credentials in the clear."
+    },
     "saved": "Saved.",
     "save": "Save",
     "saving": "Saving…",

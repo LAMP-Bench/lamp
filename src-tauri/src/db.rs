@@ -19,6 +19,21 @@ CREATE TABLE IF NOT EXISTS snapshots (
     created_at  TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (host_id) REFERENCES hosts(id) ON DELETE CASCADE
 );
+
+-- One stored deploy target per host so the FTP form doesn't have to be
+-- retyped on every upload. Password is stored in plaintext — acceptable
+-- for a local-only dev tool whose entire install dir is already
+-- user-readable; documented as such in the UI.
+CREATE TABLE IF NOT EXISTS deploy_profiles (
+    host_id      INTEGER PRIMARY KEY,
+    protocol     TEXT    NOT NULL DEFAULT 'ftp',
+    ftp_host     TEXT    NOT NULL DEFAULT '',
+    ftp_port     INTEGER NOT NULL DEFAULT 21,
+    ftp_user     TEXT    NOT NULL DEFAULT '',
+    ftp_password TEXT    NOT NULL DEFAULT '',
+    remote_dir   TEXT    NOT NULL DEFAULT '/',
+    FOREIGN KEY (host_id) REFERENCES hosts(id) ON DELETE CASCADE
+);
 ";
 
 pub fn open(path: &Path) -> Result<Connection, rusqlite::Error> {

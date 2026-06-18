@@ -199,9 +199,27 @@
       "nginx": "Nginx",
       "ssl": "SSL",
       "snapshots": "Snapshots",
-      "extras": "Extras"
+      "deploy": "Despliegue"
     },
     "tabDisabled": "Llega en una fase posterior",
+    "deploy": {
+      "intro": "Sube el document root de este host a un servidor remoto. La configuración se guarda por host. La contraseña se almacena en texto plano en la base de datos local.",
+      "protocol": "Protocolo",
+      "host": "Host",
+      "hostPlaceholder": "ftp.ejemplo.com",
+      "port": "Puerto",
+      "user": "Usuario",
+      "password": "Contraseña",
+      "remoteDir": "Carpeta remota",
+      "remoteDirPlaceholder": "/public_html",
+      "save": "Guardar perfil",
+      "saved": "Perfil guardado.",
+      "deployNow": "Desplegar ahora",
+      "deploying": "Subiendo…",
+      "result": "{{files}} archivos · {{bytes}} subidos",
+      "withErrors": "{{files}} archivos subidos, {{errors}} errores (ver abajo)",
+      "ftpsNote": "FTPS cifra la conexión. El FTP normal envía las credenciales en claro."
+    },
     "saved": "Guardado.",
     "save": "Guardar",
     "saving": "Guardando…",

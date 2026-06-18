@@ -34,6 +34,22 @@ export type PhpCatalogEntry = {
   installed: boolean;
 };
 
+export type DeployProfile = {
+  host_id: number;
+  protocol: string;
+  ftp_host: string;
+  ftp_port: number;
+  ftp_user: string;
+  ftp_password: string;
+  remote_dir: string;
+};
+
+export type DeployReport = {
+  files_uploaded: number;
+  bytes_uploaded: number;
+  errors: string[];
+};
+
 export type Snapshot = {
   id: number;
   host_id: number;

@@ -16,10 +16,11 @@ import {
   FiRefreshCw,
   FiTrash2,
   FiDatabase,
+  FiUploadCloud,
 } from "react-icons/fi";
-import type { Host, PhpCatalogEntry, Snapshot } from "../types";
+import type { Host, PhpCatalogEntry, Snapshot, DeployProfile, DeployReport } from "../types";
 
-type Tab = "general" | "apache" | "nginx" | "ssl" | "snapshots" | "extras";
+type Tab = "general" | "apache" | "nginx" | "ssl" | "snapshots" | "deploy";
 
 export function HostsSection() {
   const [hosts, setHosts] = useState<Host[]>([]);
@@ -266,7 +267,7 @@ function HostDetail({
     { id: "nginx", label: t("hosts.tab.nginx"), enabled: true },
     { id: "ssl", label: t("hosts.tab.ssl"), enabled: true },
     { id: "snapshots", label: t("hosts.tab.snapshots"), enabled: true },
-    { id: "extras", label: t("hosts.tab.extras"), enabled: false },
+    { id: "deploy", label: t("hosts.tab.deploy"), enabled: true },
   ];
 
   return (
@@ -316,6 +317,7 @@ function HostDetail({
         )}
         {tab === "ssl" && <SslTab host={host} />}
         {tab === "snapshots" && <SnapshotsTab host={host} />}
+        {tab === "deploy" && <DeployTab host={host} />}
       </div>
 
       <div className="border-t border-neutral-200 px-6 py-2.5 flex items-center gap-3 bg-neutral-50">
@@ -714,6 +716,191 @@ function SnapshotsTab({ host }: { host: Host }) {
         </div>
       )}
 
+      {error && (
+        <div className="text-xs text-red-600 font-mono break-words bg-red-50 border border-red-200 rounded p-2">
+          {error}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DeployTab({ host }: { host: Host }) {
+  const { t } = useTranslation();
+  const toast = useToast();
+  const [profile, setProfile] = useState<DeployProfile>({
+    host_id: host.id,
+    protocol: "ftp",
+    ftp_host: "",
+    ftp_port: 21,
+    ftp_user: "",
+    ftp_password: "",
+    remote_dir: "/",
+  });
+  const [busy, setBusy] = useState(false);
+  const [deploying, setDeploying] = useState(false);
+  const [report, setReport] = useState<DeployReport | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    invoke<DeployProfile | null>("deploy_profile_get", { hostId: host.id })
+      .then((p) => {
+        if (p) setProfile(p);
+      })
+      .catch(() => {});
+  }, [host.id]);
+
+  async function save() {
+    setBusy(true);
+    setError(null);
+    try {
+      await invoke("deploy_profile_save", {
+        profile: { ...profile, host_id: host.id },
+      });
+      toast("success", t("hosts.deploy.saved"));
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deploy() {
+    setDeploying(true);
+    setError(null);
+    setReport(null);
+    try {
+      await invoke("deploy_profile_save", {
+        profile: { ...profile, host_id: host.id },
+      });
+      const r = await invoke<DeployReport>("ftp_upload", {
+        host: profile.ftp_host,
+        port: profile.ftp_port,
+        user: profile.ftp_user,
+        password: profile.ftp_password,
+        remoteDir: profile.remote_dir,
+        localDir: host.docroot,
+      });
+      setReport(r);
+      if (r.errors.length === 0) {
+        toast(
+          "success",
+          t("hosts.deploy.result", {
+            files: r.files_uploaded,
+            bytes: formatSize(r.bytes_uploaded),
+          })
+        );
+      } else {
+        toast(
+          "error",
+          t("hosts.deploy.withErrors", {
+            files: r.files_uploaded,
+            errors: r.errors.length,
+          })
+        );
+      }
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setDeploying(false);
+    }
+  }
+
+  const canDeploy =
+    !deploying && profile.ftp_host.trim() && profile.ftp_user.trim();
+
+  return (
+    <div className="max-w-2xl space-y-4 text-sm">
+      <p className="text-xs text-neutral-500">{t("hosts.deploy.intro")}</p>
+
+      <Field label={t("hosts.deploy.protocol")}>
+        <select
+          value={profile.protocol}
+          onChange={(e) => setProfile({ ...profile, protocol: e.target.value })}
+          className="px-3 py-1.5 rounded border border-neutral-300 bg-white focus:outline-none focus:border-sky-500"
+        >
+          <option value="ftp">FTP</option>
+          <option value="ftps">FTPS</option>
+        </select>
+        <span className="text-xs text-neutral-500">{t("hosts.deploy.ftpsNote")}</span>
+      </Field>
+
+      <Field label={t("hosts.deploy.host")}>
+        <input
+          value={profile.ftp_host}
+          onChange={(e) => setProfile({ ...profile, ftp_host: e.target.value })}
+          placeholder={t("hosts.deploy.hostPlaceholder")}
+          className="flex-1 min-w-0 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
+        />
+      </Field>
+
+      <Field label={t("hosts.deploy.port")}>
+        <input
+          type="number"
+          value={profile.ftp_port}
+          onChange={(e) =>
+            setProfile({ ...profile, ftp_port: Number(e.target.value) || 21 })
+          }
+          className="w-28 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
+        />
+      </Field>
+
+      <Field label={t("hosts.deploy.user")}>
+        <input
+          value={profile.ftp_user}
+          onChange={(e) => setProfile({ ...profile, ftp_user: e.target.value })}
+          className="w-64 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
+        />
+      </Field>
+
+      <Field label={t("hosts.deploy.password")}>
+        <input
+          type="password"
+          value={profile.ftp_password}
+          onChange={(e) =>
+            setProfile({ ...profile, ftp_password: e.target.value })
+          }
+          className="w-64 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
+        />
+      </Field>
+
+      <Field label={t("hosts.deploy.remoteDir")}>
+        <input
+          value={profile.remote_dir}
+          onChange={(e) =>
+            setProfile({ ...profile, remote_dir: e.target.value })
+          }
+          placeholder={t("hosts.deploy.remoteDirPlaceholder")}
+          className="flex-1 min-w-0 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
+        />
+      </Field>
+
+      <div className="flex items-center gap-2 pt-1">
+        <button
+          onClick={save}
+          disabled={busy}
+          className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5 disabled:opacity-50"
+        >
+          <FiSave />
+          {t("hosts.deploy.save")}
+        </button>
+        <button
+          onClick={deploy}
+          disabled={!canDeploy}
+          className="px-4 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium flex items-center gap-1.5 disabled:opacity-50"
+        >
+          <FiUploadCloud />
+          {deploying ? t("hosts.deploy.deploying") : t("hosts.deploy.deployNow")}
+        </button>
+      </div>
+
+      {report && report.errors.length > 0 && (
+        <div className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded p-2 font-mono max-h-40 overflow-auto">
+          {report.errors.map((e, i) => (
+            <div key={i}>{e}</div>
+          ))}
+        </div>
+      )}
       {error && (
         <div className="text-xs text-red-600 font-mono break-words bg-red-50 border border-red-200 rounded p-2">
           {error}
