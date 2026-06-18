@@ -34,6 +34,10 @@ impl MysqlService {
         }
     }
 
+    pub fn set_port(&mut self, port: u16) {
+        self.port = port;
+    }
+
     pub fn versions(&self) -> Vec<String> {
         self.installs.iter().map(|i| i.version.clone()).collect()
     }

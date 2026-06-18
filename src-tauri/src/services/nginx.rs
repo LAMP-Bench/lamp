@@ -19,6 +19,8 @@ pub struct NginxService {
     ca: LocalCa,
     php_installs: Vec<PhpInstall>,
     default_php: String,
+    http_port: u16,
+    ssl_port: u16,
     hosts: Vec<Host>,
     nginx_child: Option<Child>,
     php_pools: Vec<Child>,
@@ -40,6 +42,8 @@ impl NginxService {
             ca,
             php_installs,
             default_php,
+            http_port: HTTP_PORT,
+            ssl_port: SSL_PORT,
             hosts: Vec::new(),
             nginx_child: None,
             php_pools: Vec::new(),
@@ -48,6 +52,11 @@ impl NginxService {
 
     pub fn set_hosts(&mut self, hosts: Vec<Host>) {
         self.hosts = hosts;
+    }
+
+    pub fn set_ports(&mut self, http: u16, https: u16) {
+        self.http_port = http;
+        self.ssl_port = https;
     }
 
     pub fn set_php_installs(&mut self, installs: Vec<PhpInstall>) {
@@ -111,6 +120,8 @@ impl NginxService {
             &self.ssl_dir,
             &self.hosts,
             self.default_php_port(),
+            self.http_port,
+            self.ssl_port,
             |v| self.php_port(v),
         );
         fs::write(&conf_path, conf).map_err(|e| e.to_string())?;
@@ -198,12 +209,15 @@ impl Service for NginxService {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn build_conf(
     nginx_dir: &Path,
     runtime_dir: &Path,
     ssl_dir: &Path,
     hosts: &[Host],
     default_php_port: u16,
+    http_port: u16,
+    ssl_port: u16,
     php_port_for: impl Fn(&str) -> u16,
 ) -> String {
     let nginx_conf = posix(&nginx_dir.join("conf"));
@@ -239,8 +253,8 @@ fn build_conf(
     // Default vhost (HTTP + HTTPS) — uses default PHP version
     out.push_str(&format!(
         "\x20   server {{\n\
-         \x20       listen {HTTP_PORT};\n\
-         \x20       listen {SSL_PORT} ssl;\n\
+         \x20       listen {http_port};\n\
+         \x20       listen {ssl_port} ssl;\n\
          \x20       ssl_certificate \"{ssl}/localhost.crt\";\n\
          \x20       ssl_certificate_key \"{ssl}/localhost.key\";\n\
          \x20       server_name localhost;\n\
@@ -264,8 +278,8 @@ fn build_conf(
         let extras = render_nginx_extras(&host.nginx_extra);
         out.push_str(&format!(
             "\x20   server {{\n\
-             \x20       listen {HTTP_PORT};\n\
-             \x20       listen {SSL_PORT} ssl;\n\
+             \x20       listen {http_port};\n\
+             \x20       listen {ssl_port} ssl;\n\
              \x20       ssl_certificate \"{ssl}/{name}.crt\";\n\
              \x20       ssl_certificate_key \"{ssl}/{name}.key\";\n\
              \x20       server_name {name};\n\

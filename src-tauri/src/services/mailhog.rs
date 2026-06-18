@@ -9,6 +9,8 @@ pub const UI_PORT: u16 = 8025;
 pub struct MailhogService {
     mailhog_dir: PathBuf,
     runtime_dir: PathBuf,
+    ui_port: u16,
+    smtp_port: u16,
     child: Option<Child>,
 }
 
@@ -17,8 +19,16 @@ impl MailhogService {
         Self {
             mailhog_dir,
             runtime_dir,
+            ui_port: UI_PORT,
+            smtp_port: SMTP_PORT,
             child: None,
         }
+    }
+
+    /// `ui` is the primary port (web UI + API), `smtp` the SMTP listener.
+    pub fn set_ports(&mut self, ui: u16, smtp: u16) {
+        self.ui_port = ui;
+        self.smtp_port = smtp;
     }
 }
 
@@ -50,11 +60,11 @@ impl Service for MailhogService {
 
         let child = hidden_command(&bin)
             .arg("-smtp-bind-addr")
-            .arg(format!("127.0.0.1:{SMTP_PORT}"))
+            .arg(format!("127.0.0.1:{}", self.smtp_port))
             .arg("-ui-bind-addr")
-            .arg(format!("127.0.0.1:{UI_PORT}"))
+            .arg(format!("127.0.0.1:{}", self.ui_port))
             .arg("-api-bind-addr")
-            .arg(format!("127.0.0.1:{UI_PORT}"))
+            .arg(format!("127.0.0.1:{}", self.ui_port))
             .arg("-storage")
             .arg("maildir")
             .arg("-maildir-path")

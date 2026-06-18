@@ -182,7 +182,10 @@ function Group({
   );
 }
 
+type PortCfg = { port: number; port2: number; has_secondary: boolean };
+
 function ServiceRow({ spec }: { spec: SvcSpec }) {
+  const { t } = useTranslation();
   const { status, busy, toggle } = useService(spec.name);
   const toast = useToast();
   const running = status?.kind === "running";
@@ -193,6 +196,11 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
     spec.binaryName == null ? true : null
   );
   const [installing, setInstalling] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [cfg, setCfg] = useState<PortCfg | null>(null);
+  const [versions, setVersions] = useState<string[]>([]);
+  const [activeVersion, setActiveVersion] = useState("");
+  const [savedFlash, setSavedFlash] = useState(false);
 
   useEffect(() => {
     if (spec.binaryName == null) return;
@@ -214,33 +222,164 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
     }
   }
 
+  async function openConfig() {
+    if (expanded) {
+      setExpanded(false);
+      return;
+    }
+    setSavedFlash(false);
+    const c = await invoke<PortCfg>("service_ports_get", { name: spec.name }).catch(
+      () => null
+    );
+    setCfg(c);
+    if (spec.name === "mysql") {
+      const [vs, av] = await Promise.all([
+        invoke<string[]>("mysql_versions").catch(() => []),
+        invoke<string>("mysql_active_version").catch(() => ""),
+      ]);
+      setVersions(vs);
+      setActiveVersion(av);
+    }
+    setExpanded(true);
+  }
+
+  async function save() {
+    if (!cfg) return;
+    if (cfg.port < 1 || cfg.port > 65535) {
+      toast("error", t("svcConfig.invalidPort"));
+      return;
+    }
+    try {
+      await invoke("service_ports_set", {
+        name: spec.name,
+        port: cfg.port,
+        port2: cfg.has_secondary ? cfg.port2 : 0,
+      });
+      setSavedFlash(true);
+    } catch (e) {
+      toast("error", String(e));
+    }
+  }
+
+  async function changeVersion(v: string) {
+    try {
+      await invoke("mysql_set_version", { version: v });
+      setActiveVersion(v);
+    } catch (e) {
+      toast("error", String(e));
+    }
+  }
+
   return (
-    <div className="px-4 py-1.5 flex items-center gap-3">
-      <Icon className={`text-[15px] ${spec.iconColor}`} />
-      <div className="flex-1 flex items-center gap-1.5 text-neutral-800">
-        <span>{spec.label}</span>
-        {running && (
-          <span
-            className="size-1.5 rounded-full bg-emerald-500"
-            title="running"
-          />
+    <div>
+      <div className="px-4 py-1.5 flex items-center gap-2">
+        <Icon className={`text-[15px] ${spec.iconColor}`} />
+        <div className="flex-1 flex items-center gap-1.5 text-neutral-800 min-w-0">
+          <span className="truncate">{spec.label}</span>
+          {running && (
+            <span
+              className="size-1.5 rounded-full bg-emerald-500 shrink-0"
+              title="running"
+            />
+          )}
+        </div>
+        {installed && (
+          <button
+            onClick={openConfig}
+            className={`p-1 rounded hover:bg-neutral-200 transition ${
+              expanded ? "text-sky-600" : "text-neutral-400"
+            }`}
+            title={t("svcConfig.configure")}
+          >
+            <FiSettings className="text-[13px]" />
+          </button>
+        )}
+        {installed === null ? (
+          <span className="text-[10px] text-neutral-400 font-mono">…</span>
+        ) : installed ? (
+          <Toggle checked={running} onChange={toggle} disabled={busy} />
+        ) : (
+          <button
+            onClick={install}
+            disabled={installing}
+            className="px-2 py-0.5 rounded text-[11px] font-medium text-sky-700 border border-sky-300 hover:bg-sky-50 disabled:opacity-50 flex items-center gap-1"
+            title="Download this service"
+          >
+            <FiDownload className="text-[10px]" />
+            {installing ? "…" : "Install"}
+          </button>
         )}
       </div>
-      {installed === null ? (
-        <span className="text-[10px] text-neutral-400 font-mono">…</span>
-      ) : installed ? (
-        <Toggle checked={running} onChange={toggle} disabled={busy} />
-      ) : (
-        <button
-          onClick={install}
-          disabled={installing}
-          className="px-2 py-0.5 rounded text-[11px] font-medium text-sky-700 border border-sky-300 hover:bg-sky-50 disabled:opacity-50 flex items-center gap-1"
-          title="Download this service"
-        >
-          <FiDownload className="text-[10px]" />
-          {installing ? "…" : "Install"}
-        </button>
+
+      {expanded && cfg && (
+        <div className="mx-3 mb-2 px-3 py-2 rounded-md bg-neutral-100 border border-neutral-200 space-y-2 text-[11px]">
+          <PortField
+            label={t("svcConfig.port")}
+            value={cfg.port}
+            onChange={(v) => setCfg({ ...cfg, port: v })}
+          />
+          {cfg.has_secondary && (
+            <PortField
+              label={spec.name === "mailhog" ? t("svcConfig.portSmtp") : t("svcConfig.portHttps")}
+              value={cfg.port2}
+              onChange={(v) => setCfg({ ...cfg, port2: v })}
+            />
+          )}
+          {spec.name === "mysql" && versions.length > 1 && (
+            <label className="flex items-center justify-between gap-2">
+              <span className="text-neutral-600">{t("svcConfig.version")}</span>
+              <select
+                value={activeVersion}
+                onChange={(e) => changeVersion(e.target.value)}
+                disabled={running}
+                title={running ? t("svcConfig.stopFirst") : ""}
+                className="px-2 py-0.5 rounded border border-neutral-300 bg-white font-mono disabled:opacity-50"
+              >
+                {versions.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <div className="flex items-center justify-between pt-0.5">
+            <span className="text-neutral-400">
+              {savedFlash ? t("svcConfig.saved") : t("svcConfig.restartHint")}
+            </span>
+            <button
+              onClick={save}
+              className="px-2 py-0.5 rounded bg-sky-600 hover:bg-sky-700 text-white"
+            >
+              {t("svcConfig.save")}
+            </button>
+          </div>
+        </div>
       )}
     </div>
+  );
+}
+
+function PortField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+}) {
+  return (
+    <label className="flex items-center justify-between gap-2">
+      <span className="text-neutral-600">{label}</span>
+      <input
+        type="number"
+        value={value}
+        min={1}
+        max={65535}
+        onChange={(e) => onChange(Number(e.target.value) || 0)}
+        className="w-20 px-2 py-0.5 rounded border border-neutral-300 bg-white font-mono text-right focus:outline-none focus:border-sky-500"
+      />
+    </label>
   );
 }

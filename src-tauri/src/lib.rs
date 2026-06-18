@@ -177,8 +177,85 @@ fn load_hosts(state: &AppState) -> Result<Vec<Host>, String> {
     hosts::list(&conn)
 }
 
+/// Compiled-in default (port, port2) for a service. port2 is 0 when the
+/// service has a single port.
+fn default_ports(service: &str) -> (u16, u16) {
+    match service {
+        "apache" => (8080, 8443),
+        "nginx" => (8081, 8444),
+        "mysql" => (3306, 0),
+        "redis" => (6379, 0),
+        "mailhog" => (8025, 1025), // UI, SMTP
+        _ => (0, 0),
+    }
+}
+
+/// Read a service's configured (port, port2), falling back to the default
+/// when the user hasn't overridden it.
+fn ports_for(conn: &Connection, service: &str) -> (u16, u16) {
+    let (dp, dp2) = default_ports(service);
+    conn.query_row(
+        "SELECT port, port2 FROM service_config WHERE service = ?1",
+        rusqlite::params![service],
+        |row| Ok((row.get::<_, i64>(0)? as u16, row.get::<_, i64>(1)? as u16)),
+    )
+    .unwrap_or((dp, dp2))
+}
+
+#[derive(Serialize)]
+struct ServicePortConfig {
+    service: String,
+    port: u16,
+    port2: u16,
+    has_secondary: bool,
+}
+
+#[tauri::command]
+fn service_ports_get(name: String, state: tauri::State<AppState>) -> ServicePortConfig {
+    let conn = state.db.lock().unwrap();
+    let (port, port2) = ports_for(&conn, &name);
+    let (_, default_p2) = default_ports(&name);
+    ServicePortConfig {
+        has_secondary: default_p2 != 0,
+        service: name,
+        port,
+        port2,
+    }
+}
+
+#[tauri::command]
+fn service_ports_set(
+    name: String,
+    port: u16,
+    port2: u16,
+    state: tauri::State<AppState>,
+) -> Result<(), String> {
+    if port == 0 {
+        return Err("port must be between 1 and 65535".into());
+    }
+    let conn = state.db.lock().unwrap();
+    conn.execute(
+        "INSERT INTO service_config (service, port, port2) VALUES (?1, ?2, ?3) \
+         ON CONFLICT(service) DO UPDATE SET port=excluded.port, port2=excluded.port2",
+        rusqlite::params![name, port as i64, port2 as i64],
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[tauri::command]
 fn service_start(name: &str, state: tauri::State<AppState>) -> Result<(), String> {
+    // Snapshot all configured ports up front (one DB lock) so cross-service
+    // references (phpMyAdmin→MySQL, php.ini→MailHog SMTP) stay coherent.
+    let (apache_p, apache_p2, mysql_p, _mysql_p2, mailhog_ui, mailhog_smtp, nginx_p, nginx_p2, redis_p) = {
+        let conn = state.db.lock().unwrap();
+        let (ap, ap2) = ports_for(&conn, "apache");
+        let (mp, mp2) = ports_for(&conn, "mysql");
+        let (mu, ms) = ports_for(&conn, "mailhog");
+        let (np, np2) = ports_for(&conn, "nginx");
+        let (rp, _) = ports_for(&conn, "redis");
+        (ap, ap2, mp, mp2, mu, ms, np, np2, rp)
+    };
     match name {
         "apache" => {
             let hosts = load_hosts(&state)?;
@@ -186,6 +263,7 @@ fn service_start(name: &str, state: tauri::State<AppState>) -> Result<(), String
             let mut apache = state.apache.lock().unwrap();
             apache.set_php_installs(installs);
             apache.set_hosts(hosts);
+            apache.set_ports(apache_p, apache_p2, mysql_p, mailhog_smtp);
             apache.start()
         }
         "nginx" => {
@@ -194,11 +272,24 @@ fn service_start(name: &str, state: tauri::State<AppState>) -> Result<(), String
             let mut nginx = state.nginx.lock().unwrap();
             nginx.set_php_installs(installs);
             nginx.set_hosts(hosts);
+            nginx.set_ports(nginx_p, nginx_p2);
             nginx.start()
         }
-        "mysql" => state.mysql.lock().unwrap().start(),
-        "redis" => state.redis.lock().unwrap().start(),
-        "mailhog" => state.mailhog.lock().unwrap().start(),
+        "mysql" => {
+            let mut mysql = state.mysql.lock().unwrap();
+            mysql.set_port(mysql_p);
+            mysql.start()
+        }
+        "redis" => {
+            let mut redis = state.redis.lock().unwrap();
+            redis.set_port(redis_p);
+            redis.start()
+        }
+        "mailhog" => {
+            let mut mailhog = state.mailhog.lock().unwrap();
+            mailhog.set_ports(mailhog_ui, mailhog_smtp);
+            mailhog.start()
+        }
         other => Err(format!("unknown service: {other}")),
     }
 }
@@ -1037,6 +1128,8 @@ pub fn run() {
             service_start,
             service_stop,
             service_status,
+            service_ports_get,
+            service_ports_set,
             php_versions,
             mysql_versions,
             mysql_active_version,

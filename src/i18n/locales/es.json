@@ -55,6 +55,18 @@
     "start": "Iniciar",
     "stop": "Detener"
   },
+  "svcConfig": {
+    "configure": "Configurar",
+    "port": "Puerto",
+    "portHttps": "Puerto HTTPS",
+    "portSmtp": "Puerto SMTP",
+    "version": "Versión",
+    "save": "Guardar",
+    "saved": "Guardado — reinicia para aplicar",
+    "restartHint": "Reinicia el servicio para aplicar los cambios de puerto.",
+    "stopFirst": "Detén el servicio antes de cambiar su versión.",
+    "invalidPort": "Los puertos deben ser 1–65535."
+  },
   "settings": {
     "title": "Ajustes",
     "general": {

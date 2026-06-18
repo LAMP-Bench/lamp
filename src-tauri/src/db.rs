@@ -20,6 +20,17 @@ CREATE TABLE IF NOT EXISTS snapshots (
     FOREIGN KEY (host_id) REFERENCES hosts(id) ON DELETE CASCADE
 );
 
+-- Per-service listen ports, editable from the sidebar service panel.
+-- `port` is the primary port (Apache HTTP, MySQL, Redis, MailHog UI);
+-- `port2` is the secondary where a service has one (Apache/Nginx HTTPS,
+-- MailHog SMTP) and 0 otherwise. Rows are created lazily; a missing row
+-- means use the compiled-in default.
+CREATE TABLE IF NOT EXISTS service_config (
+    service TEXT PRIMARY KEY,
+    port    INTEGER NOT NULL,
+    port2   INTEGER NOT NULL DEFAULT 0
+);
+
 -- One stored deploy target per host so the FTP form doesn't have to be
 -- retyped on every upload. Password is stored in plaintext — acceptable
 -- for a local-only dev tool whose entire install dir is already

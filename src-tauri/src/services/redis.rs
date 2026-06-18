@@ -22,6 +22,10 @@ impl RedisService {
         }
     }
 
+    pub fn set_port(&mut self, port: u16) {
+        self.port = port;
+    }
+
     fn ensure_conf(&self) -> Result<PathBuf, String> {
         let conf_dir = self.runtime_dir.join("redis");
         let data_dir = conf_dir.join("data");

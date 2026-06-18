@@ -55,6 +55,18 @@
     "start": "Start",
     "stop": "Stop"
   },
+  "svcConfig": {
+    "configure": "Configure",
+    "port": "Port",
+    "portHttps": "HTTPS port",
+    "portSmtp": "SMTP port",
+    "version": "Version",
+    "save": "Save",
+    "saved": "Saved — restart to apply",
+    "restartHint": "Restart the service to apply port changes.",
+    "stopFirst": "Stop the service before changing its version.",
+    "invalidPort": "Ports must be 1–65535."
+  },
   "settings": {
     "title": "Settings",
     "general": {
