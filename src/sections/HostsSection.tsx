@@ -522,6 +522,7 @@ function SnapshotsTab({ host }: { host: Host }) {
   const [includeDb, setIncludeDb] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeMysql, setActiveMysql] = useState<string>("");
 
   async function refresh() {
     try {
@@ -536,6 +537,7 @@ function SnapshotsTab({ host }: { host: Host }) {
 
   useEffect(() => {
     refresh();
+    invoke<string>("mysql_active_version").then(setActiveMysql).catch(() => {});
   }, [host.id]);
 
   async function create(e: FormEvent) {
@@ -559,16 +561,30 @@ function SnapshotsTab({ host }: { host: Host }) {
     }
   }
 
-  async function restore(id: number, hasDb: boolean) {
-    const warning = hasDb
+  async function restore(snap: Snapshot) {
+    let warning = snap.has_db
       ? t("hosts.snapshots.confirmRestoreDb")
       : t("hosts.snapshots.confirmRestoreFiles");
+    // Cross-version DB restore warning: a 5.7 dump piped into an 8.0 server
+    // (or vice-versa) can fail or quietly mangle collations.
+    if (
+      snap.has_db &&
+      snap.mysql_version &&
+      activeMysql &&
+      snap.mysql_version !== activeMysql
+    ) {
+      warning += t("hosts.snapshots.versionWarning", {
+        snap: snap.mysql_version,
+        active: activeMysql,
+      });
+    }
     const ok = await confirm({
       message: warning,
       confirmLabel: t("hosts.snapshots.restore"),
       tone: "danger",
     });
     if (!ok) return;
+    const id = snap.id;
     setBusy(true);
     setError(null);
     try {
@@ -678,7 +694,7 @@ function SnapshotsTab({ host }: { host: Host }) {
                 </div>
               </div>
               <button
-                onClick={() => restore(s.id, s.has_db)}
+                onClick={() => restore(s)}
                 disabled={busy}
                 className="px-2.5 py-1 rounded border border-neutral-300 hover:bg-neutral-50 text-xs flex items-center gap-1.5 text-neutral-700 disabled:opacity-50"
               >

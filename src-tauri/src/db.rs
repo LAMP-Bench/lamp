@@ -42,6 +42,10 @@ fn migrate(conn: &Connection) -> rusqlite::Result<()> {
     // restorable — `restore` looks for `db.sql` inside the archive itself,
     // so the column is informational, used by the UI to badge entries.
     add_column_if_missing(conn, "snapshots", "has_db", "INTEGER NOT NULL DEFAULT 0")?;
+    // MySQL version the dump was taken under. Empty for files-only snapshots
+    // and for rows created before this column existed. Used to warn on
+    // cross-version restore (5.7 dump into an 8.0 server, etc.).
+    add_column_if_missing(conn, "snapshots", "mysql_version", "TEXT NOT NULL DEFAULT ''")?;
     Ok(())
 }
 

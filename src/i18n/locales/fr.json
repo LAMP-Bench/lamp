@@ -243,7 +243,8 @@
       "confirmRestoreFiles": "Restaurer ce snapshot ? Les fichiers du docroot seront écrasés par le contenu du snapshot (les fichiers ABSENTS du snapshot sont conservés).",
       "confirmRestoreDb": "Restaurer ce snapshot ? Les fichiers du docroot seront écrasés ET la base MySQL incluse sera supprimée puis réimportée.",
       "confirmDelete": "Supprimer ce snapshot ? Le fichier .tar.zst est effacé.",
-      "restored": "Restauré."
+      "restored": "Restauré.",
+      "versionWarning": "\n\n⚠ La base de données de ce snapshot a été exportée sous MySQL {{snap}}, mais {{active}} est actif maintenant. Restaurer entre versions majeures peut échouer ou corrompre subtilement les collations."
     },
     "addForm": {
       "title": "Ajouter un hôte",

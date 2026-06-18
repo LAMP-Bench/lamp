@@ -307,7 +307,7 @@ fn snapshot_create(
     db_name: Option<String>,
     state: tauri::State<AppState>,
 ) -> Result<snapshots::Snapshot, String> {
-    let (mysql_dir, mysql_port) = mysql_active(&state);
+    let (mysql_dir, mysql_port, mysql_version) = mysql_active_full(&state);
     let conn = state.db.lock().unwrap();
     let host = hosts::list(&conn)?
         .into_iter()
@@ -318,6 +318,7 @@ fn snapshot_create(
         mysql_dir: &mysql_dir,
         port: mysql_port,
         db_name: name,
+        version: &mysql_version,
     });
     snapshots::create(&conn, &host, &label, &state.runtime_dir, db_capture)
 }
@@ -452,11 +453,19 @@ fn file_write(path: String, content: String) -> Result<(), String> {
 }
 
 fn mysql_active(state: &AppState) -> (PathBuf, u16) {
+    let (dir, port, _version) = mysql_active_full(state);
+    (dir, port)
+}
+
+/// Like `mysql_active` but also returns the active version label so snapshot
+/// capture can record which MySQL produced the dump.
+fn mysql_active_full(state: &AppState) -> (PathBuf, u16, String) {
     let mysql = state.mysql.lock().unwrap();
     let active = mysql.active_version();
     (
         state.resources_dir.join(format!("mysql-{active}")),
         3306u16,
+        active,
     )
 }
 

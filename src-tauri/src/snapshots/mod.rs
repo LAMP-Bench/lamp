@@ -23,6 +23,9 @@ pub struct Snapshot {
     pub size_bytes: i64,
     pub created_at: String,
     pub has_db: bool,
+    /// MySQL version the dump was taken under (e.g. "5.7", "8.0"). Empty for
+    /// files-only snapshots and rows predating the column.
+    pub mysql_version: String,
 }
 
 /// Parameters for capturing a MySQL database into the snapshot archive. When
@@ -32,12 +35,15 @@ pub struct DbCapture<'a> {
     pub mysql_dir: &'a Path,
     pub port: u16,
     pub db_name: &'a str,
+    /// Active MySQL version label, stored alongside the snapshot so we can
+    /// warn the user when restoring into a different server version.
+    pub version: &'a str,
 }
 
 pub fn list_for_host(conn: &Connection, host_id: i64) -> Result<Vec<Snapshot>, String> {
     let mut stmt = conn
         .prepare(
-            "SELECT id, host_id, label, path, size_bytes, created_at, has_db \
+            "SELECT id, host_id, label, path, size_bytes, created_at, has_db, mysql_version \
              FROM snapshots WHERE host_id = ?1 ORDER BY created_at DESC",
         )
         .map_err(|e| e.to_string())?;
@@ -51,6 +57,7 @@ pub fn list_for_host(conn: &Connection, host_id: i64) -> Result<Vec<Snapshot>, S
                 size_bytes: row.get(4)?,
                 created_at: row.get(5)?,
                 has_db: row.get::<_, i64>(6)? != 0,
+                mysql_version: row.get(7)?,
             })
         })
         .map_err(|e| e.to_string())?;
@@ -84,18 +91,20 @@ pub fn create(
         None => None,
     };
     let has_db = db_dump.is_some();
+    let mysql_version = db.as_ref().map(|d| d.version).unwrap_or("").to_string();
 
     let size = write_tar_zst(&docroot, &target, db_dump.as_deref())?;
 
     conn.execute(
-        "INSERT INTO snapshots (host_id, label, path, size_bytes, has_db) \
-         VALUES (?1, ?2, ?3, ?4, ?5)",
+        "INSERT INTO snapshots (host_id, label, path, size_bytes, has_db, mysql_version) \
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
         params![
             host.id,
             label.trim(),
             target.to_string_lossy(),
             size as i64,
-            if has_db { 1 } else { 0 }
+            if has_db { 1 } else { 0 },
+            mysql_version,
         ],
     )
     .map_err(|e| e.to_string())?;
@@ -109,6 +118,7 @@ pub fn create(
         size_bytes: size as i64,
         created_at: now_iso(),
         has_db,
+        mysql_version,
     })
 }
 
@@ -149,7 +159,7 @@ pub fn restore(
 ) -> Result<(), String> {
     let snapshot: Snapshot = conn
         .query_row(
-            "SELECT id, host_id, label, path, size_bytes, created_at, has_db \
+            "SELECT id, host_id, label, path, size_bytes, created_at, has_db, mysql_version \
              FROM snapshots WHERE id = ?1",
             params![snapshot_id],
             |row| {
@@ -161,6 +171,7 @@ pub fn restore(
                     size_bytes: row.get(4)?,
                     created_at: row.get(5)?,
                     has_db: row.get::<_, i64>(6)? != 0,
+                    mysql_version: row.get(7)?,
                 })
             },
         )

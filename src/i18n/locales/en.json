@@ -243,7 +243,8 @@
       "confirmRestoreFiles": "Restore this snapshot? Files in the docroot will be overwritten with the snapshot's contents (existing files NOT in the snapshot are left alone).",
       "confirmRestoreDb": "Restore this snapshot? Docroot files will be overwritten AND the bundled MySQL database will be dropped and re-imported.",
       "confirmDelete": "Delete this snapshot? The .tar.zst file is removed.",
-      "restored": "Restored."
+      "restored": "Restored.",
+      "versionWarning": "\n\n⚠ This snapshot's database was dumped under MySQL {{snap}}, but {{active}} is active now. Restoring across major versions can fail or subtly corrupt collations."
     },
     "addForm": {
       "title": "Add host",
