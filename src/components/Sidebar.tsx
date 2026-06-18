@@ -8,6 +8,7 @@ import {
   FiTool,
   FiTerminal,
   FiSliders,
+  FiPackage,
   FiChevronDown,
   FiChevronUp,
   FiSettings,
@@ -29,6 +30,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "tools", icon: <FiTool /> },
   { id: "config", icon: <FiSliders /> },
   { id: "logs", icon: <FiTerminal /> },
+  { id: "versions", icon: <FiPackage /> },
 ];
 
 type SvcSpec = {

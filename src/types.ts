@@ -18,7 +18,13 @@ export type SectionId =
   | "tools"
   | "config"
   | "logs"
+  | "versions"
   | "settings";
+
+export type PhpExtension = {
+  name: string;
+  enabled: boolean;
+};
 
 export type LogName = "apache" | "mysql" | "nginx" | "redis" | "mailhog";
 

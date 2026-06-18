@@ -10,6 +10,7 @@ import { ToolsSection } from "./sections/ToolsSection";
 import { ConfigSection } from "./sections/ConfigSection";
 import { EditorSection } from "./sections/EditorSection";
 import { LogsSection } from "./sections/LogsSection";
+import { VersionsSection } from "./sections/VersionsSection";
 import { SettingsSection } from "./sections/SettingsSection";
 import { SetupWizard, setupNeeded } from "./components/SetupWizard";
 import type { SectionId } from "./types";
@@ -92,6 +93,7 @@ function MainShell() {
           {section === "tools" && <ToolsSection />}
           {section === "config" && <ConfigSection />}
           {section === "logs" && <LogsSection />}
+          {section === "versions" && <VersionsSection />}
           {section === "settings" && <SettingsSection />}
         </main>
       </div>

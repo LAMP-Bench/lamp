@@ -11,12 +11,9 @@ import {
   FiInfo,
   FiExternalLink,
   FiCheck,
-  FiPackage,
-  FiTrash2,
 } from "react-icons/fi";
 import { SiPhp, SiMysql } from "react-icons/si";
 import { LANGUAGES } from "../i18n";
-import { useConfirm } from "../components/Toast";
 import type { PhpCatalogEntry } from "../types";
 
 type UpdateState =
@@ -38,10 +35,6 @@ export function SettingsSection() {
 
         <Card title={t("settings.services.title")}>
           <ServicesRows />
-        </Card>
-
-        <Card title={t("settings.versions.title")}>
-          <VersionsRows />
         </Card>
 
         <Card title={t("settings.dyndns.title")}>
@@ -334,118 +327,6 @@ function DynDnsRows() {
           </button>
         </div>
       </Row>
-    </>
-  );
-}
-
-function VersionsRows() {
-  const { t } = useTranslation();
-  const confirm = useConfirm();
-  const [names, setNames] = useState<string[]>([]);
-  const [installed, setInstalled] = useState<Record<string, boolean>>({});
-  const [busy, setBusy] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  async function refresh() {
-    try {
-      const list = await invoke<string[]>("binary_list");
-      setNames(list);
-      const flags = await Promise.all(
-        list.map((n) =>
-          invoke<boolean>("binary_installed", { name: n }).catch(() => false),
-        ),
-      );
-      const map: Record<string, boolean> = {};
-      list.forEach((n, i) => (map[n] = flags[i]));
-      setInstalled(map);
-    } catch (e) {
-      setError(String(e));
-    }
-  }
-
-  useEffect(() => {
-    refresh();
-  }, []);
-
-  async function install(name: string) {
-    setError(null);
-    setBusy(name);
-    try {
-      await invoke("binary_download", { name });
-      await refresh();
-    } catch (e) {
-      setError(String(e));
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function remove(name: string) {
-    const ok = await confirm({
-      message: t("settings.versions.confirmRemove", { name }),
-      confirmLabel: t("settings.versions.remove"),
-      tone: "danger",
-    });
-    if (!ok) return;
-    setError(null);
-    setBusy(name);
-    try {
-      await invoke("binary_remove", { name });
-      await refresh();
-    } catch (e) {
-      setError(String(e));
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  return (
-    <>
-      <div className="px-4 py-2 text-[11px] text-neutral-500">
-        {t("settings.versions.hint")}
-      </div>
-      {names.map((name) => {
-        const isInstalled = installed[name];
-        const isBusy = busy === name;
-        return (
-          <div key={name} className="px-4 py-2 flex items-center gap-3 text-sm">
-            <FiPackage className="text-neutral-500 shrink-0" />
-            <code className="flex-1 text-neutral-800 font-mono text-xs truncate">
-              {name}
-            </code>
-            {isInstalled ? (
-              <>
-                <span className="text-emerald-600 text-xs flex items-center gap-1">
-                  <FiCheck />
-                  {t("settings.versions.installed")}
-                </span>
-                <button
-                  onClick={() => remove(name)}
-                  disabled={isBusy}
-                  className="px-2 py-1 rounded border border-red-300 text-red-600 hover:bg-red-50 text-xs flex items-center gap-1 disabled:opacity-50"
-                >
-                  <FiTrash2 />
-                  {isBusy ? t("settings.versions.removing") : t("settings.versions.remove")}
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => install(name)}
-                disabled={isBusy}
-                className="px-2 py-1 rounded border border-sky-300 text-sky-600 hover:bg-sky-50 text-xs flex items-center gap-1 disabled:opacity-50"
-              >
-                <FiDownload />
-                {isBusy ? t("settings.versions.installing") : t("settings.versions.install")}
-              </button>
-            )}
-          </div>
-        );
-      })}
-      {error && (
-        <div className="px-4 py-2 text-xs text-red-600 font-mono break-words bg-red-50">
-          {error}
-        </div>
-      )}
     </>
   );
 }
