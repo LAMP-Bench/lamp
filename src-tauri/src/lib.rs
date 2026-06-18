@@ -839,6 +839,19 @@ fn read_tail(path: &Path, lines: usize) -> Result<String, String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        // MUST be the first plugin registered. When a second copy of Lamp
+        // Bench is launched while one is already running, this callback
+        // fires in the EXISTING instance (restoring + focusing its window)
+        // and the second process exits immediately — you can't have two
+        // instances fighting over the same ports, MySQL data dir and
+        // generated configs.
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.unminimize();
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+        }))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
