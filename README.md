@@ -2,59 +2,95 @@
 
 A local web development environment for Windows, macOS and Linux — a
 from-scratch reimplementation of MAMP PRO. Bundles Apache, Nginx, MySQL
-(5.7 + 8.0), multiple PHP versions, Redis, Xdebug, OPcache, Composer,
-phpMyAdmin and a Monaco-based file editor behind a native desktop GUI.
+(5.7 + 8.0), multiple PHP versions, Redis, MailHog, Xdebug, OPcache,
+Composer, phpMyAdmin and a Monaco-based file editor behind a native
+desktop GUI.
 
-> **Status:** working MVP. Phases 0–4 of the roadmap are done: services,
-> hosts CRUD with system `hosts` file reconciliation, local Root CA + leaf
-> certs, multi-PHP via `mod_fcgid`, Xdebug, Composer, Laravel scaffolding,
-> editor with PHP lint. Phase 5 (WordPress / Joomla / Drupal one-click) is
-> next. Linux is wired into the architecture but ships in Phase 9 — until
-> then the verified platforms are Windows and macOS.
+> **Status: alpha.** Phases 0–7 are done and Phase 9 (polish + Linux) is
+> well underway. The app installs as a slim ~30 MB shell that downloads
+> Apache/MySQL/PHP/etc. on first launch, auto-updates via signed GitHub
+> Releases, ships a Settings panel with English/Spanish/French i18n, and
+> builds on Windows + Linux + macOS (Intel & Apple Silicon) in CI. Windows
+> is the most exercised target; Linux/macOS native service binaries are
+> still being pinned (see "Platform support").
 
-## What it does today
+## Install (pre-built alpha)
 
-- Start / stop Apache, Nginx, MySQL (5.7 ↔ 8.0 toggle) and Redis from a
-  sidebar of toggle switches.
-- Create virtual hosts with per-host PHP version. A single Save:
+Grab the installer for your machine from the rolling
+[**alpha-testing release**](https://github.com/LAMP-Bench/lamp/releases/tag/alpha-testing):
+
+| Platform | File |
+|---|---|
+| Windows x64 | `.exe` (NSIS) or `.msi` |
+| macOS Apple Silicon | `.dmg` or `.app.tar.gz` (aarch64) |
+| macOS Intel | `.dmg` or `.app.tar.gz` (x86_64) |
+| Linux Debian/Ubuntu/Mint | `.deb` |
+| Linux Fedora/RHEL/openSUSE | `.rpm` |
+| Any other Linux (Arch, …) | `.AppImage` |
+
+On Windows the installer defaults to `C:\LAMP\`. First launch runs a
+short setup wizard that downloads the bundled services into
+`<install>/resources/`. The in-app updater offers new alpha builds on
+each launch.
+
+> ⚠ **Alpha software.** Things change shape between builds; expect rough
+> edges. Don't point it at data you can't afford to lose.
+
+## What it does
+
+- Start / stop Apache, Nginx, MySQL (5.7 ↔ 8.0), Redis and MailHog from a
+  sidebar of toggle switches. No CMD windows flash; closing the window
+  minimises to the system tray (Discord-style).
+- Create virtual hosts with a per-host PHP version. A single Save:
   - inserts the host into SQLite,
-  - rewrites the managed section of `C:\Windows\System32\drivers\etc\hosts`
-    via an elevated child process (UAC prompt once per change),
-  - issues a leaf SSL cert for the hostname, signed by the local Root CA
-    that lives in `.lamp-bench/ca/`,
-  - regenerates Apache + Nginx configs and restarts whichever is running.
-- Edit each host's General / Apache / Nginx / SSL settings inline. The
-  Apache and Nginx tabs accept raw directives that get injected inside the
-  per-host vhost block.
-- Edit per-version `php.ini` files in the embedded Monaco editor. PHP lint
-  via `php -l` is one click. Ctrl+S saves.
-- Tools panel: open phpMyAdmin in the browser, check Composer version,
-  scaffold a Laravel project with `composer create-project`.
-- Logs panel: live tail of Apache, Nginx, and MySQL error logs.
+  - rewrites the managed section of the system `hosts` file (elevated —
+    UAC on Windows, `osascript`/`pkexec` on macOS/Linux),
+  - issues a leaf SSL cert signed by a local Root CA, installed into the
+    platform user trust store,
+  - regenerates Apache + Nginx configs and reloads whichever is running.
+- Per-host tabs: General / Apache / Nginx / SSL / Snapshots / Deploy.
+  Snapshots are `.tar.zst` archives of the docroot with an optional
+  `mysqldump`; Deploy uploads the docroot to a saved FTP profile.
+- Tools: phpMyAdmin, MailHog inbox, image optimizer (JPG re-encode +
+  lossless PNG), FTP deploy, Composer, Laravel scaffolding, one-click
+  WordPress / Joomla / Drupal / MediaWiki.
+- Config: edit per-version `php.ini`, `httpd.conf`, `nginx.conf`, `my.cnf`
+  in a standalone Monaco window. `php -l` lint is one click.
+- Logs: live tail of Apache, Nginx, MySQL, Redis and MailHog.
+- Settings: language (en/es/fr), PHP/MySQL version pickers, installed-
+  components manager, update channel + manual check, Dynamic DNS, About
+  (version + commit SHA + build date).
 
-## Prerequisites
+## Platform support
+
+The app, UI, hosts-file reconciliation, CA trust and DynDNS are
+cross-platform. The **bundled service binaries** (Apache, MySQL, PHP,
+nginx, Redis, MailHog, mod_fcgid, Xdebug) are currently pinned for Windows
+only in `scripts/binaries.json` — the OS-agnostic pieces (Composer,
+phpMyAdmin, the CMSes) work everywhere. Linux/macOS native service
+binaries are the remaining gap.
+
+## Prerequisites (development)
 
 - Node ≥ 20 and **pnpm**
-- **Rust** stable, installed via `rustup`
-- **MSVC Build Tools 2022** with the VC++ workload + Windows 11 SDK on
-  Windows, Xcode Command Line Tools on macOS
-- **WebView2** runtime (already on Windows 11)
+- **Rust** stable (rustup)
+- Windows: **MSVC Build Tools 2022** (VC++ workload + Win11 SDK), WebView2
+  (preinstalled on Win11)
+- Linux: `libwebkit2gtk-4.1-dev`, `libsoup-3.0-dev`, `libxdo-dev`,
+  `librsvg2-dev`, `libayatana-appindicator3-dev`
+- macOS: Xcode Command Line Tools
 
 ## Develop
 
 ```sh
 pnpm install
-pnpm scripts:fetch-binaries
-pnpm tauri dev
+pnpm scripts:fetch-binaries        # download + verify pinned binaries
+pnpm tauri dev                     # run with hot reload
 ```
 
-The binary fetch pulls ~500 MB of pinned upstream zips
-(Apache, Nginx, MySQL ×2, PHP ×2, Redis, phpMyAdmin, Xdebug DLLs,
-Composer phar) into `resources/`, verifying SHA256 against
-`scripts/binaries.json`. They are not committed.
-
-First `pnpm tauri dev` compiles the Tauri shell from source — 5–10 min
-the first time, then incremental.
+First `pnpm tauri dev` compiles the Tauri shell from source (5–10 min,
+then incremental). `resources/` (binaries) and `.lamp-bench/` (dev
+runtime state: SQLite, certs, generated configs, logs) are gitignored.
 
 ## Build
 
@@ -65,23 +101,26 @@ pnpm tauri build
 Produces an installer for the current OS in
 `src-tauri/target/release/bundle/`.
 
+## Quality gates
+
+```sh
+./node_modules/.bin/tsc --noEmit                     # TypeScript
+cargo clippy --manifest-path src-tauri/Cargo.toml --no-deps -- -D warnings
+cargo test --manifest-path src-tauri/Cargo.toml --lib
+```
+
+CI runs all three before the build matrix.
+
 ## Repository layout
 
 ```
 lamp/
-├── src/                  React frontend
-├── src-tauri/            Rust core (services, hosts, ssl, db)
+├── src/                  React 19 + TS frontend
+├── src-tauri/            Rust core (services, hosts, ssl, deploy, dyndns, …)
 ├── resources/            Bundled service binaries — gitignored
 ├── scripts/              binaries.json + fetch-binaries.mjs
-└── docs/
+└── .github/workflows/    release.yml (lint → build → publish)
 ```
-
-`resources/` is not committed. `scripts/fetch-binaries.mjs` (single Node
-script, cross-platform) downloads pinned versions per OS and verifies SHA256.
-
-`.lamp-bench/` (in the project root) holds the runtime state: SQLite DB,
-generated configs, per-host certs, log tails, MySQL data dirs. Also
-gitignored.
 
 ## License
 
@@ -89,27 +128,8 @@ gitignored.
 
 ## Contributing
 
-**Please don't open pull requests.** The codebase is moving fast and can
-change shape entirely between commits — refactors, file renames, schema
-churn, whole subsystems getting rewritten. A PR opened today is very
-likely to conflict with something I do tomorrow, and merging it would
-mean throwing your time away.
-
-Bug reports and ideas are welcome via issues. Once the project settles
-into a stable shape this section will change.
-
----
-
-### Postscript: this was built with AI
-
-Yes, this whole thing was built sitting in a chair with Claude doing the
-typing. It wasn't a learning exercise, it was a quality-of-life thing,
-because in 2026 if I want a working multi-PHP local dev env on Windows by
-the end of a weekend, I'm going to use the tool that makes that happen.
-
-If using AI to ship code rubs you the wrong way, that's fine, but I'm not
-slowing down for it. The world moves; I'd rather keep up.
-
-And hell nah im not gonna use MAMP or XAMMP, they run like shit.
-
-— @caixax
+**Please don't open pull requests.** The codebase moves fast and can
+change shape entirely between commits — refactors, renames, schema churn,
+whole subsystems rewritten. A PR opened today is likely to conflict with
+tomorrow's work. Bug reports and ideas are welcome via issues. This note
+will change once the project settles.
