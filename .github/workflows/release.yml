@@ -112,16 +112,14 @@ jobs:
           - platform: ubuntu-22.04
             label: linux-x86_64
             args: ''
+          # One universal macOS build (Intel + Apple Silicon in a single
+          # .dmg/.app) cross-compiled on the fast, always-available
+          # Apple-Silicon runner. We used to have a separate macos-13 Intel
+          # job, but those Intel runners sit in a multi-hour queue and were
+          # blocking the publish gate (which needs every matrix job green).
           - platform: macos-latest
-            label: darwin-aarch64
-            args: '--target aarch64-apple-darwin'
-          # macos-13 is the last Intel-host runner on GitHub Actions; macOS
-          # 14+ runners are Apple Silicon and can cross-compile but the
-          # universal binary story is finicky, so we keep them as two
-          # separate matrix entries.
-          - platform: macos-13
-            label: darwin-x86_64
-            args: '--target x86_64-apple-darwin'
+            label: darwin-universal
+            args: '--target universal-apple-darwin'
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -159,12 +157,12 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Install Rust (with macOS target when needed)
+      - name: Install Rust (both macOS arches for the universal build)
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: |
-            ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || '' }}
-            ${{ matrix.platform == 'macos-13' && 'x86_64-apple-darwin' || '' }}
+          # universal-apple-darwin lipo's both arch slices, so the runner
+          # needs both targets installed.
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - uses: swatinem/rust-cache@v2
         with:
@@ -235,8 +233,7 @@ jobs:
 
             Pick the installer that matches your machine:
             - **Windows x64** — `.exe` (NSIS) or `.msi`
-            - **macOS Apple Silicon (M1/M2/M3/M4)** — `.dmg` or `.app.tar.gz` (aarch64)
-            - **macOS Intel** — `.dmg` or `.app.tar.gz` (x86_64)
+            - **macOS (Intel + Apple Silicon)** — `.dmg` or `.app.tar.gz` (universal)
             - **Linux Debian/Ubuntu/Mint** — `.deb`
             - **Linux Fedora/RHEL/openSUSE** — `.rpm`
             - **Any other Linux (Arch, etc.)** — `.AppImage`

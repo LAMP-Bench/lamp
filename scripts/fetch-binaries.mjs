@@ -42,16 +42,31 @@ async function download(url, destPath) {
 }
 
 async function extract(archivePath, destDir) {
-  // bsdtar ships with Windows 10+, macOS, and all major Linux distros and
-  // handles .zip natively. On Windows we pin to System32\tar.exe so a GNU
-  // tar shimmed in by Git for Windows does not get picked up — it parses
-  // `C:` as a remote host and bails.
   await mkdir(destDir, { recursive: true });
-  const tarBin =
-    process.platform === "win32"
-      ? join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tar.exe")
-      : "tar";
-  await execFileP(tarBin, ["-xf", archivePath, "-C", destDir]);
+  const isZip = archivePath.toLowerCase().endsWith(".zip");
+
+  if (process.platform === "win32") {
+    // bsdtar ships with Windows 10+ and handles .zip natively. Pin to
+    // System32\tar.exe so a GNU tar shimmed in by Git for Windows is not
+    // picked up — it parses `C:` as a remote host and bails.
+    const tarBin = join(
+      process.env.SystemRoot ?? "C:\\Windows",
+      "System32",
+      "tar.exe",
+    );
+    await execFileP(tarBin, ["-xf", archivePath, "-C", destDir]);
+    return;
+  }
+
+  // macOS / Linux: GNU tar (the default /usr/bin/tar on Ubuntu CI runners)
+  // CANNOT read zip archives — it only does tar streams. Use `unzip` for
+  // .zip and `tar` for actual tarballs. Both unzip and tar are preinstalled
+  // on the GitHub macos/ubuntu runners.
+  if (isZip) {
+    await execFileP("unzip", ["-q", "-o", archivePath, "-d", destDir]);
+  } else {
+    await execFileP("tar", ["-xf", archivePath, "-C", destDir]);
+  }
 }
 
 async function main() {
