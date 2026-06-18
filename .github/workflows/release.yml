@@ -185,6 +185,22 @@ jobs:
       - name: Fetch bundled service binaries
         run: pnpm scripts:fetch-binaries -- --bundled-only
 
+      # Derive a strictly-increasing version from the run number so the
+      # in-app updater actually fires. Installed builds sit at some
+      # 0.1.<N>; each workflow run produces 0.1.<run_number> which is
+      # always greater (run_number is monotonic per workflow). Patched into
+      # all three manifests so the bundler, the updater's latest.json, and
+      # the JS app_version agree. github.run_number is constant across the
+      # whole run, so every matrix OS stamps the identical version.
+      - name: Stamp build version
+        shell: bash
+        run: |
+          VER="0.1.${{ github.run_number }}"
+          echo "Stamping version $VER"
+          node -e "const f='package.json',j=require('./'+f);j.version='$VER';require('fs').writeFileSync(f,JSON.stringify(j,null,2)+'\n')"
+          node -e "const f='src-tauri/tauri.conf.json',j=require('./'+f);j.version='$VER';require('fs').writeFileSync(f,JSON.stringify(j,null,2)+'\n')"
+          node -e "const fs=require('fs');const f='src-tauri/Cargo.toml';let s=fs.readFileSync(f,'utf8');s=s.replace(/^version = \".*\"/m,'version = \"$VER\"');fs.writeFileSync(f,s)"
+
       - name: Build Tauri app + upload to alpha-testing draft
         uses: tauri-apps/tauri-action@v0
         env:
@@ -197,9 +213,10 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          # Fixed tag — every successful run replaces the artifacts on
-          # this one release. No version bumps required until cutting a
-          # real stable release.
+          # Rolling channel tag — every run replaces the artifacts on this
+          # one release. The version stamped above (0.1.<run_number>) is what
+          # makes the updater fire; the immutable per-build tag in the publish
+          # job preserves history.
           tagName: alpha-testing
           releaseName: 'Lamp Bench — alpha testing'
           # IMPORTANT: this body is set ONLY on the first build of each
@@ -263,3 +280,20 @@ jobs:
               prerelease: true,
             });
             core.notice(`Published release ${draft.id} (${draft.html_url}).`);
+
+            // Immutable per-build tag so git history isn't lost when the
+            // rolling `alpha-testing` tag gets wiped + recreated next run.
+            // `alpha-testing` is the moving channel pointer; `build-<N>` is
+            // the permanent breadcrumb pointing at this exact commit.
+            const buildTag = `build-${context.runNumber}`;
+            try {
+              await github.rest.git.createRef({
+                owner,
+                repo,
+                ref: `refs/tags/${buildTag}`,
+                sha: context.sha,
+              });
+              core.notice(`Tagged build as ${buildTag}.`);
+            } catch (e) {
+              core.notice(`Could not create ${buildTag}: ${e.message}`);
+            }
