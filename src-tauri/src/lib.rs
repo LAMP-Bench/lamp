@@ -5,6 +5,7 @@ mod db;
 mod deploy;
 mod downloads;
 mod dyndns;
+mod ioncube;
 mod hosts;
 mod images;
 mod php;
@@ -698,6 +699,34 @@ fn ftp_upload(
 }
 
 #[tauri::command]
+fn ioncube_install(version: String, state: tauri::State<AppState>) -> Result<(), String> {
+    let php_dir = state.resources_dir.join(format!("php-{version}"));
+    ioncube::install(&version, &php_dir, downloads::current_platform())
+}
+
+#[tauri::command]
+fn php_extensions(
+    version: String,
+    state: tauri::State<AppState>,
+) -> Result<Vec<php::PhpExtension>, String> {
+    php::list_extensions(&state.resources_dir.join(format!("php-{version}")))
+}
+
+#[tauri::command]
+fn php_extension_toggle(
+    version: String,
+    name: String,
+    enable: bool,
+    state: tauri::State<AppState>,
+) -> Result<(), String> {
+    php::toggle_extension(
+        &state.resources_dir.join(format!("php-{version}")),
+        &name,
+        enable,
+    )
+}
+
+#[tauri::command]
 fn dyndns_update(
     provider: String,
     hostname: String,
@@ -1029,6 +1058,9 @@ pub fn run() {
             deploy_profile_get,
             deploy_profile_save,
             dyndns_update,
+            ioncube_install,
+            php_extensions,
+            php_extension_toggle,
             editor_open,
             binary_installed,
             binary_download,
