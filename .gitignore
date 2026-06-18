@@ -41,3 +41,6 @@ CLAUDE.md
 # Tauri updater signing keys — private key never commits; public key is in
 # tauri.conf.json plugins.updater.pubkey
 src-tauri/.updater-keys/*.key
+LANDING_PAGE_PROMPT.md
+AUDIT.md
+SPRINTS.md
