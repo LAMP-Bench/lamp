@@ -214,10 +214,10 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          # Rolling channel tag — every run replaces the artifacts on this
-          # one release. The version stamped above (0.1.<run_number>) is what
-          # makes the updater fire; the immutable per-build tag in the publish
-          # job preserves history.
+          # Single rolling channel tag — every run replaces the artifacts on
+          # this one release. The version stamped above (0.1.<run_number>) is
+          # what makes the updater fire; we intentionally do NOT create a tag
+          # per build (that would pile up build-N tags forever).
           tagName: alpha-testing
           releaseName: 'Lamp Bench — alpha testing'
           # IMPORTANT: this body is set ONLY on the first build of each
@@ -280,20 +280,3 @@ jobs:
               prerelease: true,
             });
             core.notice(`Published release ${draft.id} (${draft.html_url}).`);
-
-            // Immutable per-build tag so git history isn't lost when the
-            // rolling `alpha-testing` tag gets wiped + recreated next run.
-            // `alpha-testing` is the moving channel pointer; `build-<N>` is
-            // the permanent breadcrumb pointing at this exact commit.
-            const buildTag = `build-${context.runNumber}`;
-            try {
-              await github.rest.git.createRef({
-                owner,
-                repo,
-                ref: `refs/tags/${buildTag}`,
-                sha: context.sha,
-              });
-              core.notice(`Tagged build as ${buildTag}.`);
-            } catch (e) {
-              core.notice(`Could not create ${buildTag}: ${e.message}`);
-            }
