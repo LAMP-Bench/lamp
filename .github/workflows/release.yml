@@ -94,6 +94,9 @@ jobs:
       - name: Rust clippy (warnings denied)
         run: cargo clippy --manifest-path src-tauri/Cargo.toml --no-deps -- -D warnings
 
+      - name: Rust unit tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml --lib
+
   build:
     needs: [prepare, lint]
     strategy:

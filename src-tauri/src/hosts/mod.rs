@@ -316,3 +316,63 @@ fn write_elevated_linux(new_content: &str) -> Result<(), String> {
     let _ = fs::remove_file(&tmp);
     Err(format!("hosts file update failed: {last_err}"))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn host(name: &str) -> Host {
+        Host {
+            id: 1,
+            name: name.into(),
+            docroot: "C:/x".into(),
+            php_version: "8.4".into(),
+            apache_extra: String::new(),
+            nginx_extra: String::new(),
+        }
+    }
+
+    #[test]
+    fn empty_hosts_produce_empty_section() {
+        assert_eq!(build_managed_section(&[]), "");
+    }
+
+    #[test]
+    fn section_lists_every_host() {
+        let s = build_managed_section(&[host("a.local"), host("b.local")]);
+        assert!(s.contains("127.0.0.1\ta.local"));
+        assert!(s.contains("127.0.0.1\tb.local"));
+        assert!(s.starts_with(MANAGED_BEGIN));
+        assert!(s.trim_end().ends_with(MANAGED_END));
+    }
+
+    #[test]
+    fn replace_inserts_when_no_existing_section() {
+        let current = "127.0.0.1 localhost\n";
+        let section = build_managed_section(&[host("x.local")]);
+        let out = replace_section(current, &section);
+        assert!(out.starts_with("127.0.0.1 localhost"));
+        assert!(out.contains("x.local"));
+    }
+
+    #[test]
+    fn replace_swaps_existing_section_without_touching_user_lines() {
+        let first = replace_section(
+            "127.0.0.1 localhost\n",
+            &build_managed_section(&[host("old.local")]),
+        );
+        let second = replace_section(&first, &build_managed_section(&[host("new.local")]));
+        assert!(second.contains("new.local"));
+        assert!(!second.contains("old.local"));
+        // user line preserved exactly once
+        assert_eq!(second.matches("127.0.0.1 localhost").count(), 1);
+    }
+
+    #[test]
+    fn replace_is_idempotent() {
+        let section = build_managed_section(&[host("x.local")]);
+        let once = replace_section("# header\n", &section);
+        let twice = replace_section(&once, &section);
+        assert_eq!(once, twice);
+    }
+}
