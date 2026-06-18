@@ -77,6 +77,19 @@
       "removing": "Suppression…",
       "installed": "Installé",
       "confirmRemove": "Supprimer {{name}} ? L'espace disque est libéré et le service ne pourra pas démarrer tant qu'il n'est pas réinstallé."
+    },
+    "dyndns": {
+      "title": "DNS dynamique",
+      "hint": "Pointe un nom d'hôte DNS dynamique vers l'IP publique actuelle de cette machine. Les identifiants sont stockés localement dans votre profil de navigateur.",
+      "provider": "Fournisseur",
+      "hostname": "Nom d'hôte",
+      "hostnamePlaceholder": "monhote.ddns.net",
+      "user": "Utilisateur",
+      "password": "Mot de passe / jeton",
+      "update": "Mettre à jour",
+      "updating": "Mise à jour…",
+      "ok": "DNS mis à jour : {{status}}",
+      "failed": "Échec de la mise à jour : {{status}}"
     }
   },
   "updateBanner": {

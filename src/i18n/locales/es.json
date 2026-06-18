@@ -77,6 +77,19 @@
       "removing": "Eliminando…",
       "installed": "Instalado",
       "confirmRemove": "¿Eliminar {{name}}? Se libera disco y el servicio no podrá arrancar hasta reinstalarlo."
+    },
+    "dyndns": {
+      "title": "DNS dinámico",
+      "hint": "Apunta un hostname de DNS dinámico a la IP pública actual de esta máquina. Las credenciales se guardan localmente en tu perfil del navegador.",
+      "provider": "Proveedor",
+      "hostname": "Hostname",
+      "hostnamePlaceholder": "mihost.ddns.net",
+      "user": "Usuario",
+      "password": "Contraseña / token",
+      "update": "Actualizar ahora",
+      "updating": "Actualizando…",
+      "ok": "DNS actualizado: {{status}}",
+      "failed": "Error al actualizar: {{status}}"
     }
   },
   "updateBanner": {

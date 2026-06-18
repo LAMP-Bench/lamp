@@ -77,6 +77,19 @@
       "removing": "Removing…",
       "installed": "Installed",
       "confirmRemove": "Remove {{name}}? Disk is freed and the service can't start until re-installed."
+    },
+    "dyndns": {
+      "title": "Dynamic DNS",
+      "hint": "Point a dynamic-DNS hostname at this machine's current public IP. Credentials are stored locally in your browser profile.",
+      "provider": "Provider",
+      "hostname": "Hostname",
+      "hostnamePlaceholder": "myhost.ddns.net",
+      "user": "Username",
+      "password": "Password / token",
+      "update": "Update now",
+      "updating": "Updating…",
+      "ok": "DNS updated: {{status}}",
+      "failed": "Update failed: {{status}}"
     }
   },
   "updateBanner": {

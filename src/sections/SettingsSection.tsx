@@ -44,6 +44,10 @@ export function SettingsSection() {
           <VersionsRows />
         </Card>
 
+        <Card title={t("settings.dyndns.title")}>
+          <DynDnsRows />
+        </Card>
+
         <Card title={t("settings.updates.title")}>
           <ChannelRow />
           <UpdatesRow />
@@ -214,6 +218,122 @@ function ServicesRows() {
           {error}
         </div>
       )}
+    </>
+  );
+}
+
+type DynDnsConfig = {
+  provider: string;
+  hostname: string;
+  user: string;
+  password: string;
+};
+const DYNDNS_KEY = "lamp-bench-dyndns";
+
+function DynDnsRows() {
+  const { t } = useTranslation();
+  const [cfg, setCfg] = useState<DynDnsConfig>(() => {
+    try {
+      const raw = localStorage.getItem(DYNDNS_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch {
+      /* ignore */
+    }
+    return { provider: "noip", hostname: "", user: "", password: "" };
+  });
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
+  function set<K extends keyof DynDnsConfig>(k: K, v: DynDnsConfig[K]) {
+    const next = { ...cfg, [k]: v };
+    setCfg(next);
+    localStorage.setItem(DYNDNS_KEY, JSON.stringify(next));
+  }
+
+  async function update() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const r = await invoke<{ status: string; ok: boolean }>("dyndns_update", {
+        provider: cfg.provider,
+        hostname: cfg.hostname,
+        user: cfg.user,
+        password: cfg.password,
+      });
+      setMsg({
+        ok: r.ok,
+        text: r.ok
+          ? t("settings.dyndns.ok", { status: r.status })
+          : t("settings.dyndns.failed", { status: r.status }),
+      });
+    } catch (e) {
+      setMsg({ ok: false, text: t("settings.dyndns.failed", { status: String(e) }) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <div className="px-4 py-2 text-[11px] text-neutral-500">
+        {t("settings.dyndns.hint")}
+      </div>
+      <Row icon={<FiGlobe />} label={t("settings.dyndns.provider")}>
+        <select
+          value={cfg.provider}
+          onChange={(e) => set("provider", e.target.value)}
+          className="px-3 py-1.5 rounded border border-neutral-300 text-sm bg-white focus:outline-none focus:border-sky-500"
+        >
+          <option value="noip">No-IP</option>
+          <option value="dyn">Dyn</option>
+          <option value="dnsomatic">DNS-O-Matic</option>
+          <option value="easydns">easyDNS</option>
+          <option value="spdyn">spDYN</option>
+        </select>
+      </Row>
+      <Row icon={<FiGlobe />} label={t("settings.dyndns.hostname")}>
+        <input
+          value={cfg.hostname}
+          onChange={(e) => set("hostname", e.target.value)}
+          placeholder={t("settings.dyndns.hostnamePlaceholder")}
+          className="w-56 px-3 py-1.5 rounded border border-neutral-300 text-sm font-mono focus:outline-none focus:border-sky-500"
+        />
+      </Row>
+      <Row icon={<FiGlobe />} label={t("settings.dyndns.user")}>
+        <input
+          value={cfg.user}
+          onChange={(e) => set("user", e.target.value)}
+          className="w-56 px-3 py-1.5 rounded border border-neutral-300 text-sm font-mono focus:outline-none focus:border-sky-500"
+        />
+      </Row>
+      <Row
+        icon={<FiGlobe />}
+        label={t("settings.dyndns.password")}
+        hint={
+          msg ? (
+            <span className={msg.ok ? "text-emerald-700" : "text-red-700"}>
+              {msg.text}
+            </span>
+          ) : undefined
+        }
+      >
+        <div className="flex items-center gap-2">
+          <input
+            type="password"
+            value={cfg.password}
+            onChange={(e) => set("password", e.target.value)}
+            className="w-44 px-3 py-1.5 rounded border border-neutral-300 text-sm font-mono focus:outline-none focus:border-sky-500"
+          />
+          <button
+            onClick={update}
+            disabled={busy || !cfg.hostname.trim() || !cfg.user.trim()}
+            className="px-3 py-1.5 rounded bg-sky-600 hover:bg-sky-700 text-white text-sm flex items-center gap-1.5 disabled:opacity-50"
+          >
+            <FiRefreshCw className={busy ? "animate-spin" : ""} />
+            {busy ? t("settings.dyndns.updating") : t("settings.dyndns.update")}
+          </button>
+        </div>
+      </Row>
     </>
   );
 }

@@ -4,6 +4,7 @@ mod config_gen;
 mod db;
 mod deploy;
 mod downloads;
+mod dyndns;
 mod hosts;
 mod images;
 mod php;
@@ -697,6 +698,16 @@ fn ftp_upload(
 }
 
 #[tauri::command]
+fn dyndns_update(
+    provider: String,
+    hostname: String,
+    user: String,
+    password: String,
+) -> Result<dyndns::DynDnsResult, String> {
+    dyndns::update(&provider, &hostname, &user, &password)
+}
+
+#[tauri::command]
 fn deploy_profile_get(
     host_id: i64,
     state: tauri::State<AppState>,
@@ -1004,6 +1015,7 @@ pub fn run() {
             ftp_upload,
             deploy_profile_get,
             deploy_profile_save,
+            dyndns_update,
             editor_open,
             binary_installed,
             binary_download,
