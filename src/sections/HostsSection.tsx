@@ -780,6 +780,7 @@ function DeployTab({ host }: { host: Host }) {
         password: profile.ftp_password,
         remoteDir: profile.remote_dir,
         localDir: host.docroot,
+        protocol: profile.protocol,
       });
       setReport(r);
       if (r.errors.length === 0) {

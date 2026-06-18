@@ -670,7 +670,22 @@ fn ftp_upload(
     password: String,
     remote_dir: String,
     local_dir: String,
+    protocol: Option<String>,
 ) -> Result<deploy::DeployReport, String> {
+    // Guard against silently downgrading an FTPS/SFTP request to plaintext —
+    // that would leak credentials over the wire. Encrypted transports are
+    // not wired yet (suppaftp's TLS type-split + no SFTP runtime), so reject
+    // them explicitly rather than send the password in the clear.
+    match protocol.as_deref() {
+        None | Some("ftp") => {}
+        Some(other) => {
+            return Err(format!(
+                "{} transport is not supported yet — only plain FTP is available. \
+                 Encrypted transports (FTPS/SFTP) are coming in a later release.",
+                other.to_uppercase()
+            ))
+        }
+    }
     deploy::ftp_upload_folder(
         host.trim(),
         port,
