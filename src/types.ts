@@ -18,7 +18,6 @@ export type SectionId =
   | "tools"
   | "config"
   | "logs"
-  | "versions"
   | "settings";
 
 export type PhpExtension = {

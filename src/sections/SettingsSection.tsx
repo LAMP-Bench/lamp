@@ -11,9 +11,13 @@ import {
   FiInfo,
   FiExternalLink,
   FiCheck,
+  FiSliders,
+  FiPackage,
+  FiServer,
 } from "react-icons/fi";
 import { SiPhp, SiMysql } from "react-icons/si";
 import { LANGUAGES } from "../i18n";
+import { VersionsSection } from "./VersionsSection";
 import type { PhpCatalogEntry } from "../types";
 
 type UpdateState =
@@ -24,31 +28,89 @@ type UpdateState =
   | { kind: "installing"; progress: number; total: number | null }
   | { kind: "error"; message: string };
 
+type Category =
+  | "general"
+  | "services"
+  | "components"
+  | "updates"
+  | "dyndns"
+  | "about";
+
+const CATEGORIES: { id: Category; icon: React.ReactNode }[] = [
+  { id: "general", icon: <FiSliders /> },
+  { id: "services", icon: <FiServer /> },
+  { id: "components", icon: <FiPackage /> },
+  { id: "updates", icon: <FiDownload /> },
+  { id: "dyndns", icon: <FiGlobe /> },
+  { id: "about", icon: <FiInfo /> },
+];
+
 export function SettingsSection() {
   const { t } = useTranslation();
+  const [cat, setCat] = useState<Category>("general");
+
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="p-6 max-w-3xl space-y-6">
-        <Card title={t("settings.general.title")}>
-          <LanguageRow />
-        </Card>
+    <div className="h-full flex min-h-0">
+      {/* Category rail */}
+      <nav className="w-52 shrink-0 border-r border-neutral-200 bg-neutral-50 overflow-y-auto py-2">
+        {CATEGORIES.map((c) => {
+          const active = cat === c.id;
+          return (
+            <button
+              key={c.id}
+              onClick={() => setCat(c.id)}
+              className={`relative w-full flex items-center gap-3 pl-4 pr-3 py-2 text-left text-sm transition ${
+                active
+                  ? "bg-sky-50 text-sky-700 font-medium"
+                  : "text-neutral-700 hover:bg-neutral-100"
+              }`}
+            >
+              {active && (
+                <span className="absolute inset-y-0 left-0 w-[3px] bg-sky-500" />
+              )}
+              <span className="text-[15px] text-neutral-500">{c.icon}</span>
+              <span>{t(`settings.cat.${c.id}`)}</span>
+            </button>
+          );
+        })}
+      </nav>
 
-        <Card title={t("settings.services.title")}>
-          <ServicesRows />
-        </Card>
-
-        <Card title={t("settings.dyndns.title")}>
-          <DynDnsRows />
-        </Card>
-
-        <Card title={t("settings.updates.title")}>
-          <ChannelRow />
-          <UpdatesRow />
-        </Card>
-
-        <Card title={t("settings.about.title")}>
-          <AboutRow />
-        </Card>
+      {/* Detail panel */}
+      <div className="flex-1 min-w-0 min-h-0">
+        {cat === "components" ? (
+          <VersionsSection />
+        ) : (
+          <div className="h-full overflow-y-auto">
+            <div className="p-6 max-w-3xl space-y-6">
+              {cat === "general" && (
+                <Card title={t("settings.general.title")}>
+                  <LanguageRow />
+                </Card>
+              )}
+              {cat === "services" && (
+                <Card title={t("settings.services.title")}>
+                  <ServicesRows />
+                </Card>
+              )}
+              {cat === "updates" && (
+                <Card title={t("settings.updates.title")}>
+                  <ChannelRow />
+                  <UpdatesRow />
+                </Card>
+              )}
+              {cat === "dyndns" && (
+                <Card title={t("settings.dyndns.title")}>
+                  <DynDnsRows />
+                </Card>
+              )}
+              {cat === "about" && (
+                <Card title={t("settings.about.title")}>
+                  <AboutRow />
+                </Card>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -69,6 +69,14 @@
   },
   "settings": {
     "title": "Ajustes",
+    "cat": {
+      "general": "General",
+      "services": "Servicios",
+      "components": "Versiones y componentes",
+      "updates": "Actualizaciones",
+      "dyndns": "DNS dinámico",
+      "about": "Acerca de"
+    },
     "general": {
       "title": "General",
       "language": "Idioma",
