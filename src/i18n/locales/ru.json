@@ -1,0 +1,159 @@
+{
+  "setup": {
+    "title": "Настройка Lamp Bench",
+    "subtitle": "Первоначальная загрузка встроенных сервисов. Происходит только один раз.",
+    "getStarted": "Начать",
+    "retry": "Повторить",
+    "skip": "Пропустить пока",
+    "errorTitle": "Некоторые загрузки не удались",
+    "continueAnyway": "Перейти к приложению"
+  },
+  "nav": {
+    "home": "Главная",
+    "hosts": "Хосты",
+    "tools": "Инструменты",
+    "config": "Конфигурация",
+    "logs": "Журналы",
+    "versions": "Версии",
+    "settings": "Настройки",
+    "navigation": "Навигация",
+    "servers": "Серверы и службы"
+  },
+  "topbar": {
+    "editor": "Редактор",
+    "webstart": "Открыть сайт",
+    "start": "Запустить",
+    "stop": "Остановить"
+  },
+  "svcConfig": {
+    "configure": "Настроить",
+    "port": "Порт",
+    "portHttps": "Порт HTTPS",
+    "portSmtp": "Порт SMTP",
+    "version": "Версия",
+    "save": "Сохранить",
+    "saved": "Сохранено — нужен перезапуск",
+    "restartHint": "Перезапустите службу, чтобы применить изменения портов.",
+    "stopFirst": "Остановите службу перед сменой версии.",
+    "invalidPort": "Порты должны быть от 1 до 65535."
+  },
+  "settings": {
+    "title": "Настройки",
+    "cat": {
+      "general": "Общие",
+      "services": "Службы",
+      "components": "Версии и компоненты",
+      "updates": "Обновления",
+      "dyndns": "Динамический DNS",
+      "about": "О программе"
+    },
+    "general": {
+      "title": "Общие",
+      "language": "Язык",
+      "languageHint": "Применяется сразу и запоминается до следующего запуска."
+    },
+    "updates": {
+      "title": "Обновления",
+      "checkNow": "Проверить обновления",
+      "checking": "Проверка…",
+      "installNow": "Установить и перезапустить",
+      "channel": "Канал выпуска",
+      "channelAlpha": "Альфа (скользящий)",
+      "channelBeta": "Бета",
+      "channelStable": "Стабильный"
+    },
+    "about": {
+      "title": "О программе",
+      "version": "Версия",
+      "build": "Сборка",
+      "github": "GitHub",
+      "license": "Лицензия",
+      "openRepo": "Открыть репозиторий"
+    }
+  },
+  "updateBanner": {
+    "install": "Установить и перезапустить",
+    "downloading": "Загрузка обновления…"
+  },
+  "home": {
+    "services": "Службы",
+    "defaultHtdocs": "htdocs по умолчанию",
+    "virtualHosts": "Виртуальные хосты",
+    "manage": "Управление →",
+    "quickAccess": "Быстрый доступ",
+    "quickHosts": "Хосты",
+    "quickTools": "Инструменты",
+    "quickConfig": "Конфигурация",
+    "quickLogs": "Журналы",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "Моб. QR",
+    "statusRunning": "работает",
+    "statusStopped": "остановлен"
+  },
+  "hosts": {
+    "columns": { "name": "Имя", "php": "PHP", "extras": "Доп." },
+    "empty": "Хостов пока нет. Нажмите +, чтобы добавить.",
+    "add": "Добавить хост",
+    "deleteSelected": "Удалить выбранный хост",
+    "noneSelected": "Хост не выбран.",
+    "tab": {
+      "general": "Общие",
+      "apache": "Apache",
+      "nginx": "Nginx",
+      "ssl": "SSL",
+      "snapshots": "Снимки",
+      "deploy": "Деплой"
+    },
+    "saved": "Сохранено.",
+    "save": "Сохранить",
+    "saving": "Сохранение…",
+    "savedShort": "Сохранено",
+    "revert": "Отменить",
+    "addForm": {
+      "title": "Добавить хост",
+      "create": "Создать",
+      "creating": "Создание…",
+      "cancel": "Отмена"
+    }
+  },
+  "tools": {
+    "section": {
+      "database": "База данных",
+      "email": "Почта",
+      "images": "Изображения",
+      "deploy": "Деплой",
+      "php": "PHP",
+      "cms": "CMS"
+    },
+    "open": "Открыть"
+  },
+  "config": {
+    "loading": "Загрузка путей…",
+    "php": "PHP",
+    "servers": "Серверы",
+    "edit": "Изменить"
+  },
+  "logs": {
+    "noContent": "(журнал пока пуст)",
+    "pause": "Пауза",
+    "resume": "Продолжить"
+  },
+  "editor": {
+    "open": "Открыть",
+    "save": "Сохранить",
+    "saved": "Сохранено",
+    "dirty": "Сохранить *",
+    "checkSyntax": "Проверить синтаксис",
+    "empty": "Введите путь к файлу выше и нажмите Enter (или «Открыть»)."
+  },
+  "versions": {
+    "title": "Версии и компоненты",
+    "installed": "Установлено",
+    "install": "Установить",
+    "installing": "Установка…",
+    "remove": "Удалить",
+    "removing": "Удаление…",
+    "downloadMore": "Загрузить ещё",
+    "hideMore": "Скрыть"
+  }
+}

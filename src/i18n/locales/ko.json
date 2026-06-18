@@ -1,0 +1,159 @@
+{
+  "setup": {
+    "title": "Lamp Bench 설정 중",
+    "subtitle": "번들 서비스의 첫 실행 다운로드입니다. 한 번만 진행됩니다.",
+    "getStarted": "시작하기",
+    "retry": "다시 시도",
+    "skip": "지금은 건너뛰기",
+    "errorTitle": "일부 다운로드 실패",
+    "continueAnyway": "앱으로 계속"
+  },
+  "nav": {
+    "home": "홈",
+    "hosts": "호스트",
+    "tools": "도구",
+    "config": "구성",
+    "logs": "로그",
+    "versions": "버전",
+    "settings": "설정",
+    "navigation": "탐색",
+    "servers": "서버 및 서비스"
+  },
+  "topbar": {
+    "editor": "편집기",
+    "webstart": "사이트 열기",
+    "start": "시작",
+    "stop": "중지"
+  },
+  "svcConfig": {
+    "configure": "구성",
+    "port": "포트",
+    "portHttps": "HTTPS 포트",
+    "portSmtp": "SMTP 포트",
+    "version": "버전",
+    "save": "저장",
+    "saved": "저장됨 — 다시 시작해야 적용",
+    "restartHint": "포트 변경을 적용하려면 서비스를 다시 시작하세요.",
+    "stopFirst": "버전을 변경하기 전에 서비스를 중지하세요.",
+    "invalidPort": "포트는 1~65535 사이여야 합니다."
+  },
+  "settings": {
+    "title": "설정",
+    "cat": {
+      "general": "일반",
+      "services": "서비스",
+      "components": "버전 및 구성요소",
+      "updates": "업데이트",
+      "dyndns": "동적 DNS",
+      "about": "정보"
+    },
+    "general": {
+      "title": "일반",
+      "language": "언어",
+      "languageHint": "즉시 적용되며 다음 실행 시 기억됩니다."
+    },
+    "updates": {
+      "title": "업데이트",
+      "checkNow": "업데이트 확인",
+      "checking": "확인 중…",
+      "installNow": "설치 후 다시 시작",
+      "channel": "릴리스 채널",
+      "channelAlpha": "알파(롤링)",
+      "channelBeta": "베타",
+      "channelStable": "안정"
+    },
+    "about": {
+      "title": "정보",
+      "version": "버전",
+      "build": "빌드",
+      "github": "GitHub",
+      "license": "라이선스",
+      "openRepo": "저장소 열기"
+    }
+  },
+  "updateBanner": {
+    "install": "설치 후 다시 시작",
+    "downloading": "업데이트 다운로드 중…"
+  },
+  "home": {
+    "services": "서비스",
+    "defaultHtdocs": "기본 htdocs",
+    "virtualHosts": "가상 호스트",
+    "manage": "관리 →",
+    "quickAccess": "빠른 액세스",
+    "quickHosts": "호스트",
+    "quickTools": "도구",
+    "quickConfig": "구성",
+    "quickLogs": "로그",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "모바일 QR",
+    "statusRunning": "실행 중",
+    "statusStopped": "중지됨"
+  },
+  "hosts": {
+    "columns": { "name": "이름", "php": "PHP", "extras": "추가" },
+    "empty": "아직 호스트가 없습니다. +를 클릭하여 추가하세요.",
+    "add": "호스트 추가",
+    "deleteSelected": "선택한 호스트 삭제",
+    "noneSelected": "선택된 호스트가 없습니다.",
+    "tab": {
+      "general": "일반",
+      "apache": "Apache",
+      "nginx": "Nginx",
+      "ssl": "SSL",
+      "snapshots": "스냅샷",
+      "deploy": "배포"
+    },
+    "saved": "저장됨.",
+    "save": "저장",
+    "saving": "저장 중…",
+    "savedShort": "저장됨",
+    "revert": "되돌리기",
+    "addForm": {
+      "title": "호스트 추가",
+      "create": "만들기",
+      "creating": "만드는 중…",
+      "cancel": "취소"
+    }
+  },
+  "tools": {
+    "section": {
+      "database": "데이터베이스",
+      "email": "이메일",
+      "images": "이미지",
+      "deploy": "배포",
+      "php": "PHP",
+      "cms": "CMS"
+    },
+    "open": "열기"
+  },
+  "config": {
+    "loading": "경로 불러오는 중…",
+    "php": "PHP",
+    "servers": "서버",
+    "edit": "편집"
+  },
+  "logs": {
+    "noContent": "(아직 로그 내용 없음)",
+    "pause": "일시정지",
+    "resume": "재개"
+  },
+  "editor": {
+    "open": "열기",
+    "save": "저장",
+    "saved": "저장됨",
+    "dirty": "저장 *",
+    "checkSyntax": "구문 검사",
+    "empty": "위에 파일 경로를 입력하고 Enter를 누르세요(또는 열기 클릭)."
+  },
+  "versions": {
+    "title": "버전 및 구성요소",
+    "installed": "설치됨",
+    "install": "설치",
+    "installing": "설치 중…",
+    "remove": "제거",
+    "removing": "제거 중…",
+    "downloadMore": "더 다운로드",
+    "hideMore": "숨기기"
+  }
+}

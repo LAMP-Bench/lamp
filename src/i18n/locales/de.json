@@ -1,0 +1,159 @@
+{
+  "setup": {
+    "title": "Lamp Bench wird eingerichtet",
+    "subtitle": "Erstmaliger Download der mitgelieferten Dienste. Passiert nur einmal.",
+    "getStarted": "Loslegen",
+    "retry": "Wiederholen",
+    "skip": "Vorerst überspringen",
+    "errorTitle": "Einige Downloads sind fehlgeschlagen",
+    "continueAnyway": "Zur App fortfahren"
+  },
+  "nav": {
+    "home": "Start",
+    "hosts": "Hosts",
+    "tools": "Werkzeuge",
+    "config": "Konfiguration",
+    "logs": "Protokolle",
+    "versions": "Versionen",
+    "settings": "Einstellungen",
+    "navigation": "Navigation",
+    "servers": "Server & Dienste"
+  },
+  "topbar": {
+    "editor": "Editor",
+    "webstart": "Web öffnen",
+    "start": "Starten",
+    "stop": "Stoppen"
+  },
+  "svcConfig": {
+    "configure": "Konfigurieren",
+    "port": "Port",
+    "portHttps": "HTTPS-Port",
+    "portSmtp": "SMTP-Port",
+    "version": "Version",
+    "save": "Speichern",
+    "saved": "Gespeichert — Neustart erforderlich",
+    "restartHint": "Dienst neu starten, um Portänderungen anzuwenden.",
+    "stopFirst": "Dienst stoppen, bevor die Version geändert wird.",
+    "invalidPort": "Ports müssen zwischen 1 und 65535 liegen."
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "cat": {
+      "general": "Allgemein",
+      "services": "Dienste",
+      "components": "Versionen & Komponenten",
+      "updates": "Updates",
+      "dyndns": "Dynamisches DNS",
+      "about": "Über"
+    },
+    "general": {
+      "title": "Allgemein",
+      "language": "Sprache",
+      "languageHint": "Wird sofort wirksam und für den nächsten Start gespeichert."
+    },
+    "updates": {
+      "title": "Updates",
+      "checkNow": "Nach Updates suchen",
+      "checking": "Suche…",
+      "installNow": "Installieren & Neustarten",
+      "channel": "Release-Kanal",
+      "channelAlpha": "Alpha (rollend)",
+      "channelBeta": "Beta",
+      "channelStable": "Stabil"
+    },
+    "about": {
+      "title": "Über",
+      "version": "Version",
+      "build": "Build",
+      "github": "GitHub",
+      "license": "Lizenz",
+      "openRepo": "Repository öffnen"
+    }
+  },
+  "updateBanner": {
+    "install": "Installieren & Neustarten",
+    "downloading": "Update wird heruntergeladen…"
+  },
+  "home": {
+    "services": "Dienste",
+    "defaultHtdocs": "Standard-htdocs",
+    "virtualHosts": "Virtuelle Hosts",
+    "manage": "Verwalten →",
+    "quickAccess": "Schnellzugriff",
+    "quickHosts": "Hosts",
+    "quickTools": "Werkzeuge",
+    "quickConfig": "Konfiguration",
+    "quickLogs": "Protokolle",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "Mobiler QR",
+    "statusRunning": "läuft",
+    "statusStopped": "gestoppt"
+  },
+  "hosts": {
+    "columns": { "name": "Name", "php": "PHP", "extras": "Extras" },
+    "empty": "Noch keine Hosts. Auf + klicken, um einen hinzuzufügen.",
+    "add": "Host hinzufügen",
+    "deleteSelected": "Ausgewählten Host löschen",
+    "noneSelected": "Kein Host ausgewählt.",
+    "tab": {
+      "general": "Allgemein",
+      "apache": "Apache",
+      "nginx": "Nginx",
+      "ssl": "SSL",
+      "snapshots": "Snapshots",
+      "deploy": "Deploy"
+    },
+    "saved": "Gespeichert.",
+    "save": "Speichern",
+    "saving": "Speichern…",
+    "savedShort": "Gespeichert",
+    "revert": "Zurücksetzen",
+    "addForm": {
+      "title": "Host hinzufügen",
+      "create": "Erstellen",
+      "creating": "Erstellen…",
+      "cancel": "Abbrechen"
+    }
+  },
+  "tools": {
+    "section": {
+      "database": "Datenbank",
+      "email": "E-Mail",
+      "images": "Bilder",
+      "deploy": "Deploy",
+      "php": "PHP",
+      "cms": "CMS"
+    },
+    "open": "Öffnen"
+  },
+  "config": {
+    "loading": "Pfade werden geladen…",
+    "php": "PHP",
+    "servers": "Server",
+    "edit": "Bearbeiten"
+  },
+  "logs": {
+    "noContent": "(noch kein Protokollinhalt)",
+    "pause": "Pause",
+    "resume": "Fortsetzen"
+  },
+  "editor": {
+    "open": "Öffnen",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "dirty": "Speichern *",
+    "checkSyntax": "Syntax prüfen",
+    "empty": "Dateipfad oben eingeben und Enter drücken (oder Öffnen klicken)."
+  },
+  "versions": {
+    "title": "Versionen & Komponenten",
+    "installed": "Installiert",
+    "install": "Installieren",
+    "installing": "Installieren…",
+    "remove": "Entfernen",
+    "removing": "Entfernen…",
+    "downloadMore": "Mehr herunterladen",
+    "hideMore": "Ausblenden"
+  }
+}

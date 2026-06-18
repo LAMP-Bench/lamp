@@ -1,0 +1,159 @@
+{
+  "setup": {
+    "title": "正在设置 Lamp Bench",
+    "subtitle": "首次启动下载捆绑的服务，仅进行一次。",
+    "getStarted": "开始使用",
+    "retry": "重试",
+    "skip": "暂时跳过",
+    "errorTitle": "部分下载失败",
+    "continueAnyway": "继续进入应用"
+  },
+  "nav": {
+    "home": "主页",
+    "hosts": "主机",
+    "tools": "工具",
+    "config": "配置",
+    "logs": "日志",
+    "versions": "版本",
+    "settings": "设置",
+    "navigation": "导航",
+    "servers": "服务器与服务"
+  },
+  "topbar": {
+    "editor": "编辑器",
+    "webstart": "打开网站",
+    "start": "启动",
+    "stop": "停止"
+  },
+  "svcConfig": {
+    "configure": "配置",
+    "port": "端口",
+    "portHttps": "HTTPS 端口",
+    "portSmtp": "SMTP 端口",
+    "version": "版本",
+    "save": "保存",
+    "saved": "已保存 — 重启后生效",
+    "restartHint": "重启服务以应用端口更改。",
+    "stopFirst": "更改版本前请先停止服务。",
+    "invalidPort": "端口必须在 1 到 65535 之间。"
+  },
+  "settings": {
+    "title": "设置",
+    "cat": {
+      "general": "常规",
+      "services": "服务",
+      "components": "版本与组件",
+      "updates": "更新",
+      "dyndns": "动态 DNS",
+      "about": "关于"
+    },
+    "general": {
+      "title": "常规",
+      "language": "语言",
+      "languageHint": "立即生效，并在下次启动时记住。"
+    },
+    "updates": {
+      "title": "更新",
+      "checkNow": "检查更新",
+      "checking": "检查中…",
+      "installNow": "安装并重启",
+      "channel": "发布通道",
+      "channelAlpha": "Alpha（滚动）",
+      "channelBeta": "Beta",
+      "channelStable": "稳定版"
+    },
+    "about": {
+      "title": "关于",
+      "version": "版本",
+      "build": "构建",
+      "github": "GitHub",
+      "license": "许可证",
+      "openRepo": "打开仓库"
+    }
+  },
+  "updateBanner": {
+    "install": "安装并重启",
+    "downloading": "正在下载更新…"
+  },
+  "home": {
+    "services": "服务",
+    "defaultHtdocs": "默认 htdocs",
+    "virtualHosts": "虚拟主机",
+    "manage": "管理 →",
+    "quickAccess": "快速访问",
+    "quickHosts": "主机",
+    "quickTools": "工具",
+    "quickConfig": "配置",
+    "quickLogs": "日志",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "手机二维码",
+    "statusRunning": "运行中",
+    "statusStopped": "已停止"
+  },
+  "hosts": {
+    "columns": { "name": "名称", "php": "PHP", "extras": "附加" },
+    "empty": "还没有主机。点击 + 添加一个。",
+    "add": "添加主机",
+    "deleteSelected": "删除所选主机",
+    "noneSelected": "未选择主机。",
+    "tab": {
+      "general": "常规",
+      "apache": "Apache",
+      "nginx": "Nginx",
+      "ssl": "SSL",
+      "snapshots": "快照",
+      "deploy": "部署"
+    },
+    "saved": "已保存。",
+    "save": "保存",
+    "saving": "保存中…",
+    "savedShort": "已保存",
+    "revert": "还原",
+    "addForm": {
+      "title": "添加主机",
+      "create": "创建",
+      "creating": "创建中…",
+      "cancel": "取消"
+    }
+  },
+  "tools": {
+    "section": {
+      "database": "数据库",
+      "email": "邮件",
+      "images": "图片",
+      "deploy": "部署",
+      "php": "PHP",
+      "cms": "CMS"
+    },
+    "open": "打开"
+  },
+  "config": {
+    "loading": "正在加载路径…",
+    "php": "PHP",
+    "servers": "服务器",
+    "edit": "编辑"
+  },
+  "logs": {
+    "noContent": "（暂无日志内容）",
+    "pause": "暂停",
+    "resume": "继续"
+  },
+  "editor": {
+    "open": "打开",
+    "save": "保存",
+    "saved": "已保存",
+    "dirty": "保存 *",
+    "checkSyntax": "检查语法",
+    "empty": "在上方输入文件路径并按回车（或点击打开）。"
+  },
+  "versions": {
+    "title": "版本与组件",
+    "installed": "已安装",
+    "install": "安装",
+    "installing": "安装中…",
+    "remove": "移除",
+    "removing": "移除中…",
+    "downloadMore": "下载更多",
+    "hideMore": "隐藏"
+  }
+}

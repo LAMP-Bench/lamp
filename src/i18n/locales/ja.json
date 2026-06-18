@@ -1,0 +1,159 @@
+{
+  "setup": {
+    "title": "Lamp Bench をセットアップ中",
+    "subtitle": "同梱サービスの初回ダウンロード。これは一度だけ行われます。",
+    "getStarted": "開始",
+    "retry": "再試行",
+    "skip": "今はスキップ",
+    "errorTitle": "一部のダウンロードに失敗しました",
+    "continueAnyway": "アプリへ進む"
+  },
+  "nav": {
+    "home": "ホーム",
+    "hosts": "ホスト",
+    "tools": "ツール",
+    "config": "設定ファイル",
+    "logs": "ログ",
+    "versions": "バージョン",
+    "settings": "設定",
+    "navigation": "ナビゲーション",
+    "servers": "サーバーとサービス"
+  },
+  "topbar": {
+    "editor": "エディター",
+    "webstart": "サイトを開く",
+    "start": "開始",
+    "stop": "停止"
+  },
+  "svcConfig": {
+    "configure": "設定",
+    "port": "ポート",
+    "portHttps": "HTTPS ポート",
+    "portSmtp": "SMTP ポート",
+    "version": "バージョン",
+    "save": "保存",
+    "saved": "保存しました — 再起動で反映",
+    "restartHint": "ポートの変更を反映するにはサービスを再起動してください。",
+    "stopFirst": "バージョンを変更する前にサービスを停止してください。",
+    "invalidPort": "ポートは 1〜65535 の範囲で指定してください。"
+  },
+  "settings": {
+    "title": "設定",
+    "cat": {
+      "general": "一般",
+      "services": "サービス",
+      "components": "バージョンとコンポーネント",
+      "updates": "アップデート",
+      "dyndns": "ダイナミック DNS",
+      "about": "情報"
+    },
+    "general": {
+      "title": "一般",
+      "language": "言語",
+      "languageHint": "すぐに反映され、次回起動時にも記憶されます。"
+    },
+    "updates": {
+      "title": "アップデート",
+      "checkNow": "アップデートを確認",
+      "checking": "確認中…",
+      "installNow": "インストールして再起動",
+      "channel": "リリースチャンネル",
+      "channelAlpha": "アルファ（ローリング）",
+      "channelBeta": "ベータ",
+      "channelStable": "安定版"
+    },
+    "about": {
+      "title": "情報",
+      "version": "バージョン",
+      "build": "ビルド",
+      "github": "GitHub",
+      "license": "ライセンス",
+      "openRepo": "リポジトリを開く"
+    }
+  },
+  "updateBanner": {
+    "install": "インストールして再起動",
+    "downloading": "アップデートをダウンロード中…"
+  },
+  "home": {
+    "services": "サービス",
+    "defaultHtdocs": "既定の htdocs",
+    "virtualHosts": "バーチャルホスト",
+    "manage": "管理 →",
+    "quickAccess": "クイックアクセス",
+    "quickHosts": "ホスト",
+    "quickTools": "ツール",
+    "quickConfig": "設定ファイル",
+    "quickLogs": "ログ",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "モバイル QR",
+    "statusRunning": "実行中",
+    "statusStopped": "停止中"
+  },
+  "hosts": {
+    "columns": { "name": "名前", "php": "PHP", "extras": "追加" },
+    "empty": "まだホストがありません。+ をクリックして追加してください。",
+    "add": "ホストを追加",
+    "deleteSelected": "選択したホストを削除",
+    "noneSelected": "ホストが選択されていません。",
+    "tab": {
+      "general": "一般",
+      "apache": "Apache",
+      "nginx": "Nginx",
+      "ssl": "SSL",
+      "snapshots": "スナップショット",
+      "deploy": "デプロイ"
+    },
+    "saved": "保存しました。",
+    "save": "保存",
+    "saving": "保存中…",
+    "savedShort": "保存済み",
+    "revert": "元に戻す",
+    "addForm": {
+      "title": "ホストを追加",
+      "create": "作成",
+      "creating": "作成中…",
+      "cancel": "キャンセル"
+    }
+  },
+  "tools": {
+    "section": {
+      "database": "データベース",
+      "email": "メール",
+      "images": "画像",
+      "deploy": "デプロイ",
+      "php": "PHP",
+      "cms": "CMS"
+    },
+    "open": "開く"
+  },
+  "config": {
+    "loading": "パスを読み込み中…",
+    "php": "PHP",
+    "servers": "サーバー",
+    "edit": "編集"
+  },
+  "logs": {
+    "noContent": "（ログ内容はまだありません）",
+    "pause": "一時停止",
+    "resume": "再開"
+  },
+  "editor": {
+    "open": "開く",
+    "save": "保存",
+    "saved": "保存済み",
+    "dirty": "保存 *",
+    "checkSyntax": "構文チェック",
+    "empty": "上にファイルパスを入力して Enter を押してください（または「開く」をクリック）。"
+  },
+  "versions": {
+    "title": "バージョンとコンポーネント",
+    "installed": "インストール済み",
+    "install": "インストール",
+    "installing": "インストール中…",
+    "remove": "削除",
+    "removing": "削除中…",
+    "downloadMore": "さらにダウンロード",
+    "hideMore": "隠す"
+  }
+}

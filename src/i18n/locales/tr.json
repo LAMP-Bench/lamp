@@ -1,0 +1,159 @@
+{
+  "setup": {
+    "title": "Lamp Bench kuruluyor",
+    "subtitle": "Paketlenmiş hizmetlerin ilk indirilmesi. Bu yalnızca bir kez olur.",
+    "getStarted": "Başla",
+    "retry": "Yeniden dene",
+    "skip": "Şimdilik atla",
+    "errorTitle": "Bazı indirmeler başarısız oldu",
+    "continueAnyway": "Uygulamaya devam et"
+  },
+  "nav": {
+    "home": "Ana sayfa",
+    "hosts": "Ana bilgisayarlar",
+    "tools": "Araçlar",
+    "config": "Yapılandırma",
+    "logs": "Günlükler",
+    "versions": "Sürümler",
+    "settings": "Ayarlar",
+    "navigation": "Gezinme",
+    "servers": "Sunucular ve hizmetler"
+  },
+  "topbar": {
+    "editor": "Düzenleyici",
+    "webstart": "Siteyi aç",
+    "start": "Başlat",
+    "stop": "Durdur"
+  },
+  "svcConfig": {
+    "configure": "Yapılandır",
+    "port": "Bağlantı noktası",
+    "portHttps": "HTTPS bağlantı noktası",
+    "portSmtp": "SMTP bağlantı noktası",
+    "version": "Sürüm",
+    "save": "Kaydet",
+    "saved": "Kaydedildi — uygulamak için yeniden başlatın",
+    "restartHint": "Bağlantı noktası değişikliklerini uygulamak için hizmeti yeniden başlatın.",
+    "stopFirst": "Sürümü değiştirmeden önce hizmeti durdurun.",
+    "invalidPort": "Bağlantı noktaları 1 ile 65535 arasında olmalıdır."
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "cat": {
+      "general": "Genel",
+      "services": "Hizmetler",
+      "components": "Sürümler ve bileşenler",
+      "updates": "Güncellemeler",
+      "dyndns": "Dinamik DNS",
+      "about": "Hakkında"
+    },
+    "general": {
+      "title": "Genel",
+      "language": "Dil",
+      "languageHint": "Hemen geçerli olur ve sonraki açılış için hatırlanır."
+    },
+    "updates": {
+      "title": "Güncellemeler",
+      "checkNow": "Güncellemeleri denetle",
+      "checking": "Denetleniyor…",
+      "installNow": "Yükle ve yeniden başlat",
+      "channel": "Sürüm kanalı",
+      "channelAlpha": "Alfa (sürekli)",
+      "channelBeta": "Beta",
+      "channelStable": "Kararlı"
+    },
+    "about": {
+      "title": "Hakkında",
+      "version": "Sürüm",
+      "build": "Yapı",
+      "github": "GitHub",
+      "license": "Lisans",
+      "openRepo": "Depoyu aç"
+    }
+  },
+  "updateBanner": {
+    "install": "Yükle ve yeniden başlat",
+    "downloading": "Güncelleme indiriliyor…"
+  },
+  "home": {
+    "services": "Hizmetler",
+    "defaultHtdocs": "Varsayılan htdocs",
+    "virtualHosts": "Sanal ana bilgisayarlar",
+    "manage": "Yönet →",
+    "quickAccess": "Hızlı erişim",
+    "quickHosts": "Ana bilgisayarlar",
+    "quickTools": "Araçlar",
+    "quickConfig": "Yapılandırma",
+    "quickLogs": "Günlükler",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "Mobil QR",
+    "statusRunning": "çalışıyor",
+    "statusStopped": "durduruldu"
+  },
+  "hosts": {
+    "columns": { "name": "Ad", "php": "PHP", "extras": "Ekstralar" },
+    "empty": "Henüz ana bilgisayar yok. Eklemek için + tıklayın.",
+    "add": "Ana bilgisayar ekle",
+    "deleteSelected": "Seçili ana bilgisayarı sil",
+    "noneSelected": "Ana bilgisayar seçilmedi.",
+    "tab": {
+      "general": "Genel",
+      "apache": "Apache",
+      "nginx": "Nginx",
+      "ssl": "SSL",
+      "snapshots": "Anlık görüntüler",
+      "deploy": "Dağıtım"
+    },
+    "saved": "Kaydedildi.",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor…",
+    "savedShort": "Kaydedildi",
+    "revert": "Geri al",
+    "addForm": {
+      "title": "Ana bilgisayar ekle",
+      "create": "Oluştur",
+      "creating": "Oluşturuluyor…",
+      "cancel": "İptal"
+    }
+  },
+  "tools": {
+    "section": {
+      "database": "Veritabanı",
+      "email": "E-posta",
+      "images": "Görseller",
+      "deploy": "Dağıtım",
+      "php": "PHP",
+      "cms": "CMS"
+    },
+    "open": "Aç"
+  },
+  "config": {
+    "loading": "Yollar yükleniyor…",
+    "php": "PHP",
+    "servers": "Sunucular",
+    "edit": "Düzenle"
+  },
+  "logs": {
+    "noContent": "(henüz günlük içeriği yok)",
+    "pause": "Duraklat",
+    "resume": "Sürdür"
+  },
+  "editor": {
+    "open": "Aç",
+    "save": "Kaydet",
+    "saved": "Kaydedildi",
+    "dirty": "Kaydet *",
+    "checkSyntax": "Söz dizimini denetle",
+    "empty": "Yukarıya bir dosya yolu yazın ve Enter'a basın (veya Aç'a tıklayın)."
+  },
+  "versions": {
+    "title": "Sürümler ve bileşenler",
+    "installed": "Yüklü",
+    "install": "Yükle",
+    "installing": "Yükleniyor…",
+    "remove": "Kaldır",
+    "removing": "Kaldırılıyor…",
+    "downloadMore": "Daha fazla indir",
+    "hideMore": "Gizle"
+  }
+}

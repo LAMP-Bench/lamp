@@ -1,0 +1,159 @@
+{
+  "setup": {
+    "title": "Configurando o Lamp Bench",
+    "subtitle": "Download inicial dos serviços incluídos. Acontece apenas uma vez.",
+    "getStarted": "Começar",
+    "retry": "Tentar de novo",
+    "skip": "Pular por agora",
+    "errorTitle": "Alguns downloads falharam",
+    "continueAnyway": "Continuar para o app"
+  },
+  "nav": {
+    "home": "Início",
+    "hosts": "Hosts",
+    "tools": "Ferramentas",
+    "config": "Configuração",
+    "logs": "Logs",
+    "versions": "Versões",
+    "settings": "Configurações",
+    "navigation": "Navegação",
+    "servers": "Servidores e serviços"
+  },
+  "topbar": {
+    "editor": "Editor",
+    "webstart": "Abrir site",
+    "start": "Iniciar",
+    "stop": "Parar"
+  },
+  "svcConfig": {
+    "configure": "Configurar",
+    "port": "Porta",
+    "portHttps": "Porta HTTPS",
+    "portSmtp": "Porta SMTP",
+    "version": "Versão",
+    "save": "Salvar",
+    "saved": "Salvo — reinicie para aplicar",
+    "restartHint": "Reinicie o serviço para aplicar as mudanças de porta.",
+    "stopFirst": "Pare o serviço antes de mudar a versão.",
+    "invalidPort": "As portas devem estar entre 1 e 65535."
+  },
+  "settings": {
+    "title": "Configurações",
+    "cat": {
+      "general": "Geral",
+      "services": "Serviços",
+      "components": "Versões e componentes",
+      "updates": "Atualizações",
+      "dyndns": "DNS dinâmico",
+      "about": "Sobre"
+    },
+    "general": {
+      "title": "Geral",
+      "language": "Idioma",
+      "languageHint": "Aplica-se imediatamente e fica salvo para a próxima inicialização."
+    },
+    "updates": {
+      "title": "Atualizações",
+      "checkNow": "Procurar atualizações",
+      "checking": "Procurando…",
+      "installNow": "Instalar e reiniciar",
+      "channel": "Canal de versão",
+      "channelAlpha": "Alfa (contínuo)",
+      "channelBeta": "Beta",
+      "channelStable": "Estável"
+    },
+    "about": {
+      "title": "Sobre",
+      "version": "Versão",
+      "build": "Build",
+      "github": "GitHub",
+      "license": "Licença",
+      "openRepo": "Abrir repositório"
+    }
+  },
+  "updateBanner": {
+    "install": "Instalar e reiniciar",
+    "downloading": "Baixando atualização…"
+  },
+  "home": {
+    "services": "Serviços",
+    "defaultHtdocs": "htdocs padrão",
+    "virtualHosts": "Hosts virtuais",
+    "manage": "Gerenciar →",
+    "quickAccess": "Acesso rápido",
+    "quickHosts": "Hosts",
+    "quickTools": "Ferramentas",
+    "quickConfig": "Configuração",
+    "quickLogs": "Logs",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "QR móvel",
+    "statusRunning": "em execução",
+    "statusStopped": "parado"
+  },
+  "hosts": {
+    "columns": { "name": "Nome", "php": "PHP", "extras": "Extras" },
+    "empty": "Nenhum host ainda. Clique em + para adicionar.",
+    "add": "Adicionar host",
+    "deleteSelected": "Excluir host selecionado",
+    "noneSelected": "Nenhum host selecionado.",
+    "tab": {
+      "general": "Geral",
+      "apache": "Apache",
+      "nginx": "Nginx",
+      "ssl": "SSL",
+      "snapshots": "Snapshots",
+      "deploy": "Deploy"
+    },
+    "saved": "Salvo.",
+    "save": "Salvar",
+    "saving": "Salvando…",
+    "savedShort": "Salvo",
+    "revert": "Reverter",
+    "addForm": {
+      "title": "Adicionar host",
+      "create": "Criar",
+      "creating": "Criando…",
+      "cancel": "Cancelar"
+    }
+  },
+  "tools": {
+    "section": {
+      "database": "Banco de dados",
+      "email": "E-mail",
+      "images": "Imagens",
+      "deploy": "Deploy",
+      "php": "PHP",
+      "cms": "CMS"
+    },
+    "open": "Abrir"
+  },
+  "config": {
+    "loading": "Carregando caminhos…",
+    "php": "PHP",
+    "servers": "Servidores",
+    "edit": "Editar"
+  },
+  "logs": {
+    "noContent": "(sem conteúdo de log ainda)",
+    "pause": "Pausar",
+    "resume": "Retomar"
+  },
+  "editor": {
+    "open": "Abrir",
+    "save": "Salvar",
+    "saved": "Salvo",
+    "dirty": "Salvar *",
+    "checkSyntax": "Verificar sintaxe",
+    "empty": "Digite um caminho de arquivo acima e pressione Enter (ou clique em Abrir)."
+  },
+  "versions": {
+    "title": "Versões e componentes",
+    "installed": "Instalado",
+    "install": "Instalar",
+    "installing": "Instalando…",
+    "remove": "Remover",
+    "removing": "Removendo…",
+    "downloadMore": "Baixar mais",
+    "hideMore": "Ocultar"
+  }
+}

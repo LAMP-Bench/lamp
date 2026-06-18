@@ -1,0 +1,159 @@
+{
+  "setup": {
+    "title": "Lamp Bench सेटअप हो रहा है",
+    "subtitle": "बंडल की गई सेवाओं का पहली बार डाउनलोड। यह केवल एक बार होता है।",
+    "getStarted": "शुरू करें",
+    "retry": "पुनः प्रयास",
+    "skip": "अभी छोड़ें",
+    "errorTitle": "कुछ डाउनलोड विफल रहे",
+    "continueAnyway": "ऐप पर जारी रखें"
+  },
+  "nav": {
+    "home": "होम",
+    "hosts": "होस्ट",
+    "tools": "उपकरण",
+    "config": "कॉन्फ़िग",
+    "logs": "लॉग",
+    "versions": "संस्करण",
+    "settings": "सेटिंग्स",
+    "navigation": "नेविगेशन",
+    "servers": "सर्वर और सेवाएँ"
+  },
+  "topbar": {
+    "editor": "एडिटर",
+    "webstart": "साइट खोलें",
+    "start": "शुरू",
+    "stop": "रोकें"
+  },
+  "svcConfig": {
+    "configure": "कॉन्फ़िगर करें",
+    "port": "पोर्ट",
+    "portHttps": "HTTPS पोर्ट",
+    "portSmtp": "SMTP पोर्ट",
+    "version": "संस्करण",
+    "save": "सहेजें",
+    "saved": "सहेजा गया — लागू करने के लिए पुनः आरंभ करें",
+    "restartHint": "पोर्ट परिवर्तन लागू करने के लिए सेवा को पुनः आरंभ करें।",
+    "stopFirst": "संस्करण बदलने से पहले सेवा रोकें।",
+    "invalidPort": "पोर्ट 1 से 65535 के बीच होने चाहिए।"
+  },
+  "settings": {
+    "title": "सेटिंग्स",
+    "cat": {
+      "general": "सामान्य",
+      "services": "सेवाएँ",
+      "components": "संस्करण और घटक",
+      "updates": "अपडेट",
+      "dyndns": "डायनेमिक DNS",
+      "about": "परिचय"
+    },
+    "general": {
+      "title": "सामान्य",
+      "language": "भाषा",
+      "languageHint": "तुरंत लागू होती है और अगली बार के लिए याद रखी जाती है।"
+    },
+    "updates": {
+      "title": "अपडेट",
+      "checkNow": "अपडेट जाँचें",
+      "checking": "जाँच रहे हैं…",
+      "installNow": "इंस्टॉल करें और पुनः आरंभ करें",
+      "channel": "रिलीज़ चैनल",
+      "channelAlpha": "अल्फ़ा (रोलिंग)",
+      "channelBeta": "बीटा",
+      "channelStable": "स्थिर"
+    },
+    "about": {
+      "title": "परिचय",
+      "version": "संस्करण",
+      "build": "बिल्ड",
+      "github": "GitHub",
+      "license": "लाइसेंस",
+      "openRepo": "रिपॉज़िटरी खोलें"
+    }
+  },
+  "updateBanner": {
+    "install": "इंस्टॉल करें और पुनः आरंभ करें",
+    "downloading": "अपडेट डाउनलोड हो रहा है…"
+  },
+  "home": {
+    "services": "सेवाएँ",
+    "defaultHtdocs": "डिफ़ॉल्ट htdocs",
+    "virtualHosts": "वर्चुअल होस्ट",
+    "manage": "प्रबंधित करें →",
+    "quickAccess": "त्वरित पहुँच",
+    "quickHosts": "होस्ट",
+    "quickTools": "उपकरण",
+    "quickConfig": "कॉन्फ़िग",
+    "quickLogs": "लॉग",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "मोबाइल QR",
+    "statusRunning": "चल रहा है",
+    "statusStopped": "रुका हुआ"
+  },
+  "hosts": {
+    "columns": { "name": "नाम", "php": "PHP", "extras": "अतिरिक्त" },
+    "empty": "अभी कोई होस्ट नहीं। जोड़ने के लिए + क्लिक करें।",
+    "add": "होस्ट जोड़ें",
+    "deleteSelected": "चयनित होस्ट हटाएँ",
+    "noneSelected": "कोई होस्ट चयनित नहीं।",
+    "tab": {
+      "general": "सामान्य",
+      "apache": "Apache",
+      "nginx": "Nginx",
+      "ssl": "SSL",
+      "snapshots": "स्नैपशॉट",
+      "deploy": "डिप्लॉय"
+    },
+    "saved": "सहेजा गया।",
+    "save": "सहेजें",
+    "saving": "सहेज रहे हैं…",
+    "savedShort": "सहेजा गया",
+    "revert": "वापस लें",
+    "addForm": {
+      "title": "होस्ट जोड़ें",
+      "create": "बनाएँ",
+      "creating": "बना रहे हैं…",
+      "cancel": "रद्द करें"
+    }
+  },
+  "tools": {
+    "section": {
+      "database": "डेटाबेस",
+      "email": "ईमेल",
+      "images": "छवियाँ",
+      "deploy": "डिप्लॉय",
+      "php": "PHP",
+      "cms": "CMS"
+    },
+    "open": "खोलें"
+  },
+  "config": {
+    "loading": "पथ लोड हो रहे हैं…",
+    "php": "PHP",
+    "servers": "सर्वर",
+    "edit": "संपादित करें"
+  },
+  "logs": {
+    "noContent": "(अभी कोई लॉग सामग्री नहीं)",
+    "pause": "रोकें",
+    "resume": "जारी रखें"
+  },
+  "editor": {
+    "open": "खोलें",
+    "save": "सहेजें",
+    "saved": "सहेजा गया",
+    "dirty": "सहेजें *",
+    "checkSyntax": "सिंटैक्स जाँचें",
+    "empty": "ऊपर फ़ाइल पथ लिखें और Enter दबाएँ (या खोलें पर क्लिक करें)।"
+  },
+  "versions": {
+    "title": "संस्करण और घटक",
+    "installed": "इंस्टॉल किया गया",
+    "install": "इंस्टॉल करें",
+    "installing": "इंस्टॉल हो रहा है…",
+    "remove": "हटाएँ",
+    "removing": "हटा रहे हैं…",
+    "downloadMore": "और डाउनलोड करें",
+    "hideMore": "छिपाएँ"
+  }
+}

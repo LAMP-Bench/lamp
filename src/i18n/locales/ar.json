@@ -1,0 +1,159 @@
+{
+  "setup": {
+    "title": "جارٍ إعداد Lamp Bench",
+    "subtitle": "تنزيل الخدمات المضمّنة لأول مرة. يحدث هذا مرة واحدة فقط.",
+    "getStarted": "ابدأ",
+    "retry": "إعادة المحاولة",
+    "skip": "تخطٍّ الآن",
+    "errorTitle": "فشلت بعض التنزيلات",
+    "continueAnyway": "المتابعة إلى التطبيق"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "hosts": "المضيفون",
+    "tools": "الأدوات",
+    "config": "الإعداد",
+    "logs": "السجلات",
+    "versions": "الإصدارات",
+    "settings": "الإعدادات",
+    "navigation": "التنقل",
+    "servers": "الخوادم والخدمات"
+  },
+  "topbar": {
+    "editor": "المحرر",
+    "webstart": "فتح الموقع",
+    "start": "تشغيل",
+    "stop": "إيقاف"
+  },
+  "svcConfig": {
+    "configure": "تهيئة",
+    "port": "المنفذ",
+    "portHttps": "منفذ HTTPS",
+    "portSmtp": "منفذ SMTP",
+    "version": "الإصدار",
+    "save": "حفظ",
+    "saved": "تم الحفظ — أعد التشغيل للتطبيق",
+    "restartHint": "أعد تشغيل الخدمة لتطبيق تغييرات المنفذ.",
+    "stopFirst": "أوقف الخدمة قبل تغيير إصدارها.",
+    "invalidPort": "يجب أن تكون المنافذ بين 1 و65535."
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "cat": {
+      "general": "عام",
+      "services": "الخدمات",
+      "components": "الإصدارات والمكوّنات",
+      "updates": "التحديثات",
+      "dyndns": "DNS الديناميكي",
+      "about": "حول"
+    },
+    "general": {
+      "title": "عام",
+      "language": "اللغة",
+      "languageHint": "يسري على الفور ويُحفظ للتشغيل التالي."
+    },
+    "updates": {
+      "title": "التحديثات",
+      "checkNow": "التحقق من التحديثات",
+      "checking": "جارٍ التحقق…",
+      "installNow": "التثبيت وإعادة التشغيل",
+      "channel": "قناة الإصدار",
+      "channelAlpha": "ألفا (متجدّد)",
+      "channelBeta": "بيتا",
+      "channelStable": "مستقر"
+    },
+    "about": {
+      "title": "حول",
+      "version": "الإصدار",
+      "build": "البناء",
+      "github": "GitHub",
+      "license": "الترخيص",
+      "openRepo": "فتح المستودع"
+    }
+  },
+  "updateBanner": {
+    "install": "التثبيت وإعادة التشغيل",
+    "downloading": "جارٍ تنزيل التحديث…"
+  },
+  "home": {
+    "services": "الخدمات",
+    "defaultHtdocs": "htdocs الافتراضي",
+    "virtualHosts": "المضيفون الافتراضيون",
+    "manage": "إدارة ←",
+    "quickAccess": "وصول سريع",
+    "quickHosts": "المضيفون",
+    "quickTools": "الأدوات",
+    "quickConfig": "الإعداد",
+    "quickLogs": "السجلات",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "رمز QR للجوال",
+    "statusRunning": "قيد التشغيل",
+    "statusStopped": "متوقف"
+  },
+  "hosts": {
+    "columns": { "name": "الاسم", "php": "PHP", "extras": "إضافات" },
+    "empty": "لا يوجد مضيفون بعد. انقر + لإضافة واحد.",
+    "add": "إضافة مضيف",
+    "deleteSelected": "حذف المضيف المحدد",
+    "noneSelected": "لم يتم تحديد مضيف.",
+    "tab": {
+      "general": "عام",
+      "apache": "Apache",
+      "nginx": "Nginx",
+      "ssl": "SSL",
+      "snapshots": "اللقطات",
+      "deploy": "النشر"
+    },
+    "saved": "تم الحفظ.",
+    "save": "حفظ",
+    "saving": "جارٍ الحفظ…",
+    "savedShort": "تم الحفظ",
+    "revert": "تراجع",
+    "addForm": {
+      "title": "إضافة مضيف",
+      "create": "إنشاء",
+      "creating": "جارٍ الإنشاء…",
+      "cancel": "إلغاء"
+    }
+  },
+  "tools": {
+    "section": {
+      "database": "قاعدة البيانات",
+      "email": "البريد",
+      "images": "الصور",
+      "deploy": "النشر",
+      "php": "PHP",
+      "cms": "CMS"
+    },
+    "open": "فتح"
+  },
+  "config": {
+    "loading": "جارٍ تحميل المسارات…",
+    "php": "PHP",
+    "servers": "الخوادم",
+    "edit": "تحرير"
+  },
+  "logs": {
+    "noContent": "(لا يوجد محتوى سجل بعد)",
+    "pause": "إيقاف مؤقت",
+    "resume": "استئناف"
+  },
+  "editor": {
+    "open": "فتح",
+    "save": "حفظ",
+    "saved": "تم الحفظ",
+    "dirty": "حفظ *",
+    "checkSyntax": "فحص الصياغة",
+    "empty": "أدخل مسار ملف بالأعلى واضغط Enter (أو انقر فتح)."
+  },
+  "versions": {
+    "title": "الإصدارات والمكوّنات",
+    "installed": "مُثبَّت",
+    "install": "تثبيت",
+    "installing": "جارٍ التثبيت…",
+    "remove": "إزالة",
+    "removing": "جارٍ الإزالة…",
+    "downloadMore": "تنزيل المزيد",
+    "hideMore": "إخفاء"
+  }
+}

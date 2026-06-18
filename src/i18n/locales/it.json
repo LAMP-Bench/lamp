@@ -1,0 +1,159 @@
+{
+  "setup": {
+    "title": "Configurazione di Lamp Bench",
+    "subtitle": "Download iniziale dei servizi inclusi. Succede solo una volta.",
+    "getStarted": "Inizia",
+    "retry": "Riprova",
+    "skip": "Salta per ora",
+    "errorTitle": "Alcuni download non sono riusciti",
+    "continueAnyway": "Continua all'app"
+  },
+  "nav": {
+    "home": "Home",
+    "hosts": "Host",
+    "tools": "Strumenti",
+    "config": "Configurazione",
+    "logs": "Log",
+    "versions": "Versioni",
+    "settings": "Impostazioni",
+    "navigation": "Navigazione",
+    "servers": "Server e servizi"
+  },
+  "topbar": {
+    "editor": "Editor",
+    "webstart": "Apri sito",
+    "start": "Avvia",
+    "stop": "Ferma"
+  },
+  "svcConfig": {
+    "configure": "Configura",
+    "port": "Porta",
+    "portHttps": "Porta HTTPS",
+    "portSmtp": "Porta SMTP",
+    "version": "Versione",
+    "save": "Salva",
+    "saved": "Salvato — riavvia per applicare",
+    "restartHint": "Riavvia il servizio per applicare le modifiche delle porte.",
+    "stopFirst": "Ferma il servizio prima di cambiarne la versione.",
+    "invalidPort": "Le porte devono essere tra 1 e 65535."
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "cat": {
+      "general": "Generale",
+      "services": "Servizi",
+      "components": "Versioni e componenti",
+      "updates": "Aggiornamenti",
+      "dyndns": "DNS dinamico",
+      "about": "Informazioni"
+    },
+    "general": {
+      "title": "Generale",
+      "language": "Lingua",
+      "languageHint": "Ha effetto immediato e viene ricordata al prossimo avvio."
+    },
+    "updates": {
+      "title": "Aggiornamenti",
+      "checkNow": "Controlla aggiornamenti",
+      "checking": "Controllo…",
+      "installNow": "Installa e riavvia",
+      "channel": "Canale di rilascio",
+      "channelAlpha": "Alfa (continuo)",
+      "channelBeta": "Beta",
+      "channelStable": "Stabile"
+    },
+    "about": {
+      "title": "Informazioni",
+      "version": "Versione",
+      "build": "Build",
+      "github": "GitHub",
+      "license": "Licenza",
+      "openRepo": "Apri repository"
+    }
+  },
+  "updateBanner": {
+    "install": "Installa e riavvia",
+    "downloading": "Download aggiornamento…"
+  },
+  "home": {
+    "services": "Servizi",
+    "defaultHtdocs": "htdocs predefinito",
+    "virtualHosts": "Host virtuali",
+    "manage": "Gestisci →",
+    "quickAccess": "Accesso rapido",
+    "quickHosts": "Host",
+    "quickTools": "Strumenti",
+    "quickConfig": "Configurazione",
+    "quickLogs": "Log",
+    "quickPhpMyAdmin": "phpMyAdmin",
+    "quickMobileQR": "QR mobile",
+    "statusRunning": "in esecuzione",
+    "statusStopped": "fermo"
+  },
+  "hosts": {
+    "columns": { "name": "Nome", "php": "PHP", "extras": "Extra" },
+    "empty": "Ancora nessun host. Clicca + per aggiungerne uno.",
+    "add": "Aggiungi host",
+    "deleteSelected": "Elimina host selezionato",
+    "noneSelected": "Nessun host selezionato.",
+    "tab": {
+      "general": "Generale",
+      "apache": "Apache",
+      "nginx": "Nginx",
+      "ssl": "SSL",
+      "snapshots": "Snapshot",
+      "deploy": "Deploy"
+    },
+    "saved": "Salvato.",
+    "save": "Salva",
+    "saving": "Salvataggio…",
+    "savedShort": "Salvato",
+    "revert": "Annulla",
+    "addForm": {
+      "title": "Aggiungi host",
+      "create": "Crea",
+      "creating": "Creazione…",
+      "cancel": "Annulla"
+    }
+  },
+  "tools": {
+    "section": {
+      "database": "Database",
+      "email": "E-mail",
+      "images": "Immagini",
+      "deploy": "Deploy",
+      "php": "PHP",
+      "cms": "CMS"
+    },
+    "open": "Apri"
+  },
+  "config": {
+    "loading": "Caricamento percorsi…",
+    "php": "PHP",
+    "servers": "Server",
+    "edit": "Modifica"
+  },
+  "logs": {
+    "noContent": "(nessun contenuto di log ancora)",
+    "pause": "Pausa",
+    "resume": "Riprendi"
+  },
+  "editor": {
+    "open": "Apri",
+    "save": "Salva",
+    "saved": "Salvato",
+    "dirty": "Salva *",
+    "checkSyntax": "Controlla sintassi",
+    "empty": "Inserisci un percorso file qui sopra e premi Invio (o clicca Apri)."
+  },
+  "versions": {
+    "title": "Versioni e componenti",
+    "installed": "Installato",
+    "install": "Installa",
+    "installing": "Installazione…",
+    "remove": "Rimuovi",
+    "removing": "Rimozione…",
+    "downloadMore": "Scarica altro",
+    "hideMore": "Nascondi"
+  }
+}
