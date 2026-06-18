@@ -223,6 +223,26 @@ fn service_ports_get(name: String, state: tauri::State<AppState>) -> ServicePort
     }
 }
 
+/// All ports in use by services OTHER than `exclude`, as (port, owner) pairs.
+/// Uses each service's effective port (configured or default).
+fn used_ports_excluding(conn: &Connection, exclude: &str) -> Vec<(u16, String)> {
+    const SERVICES: [&str; 5] = ["apache", "nginx", "mysql", "redis", "mailhog"];
+    let mut out = Vec::new();
+    for svc in SERVICES {
+        if svc == exclude {
+            continue;
+        }
+        let (p, p2) = ports_for(conn, svc);
+        if p != 0 {
+            out.push((p, svc.to_string()));
+        }
+        if p2 != 0 {
+            out.push((p2, svc.to_string()));
+        }
+    }
+    out
+}
+
 #[tauri::command]
 fn service_ports_set(
     name: String,
@@ -230,14 +250,40 @@ fn service_ports_set(
     port2: u16,
     state: tauri::State<AppState>,
 ) -> Result<(), String> {
-    if port == 0 {
-        return Err("port must be between 1 and 65535".into());
+    let (_, default_p2) = default_ports(&name);
+    let has_secondary = default_p2 != 0;
+    let effective_p2 = if has_secondary { port2 } else { 0 };
+
+    if port == 0 || (has_secondary && effective_p2 == 0) {
+        return Err("ports must be between 1 and 65535".into());
     }
+    // A service can't collide with its own two ports either.
+    if has_secondary && port == effective_p2 {
+        return Err(format!(
+            "the two ports must differ — both are set to {port}"
+        ));
+    }
+
     let conn = state.db.lock().unwrap();
+    // Collision check against every other service's effective ports BEFORE
+    // persisting, so a clash is rejected up front rather than surfacing as a
+    // cryptic bind failure when the service later tries to start.
+    let used = used_ports_excluding(&conn, &name);
+    for new_port in [Some(port), if has_secondary { Some(effective_p2) } else { None }]
+        .into_iter()
+        .flatten()
+    {
+        if let Some((_, owner)) = used.iter().find(|(p, _)| *p == new_port) {
+            return Err(format!(
+                "port {new_port} is already used by {owner}"
+            ));
+        }
+    }
+
     conn.execute(
         "INSERT INTO service_config (service, port, port2) VALUES (?1, ?2, ?3) \
          ON CONFLICT(service) DO UPDATE SET port=excluded.port, port2=excluded.port2",
-        rusqlite::params![name, port as i64, port2 as i64],
+        rusqlite::params![name, port as i64, effective_p2 as i64],
     )
     .map_err(|e| e.to_string())?;
     Ok(())
