@@ -20,7 +20,7 @@ export type SectionId =
   | "logs"
   | "settings";
 
-export type LogName = "apache" | "mysql" | "nginx";
+export type LogName = "apache" | "mysql" | "nginx" | "redis" | "mailhog";
 
 export type ServiceName =
   | "apache"

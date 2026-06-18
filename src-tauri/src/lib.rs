@@ -741,18 +741,52 @@ fn read_log(
     let path = match service {
         "apache" => runtime.join("apache").join("logs").join("error.log"),
         "nginx" => runtime.join("nginx").join("logs").join("error.log"),
-        "mysql" => runtime.join("mysql").join("mysql.log"),
+        "mysql" => {
+            // The data + log dir is per active version (mysql-5.7 / mysql-8.0),
+            // not a flat `mysql/` dir. Read whichever version is live.
+            let active = state.mysql.lock().unwrap().active_version();
+            runtime.join(format!("mysql-{active}")).join("mysql.log")
+        }
+        "redis" => runtime.join("redis").join("redis.log"),
+        "mailhog" => runtime.join("mailhog").join("mailhog.log"),
         other => return Err(format!("unknown log: {other}")),
     };
     if !path.exists() {
         return Ok(String::new());
     }
-    // Read as bytes and decode lossily — Apache + php-cgi mix UTF-8 with the
-    // local codepage (Windows-1252 for the user) when they write OS error
-    // strings. `read_to_string` would refuse the whole file on the first
-    // invalid byte; `from_utf8_lossy` swaps invalid sequences for U+FFFD.
-    let raw = std::fs::read(&path).map_err(|e| e.to_string())?;
-    let content = String::from_utf8_lossy(&raw);
+    read_tail(&path, lines)
+}
+
+/// Read the last `lines` lines of a file without slurping the whole thing
+/// into memory. Seeks from the end in 64 KB chunks until enough newlines are
+/// collected, then decodes lossily — Apache + php-cgi mix UTF-8 with the
+/// local codepage (Windows-1252) for OS error strings, so a strict UTF-8
+/// decode would abort on the first invalid byte.
+fn read_tail(path: &Path, lines: usize) -> Result<String, String> {
+    use std::io::{Read, Seek, SeekFrom};
+    let mut file = std::fs::File::open(path).map_err(|e| e.to_string())?;
+    let len = file.metadata().map_err(|e| e.to_string())?.len();
+    if len == 0 || lines == 0 {
+        return Ok(String::new());
+    }
+    const CHUNK: u64 = 65536;
+    let mut buf: Vec<u8> = Vec::new();
+    let mut pos = len;
+    let mut newlines = 0usize;
+    // +1 because the tail of the file usually has no trailing newline for the
+    // final line, so we need one extra boundary to keep `lines` whole lines.
+    while pos > 0 && newlines <= lines {
+        let read_size = CHUNK.min(pos);
+        pos -= read_size;
+        file.seek(SeekFrom::Start(pos)).map_err(|e| e.to_string())?;
+        let mut chunk = vec![0u8; read_size as usize];
+        file.read_exact(&mut chunk).map_err(|e| e.to_string())?;
+        newlines += chunk.iter().filter(|&&b| b == b'\n').count();
+        let mut combined = chunk;
+        combined.append(&mut buf);
+        buf = combined;
+    }
+    let content = String::from_utf8_lossy(&buf);
     let collected: Vec<&str> = content.lines().collect();
     let start = collected.len().saturating_sub(lines);
     Ok(collected[start..].join("\n"))

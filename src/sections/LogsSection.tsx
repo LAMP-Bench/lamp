@@ -1,19 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
-import { FiPause, FiPlay } from "react-icons/fi";
-import { SiApache, SiNginx, SiMysql } from "react-icons/si";
+import { FiPause, FiPlay, FiMail } from "react-icons/fi";
+import { SiApache, SiNginx, SiMysql, SiRedis } from "react-icons/si";
+import type { IconType } from "react-icons";
 import type { LogName } from "../types";
 
 const TABS: Array<{
   id: LogName;
   label: string;
-  icon: typeof SiApache;
+  icon: IconType;
   color: string;
 }> = [
   { id: "apache", label: "apache", icon: SiApache, color: "text-red-500" },
   { id: "nginx", label: "nginx", icon: SiNginx, color: "text-emerald-500" },
   { id: "mysql", label: "mysql", icon: SiMysql, color: "text-sky-500" },
+  { id: "redis", label: "redis", icon: SiRedis, color: "text-rose-500" },
+  { id: "mailhog", label: "mailhog", icon: FiMail, color: "text-amber-500" },
 ];
 
 export function LogsSection() {
