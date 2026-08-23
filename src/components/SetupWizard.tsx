@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
@@ -7,8 +7,10 @@ import {
   FiDownload,
   FiAlertTriangle,
   FiLoader,
+  FiX,
 } from "react-icons/fi";
 import { SiApache, SiMysql, SiPhp, SiPhpmyadmin, SiComposer } from "react-icons/si";
+import { cancelBinaryDownload, isCancelled } from "../useDownloadProgress";
 import { LuLamp } from "react-icons/lu";
 
 /// Manifest entries the app needs to function. `binary_download` is the same
@@ -65,14 +67,22 @@ export function SetupWizard({
   );
   const [running, setRunning] = useState(false);
   const [done, setDone] = useState(false);
+  // Which entry is mid-transfer, so the stop button knows what to cancel.
+  const [current, setCurrent] = useState<string | null>(null);
+  // A ref, not state: the loop below reads it between awaits and must see
+  // the latest value, not the one captured when the render started.
+  const abortRef = useRef(false);
 
   async function run() {
     if (running) return;
+    abortRef.current = false;
     setRunning(true);
     setDone(false);
     const next: ItemStatus[] = [...statuses];
 
     for (let i = 0; i < ESSENTIALS.length; i++) {
+      // Stopping means stopping the whole sequence, not just this download.
+      if (abortRef.current) break;
       // Skip items that already succeeded on a previous attempt.
       if (next[i].kind === "done") continue;
       const installed = await invoke<boolean>("binary_installed", {
@@ -84,13 +94,17 @@ export function SetupWizard({
         continue;
       }
       next[i] = { kind: "downloading", pct: null };
+      setCurrent(ESSENTIALS[i].name);
       setStatuses([...next]);
       try {
         await invoke("binary_download", { name: ESSENTIALS[i].name });
         next[i] = { kind: "done" };
       } catch (e) {
-        next[i] = { kind: "error", message: String(e) };
+        next[i] = isCancelled(e)
+          ? { kind: "pending" }
+          : { kind: "error", message: String(e) };
       }
+      setCurrent(null);
       setStatuses([...next]);
     }
 
@@ -131,6 +145,15 @@ export function SetupWizard({
   }, []);
 
   const anyErrors = statuses.some((s) => s.kind === "error");
+  const stopped = abortRef.current && !running;
+
+  /// Stop the current transfer and the rest of the queue. Until this existed
+  /// a stalled download left the wizard with no way forward at all — Skip
+  /// only appeared once something had errored.
+  function stopAll() {
+    abortRef.current = true;
+    if (current) cancelBinaryDownload(current);
+  }
 
   return (
     <div className="h-screen w-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-6">
@@ -172,6 +195,15 @@ export function SetupWizard({
         )}
 
         <div className="flex items-center gap-2 justify-end">
+          {running && (
+            <button
+              onClick={stopAll}
+              className="px-3 py-2 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5"
+            >
+              <FiX />
+              {t("setup.stop")}
+            </button>
+          )}
           {done ? (
             <button
               onClick={onComplete}
@@ -179,7 +211,7 @@ export function SetupWizard({
             >
               {t("setup.getStarted")}
             </button>
-          ) : anyErrors && !running ? (
+          ) : (anyErrors || stopped) && !running ? (
             <>
               <button
                 onClick={onComplete}

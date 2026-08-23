@@ -1,5 +1,23 @@
 import { useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+
+/// Error text the backend returns for a user-initiated abort. Matches
+/// `downloads::CANCELLED` — callers use it to tell "you stopped this" apart
+/// from "this failed", and stay quiet about the former.
+export const CANCELLED = "Download cancelled.";
+
+export function isCancelled(error: unknown): boolean {
+  return String(error).includes(CANCELLED);
+}
+
+/// Ask an in-flight download to stop. A timeout only rescues a dead socket;
+/// this covers the far more common case of a transfer that is simply huge,
+/// or that the user changed their mind about — which previously meant
+/// killing the app, with the first-launch wizard offering no way out at all.
+export function cancelBinaryDownload(name: string): Promise<void> {
+  return invoke("binary_download_cancel", { name }).then(() => undefined);
+}
 
 type ProgressEvent = {
   name: string;

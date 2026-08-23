@@ -6,7 +6,8 @@
     "retry": "再試行",
     "skip": "今はスキップ",
     "errorTitle": "一部のダウンロードに失敗しました",
-    "errorHint": "Lamp Bench は動作しますが、ダウンロードに失敗したサービスは再試行するまで起動できません。"
+    "errorHint": "Lamp Bench は動作しますが、ダウンロードに失敗したサービスは再試行するまで起動できません。",
+    "stop": "停止"
   },
   "nav": {
     "home": "ホーム",
@@ -71,7 +72,8 @@
       "build": "ビルド",
       "github": "GitHub",
       "license": "ライセンス",
-      "openRepo": "リポジトリを開く"
+      "openRepo": "リポジトリを開く",
+      "platform": "プラットフォーム"
     },
     "services": {
       "title": "サービス",
@@ -347,7 +349,8 @@
     "ioncubeInstall": "ionCube をインストール",
     "ioncubeInstalling": "インストール中…",
     "ioncubeDone": "PHP {{version}} 用に ionCube をインストールしました。Apache/Nginx を再起動してください。",
-    "noPhp": "PHP がまだインストールされていません — 先に上でインストールしてください。"
+    "noPhp": "PHP がまだインストールされていません — 先に上でインストールしてください。",
+    "cancelDownload": "このダウンロードを停止"
   },
   "services": {
     "exitedImmediately": "{{service}} は起動直後に停止しました。ポートがすでに使用中の可能性が高いです — 別のコピーが動いているか、前回のセッションのプロセスが残っています。理由は ログ → {{service}} を確認してください。"

@@ -13,6 +13,7 @@ import {
   FiSettings,
   FiDownload,
   FiAlertTriangle,
+  FiX,
 } from "react-icons/fi";
 import { SiApache, SiNginx, SiMysql, SiRedis } from "react-icons/si";
 import { FiMail } from "react-icons/fi";
@@ -22,7 +23,11 @@ import { useToast } from "./Toast";
 import { useService } from "../useService";
 import { serviceErrorText } from "../serviceError";
 import { usePorts } from "../PortsContext";
-import { useDownloadProgress } from "../useDownloadProgress";
+import {
+  cancelBinaryDownload,
+  isCancelled,
+  useDownloadProgress,
+} from "../useDownloadProgress";
 import type { SectionId, ServiceName } from "../types";
 
 type NavItem = { id: SectionId; icon: ReactNode };
@@ -228,7 +233,8 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
       await invoke("binary_download", { name: spec.binaryName });
       setInstalled(true);
     } catch (e) {
-      toast("error", `Install failed: ${e}`);
+      // The user pressing stop isn't a failure worth shouting about.
+      if (!isCancelled(e)) toast("error", `Install failed: ${e}`);
     } finally {
       setInstalling(false);
     }
@@ -322,15 +328,25 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
         ) : installed ? (
           <Toggle checked={running} onChange={onToggle} disabled={busy} />
         ) : (
-          <button
-            onClick={install}
-            disabled={installing}
-            className="px-2 py-0.5 rounded text-[11px] font-medium text-sky-700 border border-sky-300 hover:bg-sky-50 disabled:opacity-50 flex items-center gap-1"
-            title="Download this service"
-          >
-            <FiDownload className="text-[10px]" />
-            {installing ? (pct !== null ? `${pct}%` : "…") : "Install"}
-          </button>
+          installing ? (
+            <button
+              onClick={() => spec.binaryName && cancelBinaryDownload(spec.binaryName)}
+              className="px-2 py-0.5 rounded text-[11px] font-medium text-neutral-600 border border-neutral-300 hover:bg-neutral-100 flex items-center gap-1"
+              title={t("versions.cancelDownload")}
+            >
+              {pct !== null ? `${pct}%` : "…"}
+              <FiX className="text-[10px]" />
+            </button>
+          ) : (
+            <button
+              onClick={install}
+              className="px-2 py-0.5 rounded text-[11px] font-medium text-sky-700 border border-sky-300 hover:bg-sky-50 flex items-center gap-1"
+              title={t("versions.install")}
+            >
+              <FiDownload className="text-[10px]" />
+              {t("versions.install")}
+            </button>
+          )
         )}
       </div>
 

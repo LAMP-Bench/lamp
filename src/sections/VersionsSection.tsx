@@ -9,10 +9,15 @@ import {
   FiChevronDown,
   FiChevronUp,
   FiShield,
+  FiX,
 } from "react-icons/fi";
 import { SiPhp } from "react-icons/si";
 import { useConfirm, useToast } from "../components/Toast";
-import { useDownloadProgress } from "../useDownloadProgress";
+import {
+  cancelBinaryDownload,
+  isCancelled,
+  useDownloadProgress,
+} from "../useDownloadProgress";
 import type { PhpExtension } from "../types";
 
 /// Categorise a manifest entry name into a UI group. Anything PHP-ish goes
@@ -64,7 +69,7 @@ export function VersionsSection() {
       await refresh();
       toast("success", `${name} ✓`);
     } catch (e) {
-      toast("error", String(e));
+      if (!isCancelled(e)) toast("error", String(e));
     } finally {
       setBusy(null);
       setDownloading(null);
@@ -142,18 +147,24 @@ export function VersionsSection() {
             </button>
           </>
         ) : (
-          <button
-            onClick={() => install(name)}
-            disabled={isBusy}
-            className="px-2 py-1 rounded border border-sky-300 text-sky-600 hover:bg-sky-50 text-xs flex items-center gap-1 disabled:opacity-50"
-          >
-            <FiDownload />
-            {isBusy
-              ? pct !== null
-                ? `${pct}%`
-                : t("versions.installing")
-              : t("versions.install")}
-          </button>
+          isBusy ? (
+            <button
+              onClick={() => cancelBinaryDownload(name)}
+              className="px-2 py-1 rounded border border-neutral-300 text-neutral-600 hover:bg-neutral-100 text-xs flex items-center gap-1"
+              title={t("versions.cancelDownload")}
+            >
+              {pct !== null ? `${pct}%` : t("versions.installing")}
+              <FiX />
+            </button>
+          ) : (
+            <button
+              onClick={() => install(name)}
+              className="px-2 py-1 rounded border border-sky-300 text-sky-600 hover:bg-sky-50 text-xs flex items-center gap-1"
+            >
+              <FiDownload />
+              {t("versions.install")}
+            </button>
+          )
         )}
       </div>
     );

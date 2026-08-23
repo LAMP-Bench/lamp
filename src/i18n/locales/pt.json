@@ -6,7 +6,8 @@
     "retry": "Tentar de novo",
     "skip": "Pular por agora",
     "errorTitle": "Alguns downloads falharam",
-    "errorHint": "O Lamp Bench vai funcionar, mas os serviços cujos downloads falharam só arrancam depois de repetir a transferência."
+    "errorHint": "O Lamp Bench vai funcionar, mas os serviços cujos downloads falharam só arrancam depois de repetir a transferência.",
+    "stop": "Parar"
   },
   "nav": {
     "home": "Início",
@@ -71,7 +72,8 @@
       "build": "Build",
       "github": "GitHub",
       "license": "Licença",
-      "openRepo": "Abrir repositório"
+      "openRepo": "Abrir repositório",
+      "platform": "Plataforma"
     },
     "services": {
       "title": "Serviços",
@@ -347,7 +349,8 @@
     "ioncubeInstall": "Instalar ionCube",
     "ioncubeInstalling": "A instalar…",
     "ioncubeDone": "ionCube instalado para o PHP {{version}}. Reinicie o Apache/Nginx.",
-    "noPhp": "Ainda não há nenhuma versão do PHP instalada — instale uma acima primeiro."
+    "noPhp": "Ainda não há nenhuma versão do PHP instalada — instale uma acima primeiro.",
+    "cancelDownload": "Parar esta transferência"
   },
   "services": {
     "exitedImmediately": "O {{service}} arrancou e parou logo a seguir. Provavelmente a porta já está ocupada — outra cópia ainda em execução, ou um processo que ficou de uma sessão anterior. O motivo está em Registos → {{service}}."

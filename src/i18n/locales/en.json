@@ -6,7 +6,8 @@
     "retry": "Retry",
     "skip": "Skip for now",
     "errorTitle": "Some downloads failed",
-    "errorHint": "Lamp Bench will work, but services with failed downloads won't start until they're retried."
+    "errorHint": "Lamp Bench will work, but services with failed downloads won't start until they're retried.",
+    "stop": "Stop"
   },
   "nav": {
     "home": "Home",
@@ -42,7 +43,8 @@
     "ioncubeInstall": "Install ionCube",
     "ioncubeInstalling": "Installing…",
     "ioncubeDone": "ionCube installed for PHP {{version}}. Restart Apache/Nginx.",
-    "noPhp": "No PHP versions installed yet — install one above first."
+    "noPhp": "No PHP versions installed yet — install one above first.",
+    "cancelDownload": "Stop this download"
   },
   "topbar": {
     "editor": "Editor",
@@ -96,7 +98,8 @@
       "build": "Build",
       "github": "GitHub",
       "license": "License",
-      "openRepo": "Open repository"
+      "openRepo": "Open repository",
+      "platform": "Platform"
     },
     "services": {
       "title": "Services",

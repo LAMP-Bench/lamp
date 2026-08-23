@@ -6,7 +6,8 @@
     "retry": "Réessayer",
     "skip": "Passer pour l'instant",
     "errorTitle": "Certains téléchargements ont échoué",
-    "errorHint": "Lamp Bench fonctionnera, mais les services dont le téléchargement a échoué ne démarreront pas tant qu'ils ne seront pas réessayés."
+    "errorHint": "Lamp Bench fonctionnera, mais les services dont le téléchargement a échoué ne démarreront pas tant qu'ils ne seront pas réessayés.",
+    "stop": "Arrêter"
   },
   "nav": {
     "home": "Accueil",
@@ -42,7 +43,8 @@
     "ioncubeInstall": "Installer ionCube",
     "ioncubeInstalling": "Installation…",
     "ioncubeDone": "ionCube installé pour PHP {{version}}. Redémarrez Apache/Nginx.",
-    "noPhp": "Aucune version PHP installée — installez-en une ci-dessus d'abord."
+    "noPhp": "Aucune version PHP installée — installez-en une ci-dessus d'abord.",
+    "cancelDownload": "Arrêter ce téléchargement"
   },
   "topbar": {
     "editor": "Éditeur",
@@ -96,7 +98,8 @@
       "build": "Build",
       "github": "GitHub",
       "license": "Licence",
-      "openRepo": "Ouvrir le dépôt"
+      "openRepo": "Ouvrir le dépôt",
+      "platform": "Plateforme"
     },
     "services": {
       "title": "Services",

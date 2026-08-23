@@ -563,11 +563,16 @@ function AboutRow() {
     git_sha: string;
     build_epoch: number;
   } | null>(null);
+  const [platform, setPlatform] = useState<string>("");
 
   useEffect(() => {
     invoke<{ version: string; git_sha: string; build_epoch: number }>("build_info")
       .then(setInfo)
       .catch(() => {});
+    // Which platform key an install resolves to is the first thing worth
+    // knowing about a "download failed" report — binaries.json is indexed
+    // by exactly this string.
+    invoke<string>("current_platform").then(setPlatform).catch(() => {});
   }, []);
 
   const buildDate =
@@ -586,6 +591,9 @@ function AboutRow() {
         hint={buildDate ? `${buildDate} UTC` : undefined}
       >
         <code className="text-xs text-neutral-700">{info?.git_sha || "…"}</code>
+      </Row>
+      <Row icon={<FiInfo />} label={t("settings.about.platform")}>
+        <code className="text-xs text-neutral-700">{platform || "…"}</code>
       </Row>
       <Row icon={<FiExternalLink />} label={t("settings.about.github")}>
         <button

@@ -13,6 +13,7 @@ mod services;
 mod snapshots;
 pub mod ssl;
 
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
@@ -39,6 +40,9 @@ struct AppState {
     mailhog: Mutex<MailhogService>,
     php_installs: Vec<PhpInstall>,
     default_php: String,
+    /// Names the user has asked to stop downloading. The transfer loop polls
+    /// this between chunks; entries are cleared when a download starts.
+    cancelled_downloads: Mutex<HashSet<String>>,
     resources_dir: PathBuf,
     runtime_dir: PathBuf,
     htdocs_dir: PathBuf,
@@ -897,9 +901,14 @@ fn binary_download(
     state: tauri::State<AppState>,
 ) -> Result<(), String> {
     ensure_not_in_use(&name, &state)?;
+    let resources = state.resources_dir.clone();
+
+    // Clear any flag left over from a previous attempt, or this download
+    // would abort the instant it started.
+    state.cancelled_downloads.lock().unwrap().remove(&name);
+
     // Streaming progress is forwarded as Tauri events. Frontend subscribes
     // to `binary-download-progress` and filters on the `name` field.
-    let resources = state.resources_dir.clone();
     let emit_name = name.clone();
     let mut cb = move |downloaded: u64, total: Option<u64>| {
         let _ = app.emit(
@@ -911,7 +920,26 @@ fn binary_download(
             }),
         );
     };
-    downloads::download(&name, &resources, Some(&mut cb))
+    let cancel = cancel_check(&state, &name);
+    downloads::download(&name, &resources, Some(&mut cb), Some(&cancel))
+}
+
+/// A closure the transfer loop can poll to see whether `name` was cancelled.
+fn cancel_check<'a>(state: &'a AppState, name: &'a str) -> impl Fn() -> bool + 'a {
+    move || {
+        state
+            .cancelled_downloads
+            .lock()
+            .map(|set| set.contains(name))
+            .unwrap_or(false)
+    }
+}
+
+/// Ask an in-flight download to stop. Safe to call when nothing is running —
+/// the flag is cleared before the next attempt begins.
+#[tauri::command]
+fn binary_download_cancel(name: String, state: tauri::State<AppState>) {
+    state.cancelled_downloads.lock().unwrap().insert(name);
 }
 
 #[tauri::command]
@@ -931,8 +959,37 @@ fn php_catalog(state: tauri::State<AppState>) -> Vec<downloads::PhpCatalogEntry>
 }
 
 #[tauri::command]
-fn php_install(version: String, state: tauri::State<AppState>) -> Result<(), String> {
-    downloads::install_php_with_xdebug(&version, &state.resources_dir)
+fn php_install(
+    version: String,
+    app: tauri::AppHandle,
+    state: tauri::State<AppState>,
+) -> Result<(), String> {
+    // Same event + cancel plumbing as `binary_download`; a PHP install is one
+    // of the larger downloads a user triggers by hand.
+    let event_name = format!("php-{version}");
+    state
+        .cancelled_downloads
+        .lock()
+        .unwrap()
+        .remove(&event_name);
+    let emit_name = event_name.clone();
+    let mut cb = move |downloaded: u64, total: Option<u64>| {
+        let _ = app.emit(
+            "binary-download-progress",
+            serde_json::json!({
+                "name": emit_name,
+                "downloaded": downloaded,
+                "total": total,
+            }),
+        );
+    };
+    let cancel = cancel_check(&state, &event_name);
+    downloads::install_php_with_xdebug(
+        &version,
+        &state.resources_dir,
+        Some(&mut cb),
+        Some(&cancel),
+    )
 }
 
 #[tauri::command]
@@ -1073,8 +1130,8 @@ fn compress_images(
 }
 
 /// Identifier of the current OS+arch as written in `scripts/binaries.json`.
-/// Used by the React setup wizard to short-circuit on platforms that
-/// don't have bundled-service binaries pinned yet.
+/// Shown in Settings → About: which platform key an install resolves to is
+/// the first thing worth knowing about a "download failed" report.
 #[tauri::command]
 fn current_platform() -> &'static str {
     downloads::current_platform()
@@ -1315,6 +1372,7 @@ pub fn run() {
                 )),
                 php_installs,
                 default_php,
+                cancelled_downloads: Mutex::new(HashSet::new()),
                 resources_dir: resources,
                 runtime_dir: runtime,
                 htdocs_dir: htdocs,
@@ -1424,6 +1482,7 @@ pub fn run() {
             editor_open,
             binary_installed,
             binary_download,
+            binary_download_cancel,
             binary_remove,
             binary_list,
             php_catalog,

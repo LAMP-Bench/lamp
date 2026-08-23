@@ -7,6 +7,22 @@ exact build number while in alpha.
 
 ## Unreleased (alpha)
 
+### Downloads can be stopped
+- Every download is cancellable — from the first-launch wizard, the
+  sidebar and the Versions panel. The read timeout added earlier only
+  rescues a genuinely dead socket; a transfer that is merely enormous, or
+  one you changed your mind about, previously meant killing the app. In
+  the wizard it meant no way forward at all, since Skip only appeared
+  once something had already failed.
+- Stopping in the wizard stops the whole queue, not just the current
+  file, and a cancelled item goes back to pending rather than being
+  reported as an error.
+- Settings → About shows which platform key the install resolves to
+  (`windows-x64`, `linux-x64`, `macos-arm64`, `macos-x64`). It's the
+  first thing worth knowing about a "download failed" report, and the
+  command behind it had been unused since the wizard's platform
+  short-circuit was removed.
+
 ### Translations
 - All 13 languages are complete. German, Russian, Portuguese, Italian,
   Chinese, Japanese, Korean, Arabic, Hindi and Turkish were sitting at

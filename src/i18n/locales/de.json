@@ -6,7 +6,8 @@
     "retry": "Wiederholen",
     "skip": "Vorerst überspringen",
     "errorTitle": "Einige Downloads sind fehlgeschlagen",
-    "errorHint": "Lamp Bench funktioniert, aber Dienste mit fehlgeschlagenen Downloads starten erst nach einem erneuten Versuch."
+    "errorHint": "Lamp Bench funktioniert, aber Dienste mit fehlgeschlagenen Downloads starten erst nach einem erneuten Versuch.",
+    "stop": "Abbrechen"
   },
   "nav": {
     "home": "Start",
@@ -71,7 +72,8 @@
       "build": "Build",
       "github": "GitHub",
       "license": "Lizenz",
-      "openRepo": "Repository öffnen"
+      "openRepo": "Repository öffnen",
+      "platform": "Plattform"
     },
     "services": {
       "title": "Dienste",
@@ -347,7 +349,8 @@
     "ioncubeInstall": "ionCube installieren",
     "ioncubeInstalling": "Wird installiert …",
     "ioncubeDone": "ionCube für PHP {{version}} installiert. Apache/Nginx neu starten.",
-    "noPhp": "Noch keine PHP-Version installiert — installieren Sie oben zuerst eine."
+    "noPhp": "Noch keine PHP-Version installiert — installieren Sie oben zuerst eine.",
+    "cancelDownload": "Diesen Download abbrechen"
   },
   "services": {
     "exitedImmediately": "{{service}} ist gestartet und sofort wieder stehen geblieben. Wahrscheinlich ist der Port bereits belegt — eine zweite laufende Instanz oder ein Prozess aus einer früheren Sitzung. Der Grund steht in Logs → {{service}}."

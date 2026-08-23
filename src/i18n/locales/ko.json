@@ -6,7 +6,8 @@
     "retry": "다시 시도",
     "skip": "지금은 건너뛰기",
     "errorTitle": "일부 다운로드 실패",
-    "errorHint": "Lamp Bench는 실행되지만, 다운로드에 실패한 서비스는 다시 시도하기 전까지 시작할 수 없습니다."
+    "errorHint": "Lamp Bench는 실행되지만, 다운로드에 실패한 서비스는 다시 시도하기 전까지 시작할 수 없습니다.",
+    "stop": "중지"
   },
   "nav": {
     "home": "홈",
@@ -71,7 +72,8 @@
       "build": "빌드",
       "github": "GitHub",
       "license": "라이선스",
-      "openRepo": "저장소 열기"
+      "openRepo": "저장소 열기",
+      "platform": "플랫폼"
     },
     "services": {
       "title": "서비스",
@@ -347,7 +349,8 @@
     "ioncubeInstall": "ionCube 설치",
     "ioncubeInstalling": "설치 중…",
     "ioncubeDone": "PHP {{version}}용 ionCube를 설치했습니다. Apache/Nginx를 재시작하세요.",
-    "noPhp": "설치된 PHP 버전이 없습니다 — 위에서 먼저 설치하세요."
+    "noPhp": "설치된 PHP 버전이 없습니다 — 위에서 먼저 설치하세요.",
+    "cancelDownload": "이 다운로드 중지"
   },
   "services": {
     "exitedImmediately": "{{service}}이(가) 시작된 직후 중지되었습니다. 포트가 이미 사용 중일 가능성이 높습니다 — 다른 사본이 실행 중이거나 이전 세션의 프로세스가 남아 있습니다. 이유는 로그 → {{service}}에서 확인하세요."

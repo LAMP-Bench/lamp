@@ -114,9 +114,20 @@ pub fn discover_php_installs(resources_dir: &Path) -> Vec<PhpInstall> {
 /// Convenience for the runtime download command: given a PHP version,
 /// download the matching Xdebug DLL too if present in the manifest. Failing
 /// to find an Xdebug build for a future PHP version is non-fatal.
-pub fn install_php_with_xdebug(version: &str, resources_dir: &Path) -> Result<(), String> {
-    download(&format!("php-{version}"), resources_dir, None)?;
-    let _ = download(&format!("xdebug-{version}"), resources_dir, None);
+pub fn install_php_with_xdebug(
+    version: &str,
+    resources_dir: &Path,
+    progress: Option<ProgressCb<'_>>,
+    cancel: Option<CancelCheck<'_>>,
+) -> Result<(), String> {
+    download(&format!("php-{version}"), resources_dir, progress, cancel)?;
+    // Xdebug is a small extra and its absence for a brand-new PHP release is
+    // expected, so a failure here doesn't fail the install. A *cancel*
+    // still stops us starting it.
+    if cancel.is_some_and(|c| c()) {
+        return Err(CANCELLED.to_string());
+    }
+    let _ = download(&format!("xdebug-{version}"), resources_dir, None, cancel);
     Ok(())
 }
 
@@ -209,6 +220,16 @@ pub fn is_installed(name: &str, resources_dir: &Path) -> bool {
 /// gets called periodically with `(downloaded_bytes, total_bytes_or_none)`.
 pub type ProgressCb<'a> = &'a mut dyn FnMut(u64, Option<u64>);
 
+/// Polled between chunks; returning true aborts the transfer. A timeout
+/// alone only rescues a genuinely dead socket — a download that is merely
+/// enormous, or one the user simply changed their mind about, needs a way
+/// out that isn't killing the app.
+pub type CancelCheck<'a> = &'a dyn Fn() -> bool;
+
+/// Error text for a user-initiated abort, so callers can tell it apart from
+/// a real failure instead of reporting "download failed".
+pub const CANCELLED: &str = "Download cancelled.";
+
 /// Which container an entry's archive uses, worked out from its filename.
 ///
 /// Windows builds are uniformly zips. Unix ones are not: MySQL's Linux build
@@ -259,6 +280,7 @@ pub fn download(
     name: &str,
     resources_dir: &Path,
     progress: Option<ProgressCb<'_>>,
+    cancel: Option<CancelCheck<'_>>,
 ) -> Result<(), String> {
     let manifest = load_manifest()?;
     let entry = manifest
@@ -279,7 +301,7 @@ pub fn download(
     fs::create_dir_all(&scratch).map_err(|e| format!("create cache dir: {e}"))?;
     let archive_path = scratch.join(&pe.filename);
 
-    fetch_to_file(&pe.url, &archive_path, &pe.sha256, name, progress)?;
+    fetch_to_file(&pe.url, &archive_path, &pe.sha256, name, progress, cancel)?;
 
     let result = install_from_archive(entry, pe, &archive_path, resources_dir);
 
@@ -297,6 +319,7 @@ fn fetch_to_file(
     expected_sha: &str,
     name: &str,
     mut progress: Option<ProgressCb<'_>>,
+    cancel: Option<CancelCheck<'_>>,
 ) -> Result<(), String> {
     let resp = http_agent()
         .get(url)
@@ -326,6 +349,11 @@ fn fetch_to_file(
             .map_err(|e| format!("read body: {e}"))?;
         if n == 0 {
             break;
+        }
+        if cancel.is_some_and(|c| c()) {
+            drop(file);
+            let _ = fs::remove_file(dest);
+            return Err(CANCELLED.to_string());
         }
         hasher.update(&chunk[..n]);
         file.write_all(&chunk[..n])
@@ -731,6 +759,48 @@ mod tests {
         fs::remove_dir_all(&dir).ok();
     }
 
+    /// Hits the network. Run with:
+    ///   cargo test --lib -- --ignored aborts_mid_transfer
+    #[test]
+    #[ignore = "network"]
+    fn cancelling_aborts_mid_transfer_and_cleans_up() {
+        use std::sync::atomic::{AtomicU64, Ordering};
+
+        let dir = scratch("cancel");
+        let archive = dir.join("mysql-partial.zip");
+
+        // MySQL 8.0 is ~248 MB, so this reliably gets cancelled long before
+        // it finishes — the point is that we stop early, not that we wait.
+        let seen = AtomicU64::new(0);
+        let stop_after_2mb = || seen.load(Ordering::Relaxed) > 2 * 1024 * 1024;
+        let mut count = |downloaded: u64, _total: Option<u64>| {
+            seen.store(downloaded, Ordering::Relaxed);
+        };
+
+        let started = std::time::Instant::now();
+        let err = fetch_to_file(
+            "https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-8.0.46-winx64.zip",
+            &archive,
+            // Never reached: the abort happens before the digest is checked.
+            "00",
+            "mysql-8.0",
+            Some(&mut count),
+            Some(&stop_after_2mb),
+        )
+        .expect_err("should have been cancelled");
+
+        assert_eq!(err, CANCELLED, "wrong error for a cancelled transfer");
+        assert!(
+            !archive.exists(),
+            "the partial file must not be left behind for is_installed() to find"
+        );
+        assert!(
+            started.elapsed() < std::time::Duration::from_secs(120),
+            "cancel did not take effect promptly"
+        );
+        fs::remove_dir_all(&dir).ok();
+    }
+
     /// Hits the network, so it stays out of the default run and out of CI.
     /// Exercise it deliberately with:
     ///   cargo test --lib -- --ignored real_tarball
@@ -747,6 +817,7 @@ mod tests {
             &archive,
             "058188C64BF22BAECAA72B809A6318A4F9BA623889C554FEAB03F7CB853AB31B",
             "nginx-src",
+            None,
             None,
         )
         .expect("download + sha");

@@ -6,7 +6,8 @@
     "retry": "Yeniden dene",
     "skip": "Şimdilik atla",
     "errorTitle": "Bazı indirmeler başarısız oldu",
-    "errorHint": "Lamp Bench çalışacak, ancak indirmesi başarısız olan hizmetler yeniden denenene kadar başlatılamaz."
+    "errorHint": "Lamp Bench çalışacak, ancak indirmesi başarısız olan hizmetler yeniden denenene kadar başlatılamaz.",
+    "stop": "Durdur"
   },
   "nav": {
     "home": "Ana sayfa",
@@ -71,7 +72,8 @@
       "build": "Yapı",
       "github": "GitHub",
       "license": "Lisans",
-      "openRepo": "Depoyu aç"
+      "openRepo": "Depoyu aç",
+      "platform": "Platform"
     },
     "services": {
       "title": "Hizmetler",
@@ -347,7 +349,8 @@
     "ioncubeInstall": "ionCube'ü kur",
     "ioncubeInstalling": "Kuruluyor…",
     "ioncubeDone": "ionCube, PHP {{version}} için kuruldu. Apache/Nginx'i yeniden başlatın.",
-    "noPhp": "Henüz kurulu PHP sürümü yok — önce yukarıdan bir tane kurun."
+    "noPhp": "Henüz kurulu PHP sürümü yok — önce yukarıdan bir tane kurun.",
+    "cancelDownload": "Bu indirmeyi durdur"
   },
   "services": {
     "exitedImmediately": "{{service}} başladı ve hemen durdu. Büyük olasılıkla bağlantı noktası zaten kullanımda — çalışan başka bir kopya ya da önceki oturumdan kalan bir süreç. Nedeni Günlükler → {{service}} bölümünde."
