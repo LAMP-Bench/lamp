@@ -5,8 +5,7 @@
     "getStarted": "Başla",
     "retry": "Yeniden dene",
     "skip": "Şimdilik atla",
-    "errorTitle": "Bazı indirmeler başarısız oldu",
-    "continueAnyway": "Uygulamaya devam et"
+    "errorTitle": "Bazı indirmeler başarısız oldu"
   },
   "nav": {
     "home": "Ana sayfa",
@@ -38,7 +37,6 @@
     "invalidPort": "Bağlantı noktaları 1 ile 65535 arasında olmalıdır."
   },
   "settings": {
-    "title": "Ayarlar",
     "cat": {
       "general": "Genel",
       "services": "Hizmetler",
@@ -58,9 +56,7 @@
       "checking": "Denetleniyor…",
       "installNow": "Yükle ve yeniden başlat",
       "channel": "Sürüm kanalı",
-      "channelAlpha": "Alfa (sürekli)",
-      "channelBeta": "Beta",
-      "channelStable": "Kararlı"
+      "channelAlpha": "Alfa (sürekli)"
     },
     "about": {
       "title": "Hakkında",
@@ -91,7 +87,11 @@
     "statusStopped": "durduruldu"
   },
   "hosts": {
-    "columns": { "name": "Ad", "php": "PHP", "extras": "Ekstralar" },
+    "columns": {
+      "name": "Ad",
+      "php": "PHP",
+      "extras": "Ekstralar"
+    },
     "empty": "Henüz ana bilgisayar yok. Eklemek için + tıklayın.",
     "add": "Ana bilgisayar ekle",
     "deleteSelected": "Seçili ana bilgisayarı sil",
@@ -111,8 +111,6 @@
     "revert": "Geri al",
     "addForm": {
       "title": "Ana bilgisayar ekle",
-      "create": "Oluştur",
-      "creating": "Oluşturuluyor…",
       "cancel": "İptal"
     }
   },
@@ -140,14 +138,12 @@
   },
   "editor": {
     "open": "Aç",
-    "save": "Kaydet",
     "saved": "Kaydedildi",
     "dirty": "Kaydet *",
     "checkSyntax": "Söz dizimini denetle",
     "empty": "Yukarıya bir dosya yolu yazın ve Enter'a basın (veya Aç'a tıklayın)."
   },
   "versions": {
-    "title": "Sürümler ve bileşenler",
     "installed": "Yüklü",
     "install": "Yükle",
     "installing": "Yükleniyor…",

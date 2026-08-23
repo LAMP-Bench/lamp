@@ -216,6 +216,7 @@ function HostDetail({
   const [tab, setTab] = useState<Tab>("general");
   const [draft, setDraft] = useState<Host>(host);
   const [busy, setBusy] = useState(false);
+  const [downloadingPhp, setDownloadingPhp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
 
@@ -239,6 +240,18 @@ function HostDetail({
     setError(null);
     setInfo(null);
     try {
+      // The Add form fetched a not-yet-installed PHP on save; this one didn't,
+      // so switching an existing host to 8.3 silently kept serving it with the
+      // default version while the UI claimed otherwise.
+      const picked = catalog.find((c) => c.version === draft.php_version);
+      if (picked && !picked.installed) {
+        setDownloadingPhp(true);
+        try {
+          await invoke("php_install", { version: draft.php_version });
+        } finally {
+          setDownloadingPhp(false);
+        }
+      }
       const updated = await invoke<Host>("host_update", {
         id: draft.id,
         name: draft.name,
@@ -345,7 +358,13 @@ function HostDetail({
             className="px-4 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium flex items-center gap-1.5 disabled:opacity-40"
           >
             <FiSave />
-            {busy ? t("hosts.saving") : dirty ? t("hosts.save") : t("hosts.savedShort")}
+            {downloadingPhp
+              ? t("hosts.addForm.phpDownloadOnSave", { version: draft.php_version })
+              : busy
+              ? t("hosts.saving")
+              : dirty
+              ? t("hosts.save")
+              : t("hosts.savedShort")}
           </button>
         </div>
       </div>
@@ -829,7 +848,11 @@ function DeployTab({ host }: { host: Host }) {
           className="px-3 py-1.5 rounded border border-neutral-300 bg-white focus:outline-none focus:border-sky-500"
         >
           <option value="ftp">FTP</option>
-          <option value="ftps">FTPS</option>
+          {/* The backend rejects FTPS rather than silently downgrading to
+              plaintext, so selecting it could only ever produce an error. */}
+          <option value="ftps" disabled>
+            {t("hosts.deploy.ftpsSoon")}
+          </option>
         </select>
         <span className="text-xs text-neutral-500">{t("hosts.deploy.ftpsNote")}</span>
       </Field>

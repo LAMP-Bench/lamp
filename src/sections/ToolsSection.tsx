@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { IconType } from "react-icons";
-import { FiExternalLink, FiPackage, FiX, FiMail, FiImage, FiUploadCloud } from "react-icons/fi";
+import { FiExternalLink, FiPackage, FiX, FiMail, FiImage } from "react-icons/fi";
 import { usePorts } from "../PortsContext";
 import {
   SiPhpmyadmin,
@@ -37,10 +37,6 @@ export function ToolsSection() {
 
         <Section title={t("tools.section.images")}>
           <ImageOptimizerCard />
-        </Section>
-
-        <Section title={t("tools.section.deploy")}>
-          <FtpDeployCard />
         </Section>
 
         <Section title={t("tools.section.php")}>
@@ -215,6 +211,7 @@ function CmsCard({
   command: string;
   binaryName: string;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -229,13 +226,13 @@ function CmsCard({
             className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5"
           >
             <FiPackage />
-            New site
+            {t("tools.cms.newSite")}
           </button>
         }
       />
       {open && (
         <CmsInstallDialog
-          title={`Install ${title}`}
+          title={t("tools.cms.installTitle", { name: title })}
           icon={icon}
           iconColor={iconColor}
           command={command}
@@ -262,6 +259,7 @@ function CmsInstallDialog({
   binaryName: string;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const [siteName, setSiteName] = useState("");
   const [parentDir, setParentDir] = useState("");
   const [addHost, setAddHost] = useState(false);
@@ -351,9 +349,7 @@ function CmsInstallDialog({
 
         {createdUrl ? (
           <div className="p-5 space-y-3 text-sm">
-            <p className="text-emerald-700">
-              Installed. Open the URL to finish the setup wizard:
-            </p>
+            <p className="text-emerald-700">{t("tools.cms.installed")}</p>
             <a
               href="#"
               onClick={(e) => {
@@ -370,19 +366,19 @@ function CmsInstallDialog({
                 className="px-4 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium flex items-center gap-1.5"
               >
                 <FiExternalLink />
-                Open site
+                {t("tools.cms.openSite")}
               </button>
               <button
                 onClick={onClose}
                 className="px-4 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm"
               >
-                Done
+                {t("tools.cms.done")}
               </button>
             </div>
           </div>
         ) : (
           <form onSubmit={submit} className="p-5 space-y-3 text-sm">
-            <Field label="Site name">
+            <Field label={t("tools.cms.siteName")}>
               <input
                 value={siteName}
                 onChange={(e) => setSiteName(e.target.value)}
@@ -391,14 +387,14 @@ function CmsInstallDialog({
                 className="flex-1 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
               />
             </Field>
-            <Field label="Install in">
+            <Field label={t("tools.cms.installIn")}>
               <input
                 value={parentDir}
                 onChange={(e) => setParentDir(e.target.value)}
                 className="flex-1 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
               />
             </Field>
-            <Field label="PHP version">
+            <Field label={t("tools.cms.phpVersion")}>
               <select
                 value={phpVersion}
                 onChange={(e) => setPhpVersion(e.target.value)}
@@ -422,19 +418,19 @@ function CmsInstallDialog({
                   className="mt-0.5"
                 />
                 <span>
-                  Also register as a virtual host
+                  {t("tools.cms.alsoHost")}
                   <span className="block text-[11px] text-neutral-500">
-                    Custom hostname like{" "}
-                    <code>my-site.local</code> — triggers a UAC prompt to
-                    update the hosts file. Skip to access it as a path under
-                    <code> localhost:{ports.apache.port}</code>.
+                    {t("tools.cms.alsoHostHint", {
+                      example: "my-site.local",
+                      fallback: `localhost:${ports.apache.port}`,
+                    })}
                   </span>
                 </span>
               </label>
             </div>
 
             {addHost && (
-              <Field label="Hostname">
+              <Field label={t("tools.cms.hostname")}>
                 <input
                   value={hostname}
                   onChange={(e) => {
@@ -454,10 +450,9 @@ function CmsInstallDialog({
             )}
 
             <div className="text-xs text-neutral-500">
-              {stage === "downloading" &&
-                "Downloading CMS files… (first install only, can take a minute)"}
-              {stage === "installing" && "Copying files, creating DB…"}
-              {stage === "idle" && "MySQL must be running."}
+              {stage === "downloading" && t("tools.cms.stageDownloading")}
+              {stage === "installing" && t("tools.cms.stageInstalling")}
+              {stage === "idle" && t("tools.cms.stageIdle")}
             </div>
 
             <div className="flex items-center gap-2 pt-2">
@@ -472,7 +467,7 @@ function CmsInstallDialog({
                 }
                 className="px-4 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white font-medium disabled:opacity-50"
               >
-                {busy ? "Installing…" : "Install"}
+                {busy ? t("tools.cms.installing") : t("tools.cms.install")}
               </button>
               <button
                 type="button"
@@ -480,7 +475,7 @@ function CmsInstallDialog({
                 disabled={busy}
                 className="px-4 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50"
               >
-                Cancel
+                {t("tools.cancel")}
               </button>
             </div>
           </form>
@@ -491,6 +486,7 @@ function CmsInstallDialog({
 }
 
 function LaravelDialog({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [parentDir, setParentDir] = useState("");
   const [phpVersions, setPhpVersions] = useState<string[]>([]);
@@ -530,7 +526,7 @@ function LaravelDialog({ onClose }: { onClose: () => void }) {
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
         <div className="px-5 py-3 border-b border-neutral-200 flex items-center justify-between">
           <h3 className="font-semibold text-neutral-900">
-            Create Laravel project
+            {t("tools.laravel.dialogTitle")}
           </h3>
           <button
             onClick={onClose}
@@ -542,9 +538,7 @@ function LaravelDialog({ onClose }: { onClose: () => void }) {
 
         {createdPath ? (
           <div className="p-5 space-y-3 text-sm">
-            <p className="text-emerald-700">
-              Project created. Public dir below — add it as a host in Hosts:
-            </p>
+            <p className="text-emerald-700">{t("tools.laravel.created")}</p>
             <pre className="rounded bg-neutral-100 p-3 font-mono text-xs break-words whitespace-pre-wrap">
               {createdPath}
             </pre>
@@ -553,13 +547,13 @@ function LaravelDialog({ onClose }: { onClose: () => void }) {
                 onClick={onClose}
                 className="px-4 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium"
               >
-                Done
+                {t("tools.cms.done")}
               </button>
             </div>
           </div>
         ) : (
           <form onSubmit={submit} className="p-5 space-y-3 text-sm">
-            <Field label="Project name">
+            <Field label={t("tools.laravel.projectName")}>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -568,14 +562,14 @@ function LaravelDialog({ onClose }: { onClose: () => void }) {
                 className="flex-1 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
               />
             </Field>
-            <Field label="Parent directory">
+            <Field label={t("tools.laravel.parentDir")}>
               <input
                 value={parentDir}
                 onChange={(e) => setParentDir(e.target.value)}
                 className="flex-1 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500"
               />
             </Field>
-            <Field label="PHP version">
+            <Field label={t("tools.cms.phpVersion")}>
               <select
                 value={phpVersion}
                 onChange={(e) => setPhpVersion(e.target.value)}
@@ -596,9 +590,7 @@ function LaravelDialog({ onClose }: { onClose: () => void }) {
             )}
 
             <div className="text-xs text-neutral-500">
-              {busy
-                ? "Running composer create-project — this can take 1-3 min on first download."
-                : "Composer will download Laravel and its dependencies."}
+              {busy ? t("tools.laravel.running") : t("tools.laravel.hint")}
             </div>
 
             <div className="flex items-center gap-2 pt-2">
@@ -609,7 +601,7 @@ function LaravelDialog({ onClose }: { onClose: () => void }) {
                 }
                 className="px-4 py-1.5 rounded bg-sky-500 hover:bg-sky-600 text-white font-medium disabled:opacity-50"
               >
-                {busy ? "Creating…" : "Create"}
+                {busy ? t("tools.laravel.creating") : t("tools.laravel.create")}
               </button>
               <button
                 type="button"
@@ -617,7 +609,7 @@ function LaravelDialog({ onClose }: { onClose: () => void }) {
                 disabled={busy}
                 className="px-4 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50"
               >
-                Cancel
+                {t("tools.cancel")}
               </button>
             </div>
           </form>
@@ -678,6 +670,7 @@ type CompressReport = {
 };
 
 function ImageOptimizerCard() {
+  const { t } = useTranslation();
   const [folder, setFolder] = useState("");
   const [quality, setQuality] = useState(80);
   const [includeJpg, setIncludeJpg] = useState(true);
@@ -715,23 +708,21 @@ function ImageOptimizerCard() {
     <div className="rounded-lg border border-neutral-200 bg-white p-4">
       <div className="flex items-center gap-3 mb-3">
         <FiImage className="text-emerald-600 text-xl" />
-        <h3 className="font-medium text-neutral-800">Image optimizer</h3>
+        <h3 className="font-medium text-neutral-800">
+          {t("tools.images.title")}
+        </h3>
       </div>
-      <p className="text-xs text-neutral-500 mb-3">
-        Walk a folder, re-encode JPGs at the chosen quality and run oxipng on
-        PNGs. Files are only replaced if the new version is smaller — safe to
-        run repeatedly on the same folder.
-      </p>
+      <p className="text-xs text-neutral-500 mb-3">{t("tools.images.subtitle")}</p>
       <div className="space-y-2 text-sm">
-        <Field label="Folder">
+        <Field label={t("tools.images.folder")}>
           <input
             value={folder}
             onChange={(e) => setFolder(e.target.value)}
-            placeholder="C:/path/to/images"
+            placeholder={t("tools.images.folderPlaceholder")}
             className="flex-1 min-w-0 px-3 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
           />
         </Field>
-        <Field label={`JPG quality (${quality})`}>
+        <Field label={t("tools.images.jpegQuality", { quality })}>
           <input
             type="range"
             min={40}
@@ -749,7 +740,7 @@ function ImageOptimizerCard() {
               onChange={(e) => setIncludeJpg(e.target.checked)}
               className="size-4"
             />
-            JPG
+            {t("tools.images.includeJpg")}
           </label>
           <label className="flex items-center gap-1.5 text-xs text-neutral-700">
             <input
@@ -758,7 +749,7 @@ function ImageOptimizerCard() {
               onChange={(e) => setIncludePng(e.target.checked)}
               className="size-4"
             />
-            PNG
+            {t("tools.images.includePng")}
           </label>
         </Field>
       </div>
@@ -768,14 +759,16 @@ function ImageOptimizerCard() {
           disabled={busy || !folder.trim() || (!includeJpg && !includePng)}
           className="px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium disabled:opacity-50"
         >
-          {busy ? "Optimizing…" : "Optimize"}
+          {busy ? t("tools.images.running") : t("tools.images.run")}
         </button>
         {report && (
           <span className="text-xs text-neutral-700">
-            {report.files_changed}/{report.files_total} shrunk · saved{" "}
-            <strong className="text-emerald-700">
-              {formatBytes(saved)} ({savedPct}%)
-            </strong>
+            {t("tools.images.summary", {
+              changed: report.files_changed,
+              total: report.files_total,
+              saved: formatBytes(saved),
+              pct: savedPct,
+            })}
           </span>
         )}
       </div>
@@ -808,144 +801,4 @@ function formatBytes(b: number): string {
   if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
   if (b < 1024 * 1024 * 1024) return `${(b / (1024 * 1024)).toFixed(1)} MB`;
   return `${(b / (1024 * 1024 * 1024)).toFixed(2)} GB`;
-}
-
-type DeployReport = {
-  files_uploaded: number;
-  bytes_uploaded: number;
-  errors: string[];
-};
-
-function FtpDeployCard() {
-  const [host, setHost] = useState("");
-  const [port, setPort] = useState(21);
-  const [user, setUser] = useState("");
-  const [password, setPassword] = useState("");
-  const [remoteDir, setRemoteDir] = useState("/public_html");
-  const [localDir, setLocalDir] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [report, setReport] = useState<DeployReport | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  async function run() {
-    setBusy(true);
-    setError(null);
-    setReport(null);
-    try {
-      const r = await invoke<DeployReport>("ftp_upload", {
-        host: host.trim(),
-        port,
-        user: user.trim(),
-        password,
-        remoteDir: remoteDir.trim(),
-        localDir: localDir.trim(),
-      });
-      setReport(r);
-    } catch (e) {
-      setError(String(e));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <div className="rounded-lg border border-neutral-200 bg-white p-4">
-      <div className="flex items-center gap-3 mb-3">
-        <FiUploadCloud className="text-violet-600 text-xl" />
-        <h3 className="font-medium text-neutral-800">FTP upload</h3>
-      </div>
-      <p className="text-xs text-neutral-500 mb-3">
-        Recursive upload of a local folder to an FTP server in binary mode.
-        Plain FTP only for now — SFTP is queued for the next round. Stored
-        profiles per host will come once this is exercised in anger.
-      </p>
-      <div className="grid grid-cols-[120px_1fr_80px] gap-2 items-center text-sm">
-        <label className="text-right text-neutral-600">Host</label>
-        <input
-          value={host}
-          onChange={(e) => setHost(e.target.value)}
-          placeholder="ftp.example.com"
-          className="px-2 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500"
-        />
-        <input
-          type="number"
-          value={port}
-          onChange={(e) => setPort(Number(e.target.value) || 21)}
-          className="px-2 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500"
-        />
-
-        <label className="text-right text-neutral-600">User</label>
-        <input
-          value={user}
-          onChange={(e) => setUser(e.target.value)}
-          className="px-2 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500 col-span-2"
-        />
-
-        <label className="text-right text-neutral-600">Password</label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="px-2 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500 col-span-2"
-        />
-
-        <label className="text-right text-neutral-600">Remote dir</label>
-        <input
-          value={remoteDir}
-          onChange={(e) => setRemoteDir(e.target.value)}
-          placeholder="/public_html"
-          className="px-2 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500 col-span-2"
-        />
-
-        <label className="text-right text-neutral-600">Local folder</label>
-        <input
-          value={localDir}
-          onChange={(e) => setLocalDir(e.target.value)}
-          placeholder="C:/path/to/project"
-          className="px-2 py-1.5 rounded border border-neutral-300 font-mono text-xs focus:outline-none focus:border-sky-500 col-span-2"
-        />
-      </div>
-      <div className="mt-3 flex items-center gap-2">
-        <button
-          onClick={run}
-          disabled={
-            busy ||
-            !host.trim() ||
-            !user.trim() ||
-            !remoteDir.trim() ||
-            !localDir.trim()
-          }
-          className="px-3 py-1.5 rounded bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium disabled:opacity-50"
-        >
-          {busy ? "Uploading…" : "Upload"}
-        </button>
-        {report && (
-          <span className="text-xs text-neutral-700">
-            {report.files_uploaded} file(s) ·{" "}
-            {formatBytes(report.bytes_uploaded)} uploaded
-          </span>
-        )}
-      </div>
-      {report && report.errors.length > 0 && (
-        <div className="mt-2 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded p-2 max-h-32 overflow-auto">
-          <strong>{report.errors.length} error(s):</strong>
-          <ul className="font-mono mt-1 space-y-0.5">
-            {report.errors.slice(0, 20).map((e, i) => (
-              <li key={i} className="truncate">
-                {e}
-              </li>
-            ))}
-            {report.errors.length > 20 && (
-              <li>… {report.errors.length - 20} more</li>
-            )}
-          </ul>
-        </div>
-      )}
-      {error && (
-        <div className="mt-2 text-xs text-red-600 font-mono break-words bg-red-50 border border-red-200 rounded p-2">
-          {error}
-        </div>
-      )}
-    </div>
-  );
 }

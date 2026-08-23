@@ -5,8 +5,7 @@
     "getStarted": "शुरू करें",
     "retry": "पुनः प्रयास",
     "skip": "अभी छोड़ें",
-    "errorTitle": "कुछ डाउनलोड विफल रहे",
-    "continueAnyway": "ऐप पर जारी रखें"
+    "errorTitle": "कुछ डाउनलोड विफल रहे"
   },
   "nav": {
     "home": "होम",
@@ -38,7 +37,6 @@
     "invalidPort": "पोर्ट 1 से 65535 के बीच होने चाहिए।"
   },
   "settings": {
-    "title": "सेटिंग्स",
     "cat": {
       "general": "सामान्य",
       "services": "सेवाएँ",
@@ -58,9 +56,7 @@
       "checking": "जाँच रहे हैं…",
       "installNow": "इंस्टॉल करें और पुनः आरंभ करें",
       "channel": "रिलीज़ चैनल",
-      "channelAlpha": "अल्फ़ा (रोलिंग)",
-      "channelBeta": "बीटा",
-      "channelStable": "स्थिर"
+      "channelAlpha": "अल्फ़ा (रोलिंग)"
     },
     "about": {
       "title": "परिचय",
@@ -91,7 +87,11 @@
     "statusStopped": "रुका हुआ"
   },
   "hosts": {
-    "columns": { "name": "नाम", "php": "PHP", "extras": "अतिरिक्त" },
+    "columns": {
+      "name": "नाम",
+      "php": "PHP",
+      "extras": "अतिरिक्त"
+    },
     "empty": "अभी कोई होस्ट नहीं। जोड़ने के लिए + क्लिक करें।",
     "add": "होस्ट जोड़ें",
     "deleteSelected": "चयनित होस्ट हटाएँ",
@@ -111,8 +111,6 @@
     "revert": "वापस लें",
     "addForm": {
       "title": "होस्ट जोड़ें",
-      "create": "बनाएँ",
-      "creating": "बना रहे हैं…",
       "cancel": "रद्द करें"
     }
   },
@@ -140,14 +138,12 @@
   },
   "editor": {
     "open": "खोलें",
-    "save": "सहेजें",
     "saved": "सहेजा गया",
     "dirty": "सहेजें *",
     "checkSyntax": "सिंटैक्स जाँचें",
     "empty": "ऊपर फ़ाइल पथ लिखें और Enter दबाएँ (या खोलें पर क्लिक करें)।"
   },
   "versions": {
-    "title": "संस्करण और घटक",
     "installed": "इंस्टॉल किया गया",
     "install": "इंस्टॉल करें",
     "installing": "इंस्टॉल हो रहा है…",

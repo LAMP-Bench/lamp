@@ -9,10 +9,9 @@ desktop GUI.
 > **Status: alpha.** Phases 0–7 are done and Phase 9 (polish + Linux) is
 > well underway. The app installs as a slim ~30 MB shell that downloads
 > Apache/MySQL/PHP/etc. on first launch, auto-updates via signed GitHub
-> Releases, ships a Settings panel with English/Spanish/French i18n, and
-> builds on Windows + Linux + macOS (Intel & Apple Silicon) in CI. Windows
-> is the most exercised target; Linux/macOS native service binaries are
-> still being pinned (see "Platform support").
+> Releases, and builds on Windows + Linux + macOS (universal) in CI.
+> Windows is the most exercised target by a wide margin — see "Platform
+> support" for exactly where the others stand.
 
 ## Install (pre-built alpha)
 
@@ -64,9 +63,16 @@ each launch.
 - Config: edit per-version `php.ini`, `httpd.conf`, `nginx.conf`, `my.cnf`
   in a standalone Monaco window. `php -l` lint is one click.
 - Logs: live tail of Apache, Nginx, MySQL, Redis and MailHog.
-- Settings: language (en/es/fr), PHP/MySQL version pickers, installed-
-  components manager, update channel + manual check, Dynamic DNS, About
-  (version + commit SHA + build date).
+- Settings: language, default PHP and MySQL version, installed-components
+  manager (with download progress), manual update check, Dynamic DNS,
+  About (version + commit SHA + build date).
+- Versions: install or remove any pinned component, toggle PHP extensions
+  per version, and install the ionCube loader.
+- Every service's ports are editable from the sidebar, with collisions
+  rejected before they're saved.
+- 13 languages, detected from the OS locale on first launch. English,
+  Spanish and French are complete; the other ten cover the common UI and
+  fall back to English for the longer technical strings.
 
 ## Platform support
 
@@ -133,12 +139,13 @@ Produces an installer for the current OS in
 
 ```sh
 pnpm exec tsc --noEmit                               # TypeScript
+pnpm scripts:check-i18n                              # keys vs. code, both ways
 cargo clippy --manifest-path src-tauri/Cargo.toml --no-deps -- -D warnings
 cargo test --manifest-path src-tauri/Cargo.toml --lib
 pnpm scripts:check-binaries                          # pinned URLs still live
 ```
 
-CI runs the first three before the build matrix. The URL probe runs on
+CI runs the first four before the build matrix. The URL probe runs on
 its own weekly schedule and opens an issue when an upstream purges a
 file we pin.
 

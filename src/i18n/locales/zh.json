@@ -5,8 +5,7 @@
     "getStarted": "开始使用",
     "retry": "重试",
     "skip": "暂时跳过",
-    "errorTitle": "部分下载失败",
-    "continueAnyway": "继续进入应用"
+    "errorTitle": "部分下载失败"
   },
   "nav": {
     "home": "主页",
@@ -38,7 +37,6 @@
     "invalidPort": "端口必须在 1 到 65535 之间。"
   },
   "settings": {
-    "title": "设置",
     "cat": {
       "general": "常规",
       "services": "服务",
@@ -58,9 +56,7 @@
       "checking": "检查中…",
       "installNow": "安装并重启",
       "channel": "发布通道",
-      "channelAlpha": "Alpha（滚动）",
-      "channelBeta": "Beta",
-      "channelStable": "稳定版"
+      "channelAlpha": "Alpha（滚动）"
     },
     "about": {
       "title": "关于",
@@ -91,7 +87,11 @@
     "statusStopped": "已停止"
   },
   "hosts": {
-    "columns": { "name": "名称", "php": "PHP", "extras": "附加" },
+    "columns": {
+      "name": "名称",
+      "php": "PHP",
+      "extras": "附加"
+    },
     "empty": "还没有主机。点击 + 添加一个。",
     "add": "添加主机",
     "deleteSelected": "删除所选主机",
@@ -111,8 +111,6 @@
     "revert": "还原",
     "addForm": {
       "title": "添加主机",
-      "create": "创建",
-      "creating": "创建中…",
       "cancel": "取消"
     }
   },
@@ -140,14 +138,12 @@
   },
   "editor": {
     "open": "打开",
-    "save": "保存",
     "saved": "已保存",
     "dirty": "保存 *",
     "checkSyntax": "检查语法",
     "empty": "在上方输入文件路径并按回车（或点击打开）。"
   },
   "versions": {
-    "title": "版本与组件",
     "installed": "已安装",
     "install": "安装",
     "installing": "安装中…",

@@ -2,15 +2,11 @@
   "setup": {
     "title": "Configurando Lamp Bench",
     "subtitle": "Descarga inicial de los servicios. Solo ocurre la primera vez.",
-    "complete": "Listo. Lamp Bench ya está preparado.",
     "getStarted": "Empezar",
     "retry": "Reintentar",
     "skip": "Saltar por ahora",
     "errorTitle": "Algunas descargas fallaron",
-    "errorHint": "Lamp Bench funcionará, pero los servicios con descargas fallidas no arrancarán hasta que los reintentes.",
-    "unsupportedTitle": "Los servicios para esta plataforma todavía no están listos",
-    "unsupportedHint": "Los binarios de Lamp Bench (Apache, MySQL, PHP, …) sólo están empaquetados para Windows ahora mismo. La interfaz funciona; los toggles de servicio fallarán hasta que añadamos binarios al scripts/binaries.json.",
-    "continueAnyway": "Continuar a la app"
+    "errorHint": "Lamp Bench funcionará, pero los servicios con descargas fallidas no arrancarán hasta que los reintentes."
   },
   "nav": {
     "home": "Inicio",
@@ -24,7 +20,6 @@
     "servers": "Servidores y servicios"
   },
   "versions": {
-    "title": "Versiones y componentes",
     "intro": "Instala, actualiza o elimina los runtimes y herramientas. Eliminar el MySQL activo o el PHP por defecto detiene los servicios relacionados hasta reinstalarlos.",
     "installed": "Instalado",
     "install": "Instalar",
@@ -69,7 +64,6 @@
     "running": "En ejecución"
   },
   "settings": {
-    "title": "Ajustes",
     "cat": {
       "general": "General",
       "services": "Servicios",
@@ -93,10 +87,8 @@
       "error": "Error al buscar actualizaciones: {{message}}",
       "autoHint": "Lamp Bench busca actualizaciones cada vez que arranca. Usa este botón para volver a comprobar manualmente.",
       "channel": "Canal de versiones",
-      "channelHint": "Sólo existe el canal alpha por ahora. Elegir beta o stable empezará a sondear esos tags cuando se publiquen.",
       "channelAlpha": "Alpha (continuo)",
-      "channelBeta": "Beta",
-      "channelStable": "Estable"
+      "channelOnlyAlpha": "De momento solo existe el canal alpha. Beta y estable aparecerán aquí cuando haya builds a los que apuntar."
     },
     "about": {
       "title": "Acerca de",
@@ -115,16 +107,6 @@
       "mysqlHint": "Servidor MySQL activo. Cambiar detiene el actual y arranca el seleccionado. Los directorios de datos son independientes por versión.",
       "mysqlSwitching": "Cambiando MySQL…",
       "download": " — descargar"
-    },
-    "versions": {
-      "title": "Componentes instalados",
-      "hint": "Cada binario que conoce la app. Instala o elimina para gestionar el uso de disco. Eliminar el MySQL activo o el PHP por defecto detendrá los servicios.",
-      "install": "Instalar",
-      "installing": "Instalando…",
-      "remove": "Eliminar",
-      "removing": "Eliminando…",
-      "installed": "Instalado",
-      "confirmRemove": "¿Eliminar {{name}}? Se libera disco y el servicio no podrá arrancar hasta reinstalarlo."
     },
     "dyndns": {
       "title": "DNS dinámico",
@@ -151,7 +133,6 @@
       "database": "Base de datos",
       "email": "Correo",
       "images": "Imágenes",
-      "deploy": "Despliegue",
       "php": "PHP",
       "cms": "CMS"
     },
@@ -165,13 +146,20 @@
       "subtitle": "Captura los mail() de PHP y los muestra en una UI web. Arranca MailHog antes."
     },
     "composer": {
-      "title": "Composer",
-      "checking": "comprobando…"
+      "title": "Composer"
     },
     "laravel": {
       "title": "Laravel",
       "subtitle": "Crea un proyecto Laravel nuevo con composer create-project",
-      "newProject": "Nuevo proyecto"
+      "newProject": "Nuevo proyecto",
+      "dialogTitle": "Crear proyecto Laravel",
+      "created": "Proyecto creado. Abajo está el directorio public — añádelo como host en Hosts.",
+      "projectName": "Nombre del proyecto",
+      "parentDir": "Directorio padre",
+      "create": "Crear",
+      "creating": "Creando…",
+      "running": "Ejecutando composer create-project — la primera descarga tarda 1–3 minutos.",
+      "hint": "Composer descargará Laravel y sus dependencias."
     },
     "cms": {
       "wordpressTitle": "WordPress",
@@ -182,7 +170,22 @@
       "drupalSubtitle": "Drupal 11. BD creada. Termina en el instalador web.",
       "mediawikiTitle": "MediaWiki",
       "mediawikiSubtitle": "BD creada. Visita /mw-config/ para terminar.",
-      "install": "Instalar"
+      "install": "Instalar",
+      "newSite": "Nuevo sitio",
+      "installTitle": "Instalar {{name}}",
+      "installed": "Instalado. Abre la URL para terminar el asistente de configuración:",
+      "openSite": "Abrir sitio",
+      "done": "Hecho",
+      "siteName": "Nombre del sitio",
+      "installIn": "Instalar en",
+      "phpVersion": "Versión de PHP",
+      "hostname": "Nombre de host",
+      "alsoHost": "Registrar también como host virtual",
+      "alsoHostHint": "Un nombre propio como {{example}} — requiere un permiso de administrador para actualizar el archivo hosts. Omítelo para llegar al sitio como una ruta bajo {{fallback}}.",
+      "stageDownloading": "Descargando los archivos del CMS… (solo la primera vez, puede tardar un minuto)",
+      "stageInstalling": "Copiando archivos y creando la base de datos…",
+      "stageIdle": "MySQL tiene que estar en marcha.",
+      "installing": "Instalando…"
     },
     "checking": "comprobando…",
     "images": {
@@ -190,29 +193,14 @@
       "subtitle": "Recodifica JPG a una calidad determinada y comprime PNG sin pérdida in-place. Atómico — nunca aumenta el tamaño.",
       "folder": "Carpeta",
       "folderPlaceholder": "C:/ruta/a/imagenes",
-      "jpegQuality": "Calidad JPEG (1–100)",
+      "jpegQuality": "Calidad JPG ({{quality}})",
       "includeJpg": "Recodificar .jpg/.jpeg",
       "includePng": "Optimizar .png",
       "run": "Ejecutar",
       "running": "Procesando…",
-      "summary": "{{files}} archivos procesados · ahorrados {{bytes}}"
+      "summary": "{{changed}}/{{total}} reducidos · ahorrados {{saved}} ({{pct}}%)"
     },
-    "deployTool": {
-      "title": "Despliegue FTP",
-      "subtitle": "Sube recursivamente una carpeta local a un servidor FTP remoto. SFTP llegará después.",
-      "host": "Host",
-      "hostPlaceholder": "ftp.ejemplo.com",
-      "port": "Puerto",
-      "user": "Usuario",
-      "password": "Contraseña",
-      "remoteDir": "Carpeta remota",
-      "remoteDirPlaceholder": "/public_html",
-      "localDir": "Carpeta local",
-      "localDirPlaceholder": "C:/ruta/al/sitio",
-      "upload": "Subir",
-      "uploading": "Subiendo…",
-      "result": "{{files}} archivos · {{bytes}} subidos"
-    }
+    "cancel": "Cancelar"
   },
   "config": {
     "loading": "Cargando rutas…",
@@ -238,7 +226,6 @@
   },
   "editor": {
     "open": "Abrir",
-    "save": "Guardar",
     "saved": "Guardado",
     "dirty": "Guardar *",
     "checkSyntax": "Comprobar sintaxis",
@@ -285,7 +272,8 @@
       "deploying": "Subiendo…",
       "result": "{{files}} archivos · {{bytes}} subidos",
       "withErrors": "{{files}} archivos subidos, {{errors}} errores (ver abajo)",
-      "ftpsNote": "FTPS cifra la conexión. El FTP normal envía las credenciales en claro."
+      "ftpsNote": "FTPS cifra la conexión. El FTP normal envía las credenciales en claro.",
+      "ftpsSoon": "FTPS (próximamente)"
     },
     "saved": "Guardado.",
     "save": "Guardar",
@@ -335,8 +323,6 @@
       "title": "Añadir host",
       "hostnamePlaceholder": "miproyecto.local",
       "docrootPlaceholder": "C:/ruta/al/proyecto",
-      "create": "Crear",
-      "creating": "Creando…",
       "cancel": "Cancelar",
       "gitInit": "git init en esta carpeta tras crear",
       "phpDownloadOnSave": "Se descargará PHP {{version}} al guardar."

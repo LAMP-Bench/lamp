@@ -5,8 +5,7 @@
     "getStarted": "開始",
     "retry": "再試行",
     "skip": "今はスキップ",
-    "errorTitle": "一部のダウンロードに失敗しました",
-    "continueAnyway": "アプリへ進む"
+    "errorTitle": "一部のダウンロードに失敗しました"
   },
   "nav": {
     "home": "ホーム",
@@ -38,7 +37,6 @@
     "invalidPort": "ポートは 1〜65535 の範囲で指定してください。"
   },
   "settings": {
-    "title": "設定",
     "cat": {
       "general": "一般",
       "services": "サービス",
@@ -58,9 +56,7 @@
       "checking": "確認中…",
       "installNow": "インストールして再起動",
       "channel": "リリースチャンネル",
-      "channelAlpha": "アルファ（ローリング）",
-      "channelBeta": "ベータ",
-      "channelStable": "安定版"
+      "channelAlpha": "アルファ（ローリング）"
     },
     "about": {
       "title": "情報",
@@ -91,7 +87,11 @@
     "statusStopped": "停止中"
   },
   "hosts": {
-    "columns": { "name": "名前", "php": "PHP", "extras": "追加" },
+    "columns": {
+      "name": "名前",
+      "php": "PHP",
+      "extras": "追加"
+    },
     "empty": "まだホストがありません。+ をクリックして追加してください。",
     "add": "ホストを追加",
     "deleteSelected": "選択したホストを削除",
@@ -111,8 +111,6 @@
     "revert": "元に戻す",
     "addForm": {
       "title": "ホストを追加",
-      "create": "作成",
-      "creating": "作成中…",
       "cancel": "キャンセル"
     }
   },
@@ -140,14 +138,12 @@
   },
   "editor": {
     "open": "開く",
-    "save": "保存",
     "saved": "保存済み",
     "dirty": "保存 *",
     "checkSyntax": "構文チェック",
     "empty": "上にファイルパスを入力して Enter を押してください（または「開く」をクリック）。"
   },
   "versions": {
-    "title": "バージョンとコンポーネント",
     "installed": "インストール済み",
     "install": "インストール",
     "installing": "インストール中…",

@@ -5,8 +5,7 @@
     "getStarted": "시작하기",
     "retry": "다시 시도",
     "skip": "지금은 건너뛰기",
-    "errorTitle": "일부 다운로드 실패",
-    "continueAnyway": "앱으로 계속"
+    "errorTitle": "일부 다운로드 실패"
   },
   "nav": {
     "home": "홈",
@@ -38,7 +37,6 @@
     "invalidPort": "포트는 1~65535 사이여야 합니다."
   },
   "settings": {
-    "title": "설정",
     "cat": {
       "general": "일반",
       "services": "서비스",
@@ -58,9 +56,7 @@
       "checking": "확인 중…",
       "installNow": "설치 후 다시 시작",
       "channel": "릴리스 채널",
-      "channelAlpha": "알파(롤링)",
-      "channelBeta": "베타",
-      "channelStable": "안정"
+      "channelAlpha": "알파(롤링)"
     },
     "about": {
       "title": "정보",
@@ -91,7 +87,11 @@
     "statusStopped": "중지됨"
   },
   "hosts": {
-    "columns": { "name": "이름", "php": "PHP", "extras": "추가" },
+    "columns": {
+      "name": "이름",
+      "php": "PHP",
+      "extras": "추가"
+    },
     "empty": "아직 호스트가 없습니다. +를 클릭하여 추가하세요.",
     "add": "호스트 추가",
     "deleteSelected": "선택한 호스트 삭제",
@@ -111,8 +111,6 @@
     "revert": "되돌리기",
     "addForm": {
       "title": "호스트 추가",
-      "create": "만들기",
-      "creating": "만드는 중…",
       "cancel": "취소"
     }
   },
@@ -140,14 +138,12 @@
   },
   "editor": {
     "open": "열기",
-    "save": "저장",
     "saved": "저장됨",
     "dirty": "저장 *",
     "checkSyntax": "구문 검사",
     "empty": "위에 파일 경로를 입력하고 Enter를 누르세요(또는 열기 클릭)."
   },
   "versions": {
-    "title": "버전 및 구성요소",
     "installed": "설치됨",
     "install": "설치",
     "installing": "설치 중…",

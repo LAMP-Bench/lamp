@@ -170,19 +170,16 @@ function ServicesRows() {
 
   async function refresh() {
     try {
-      const [cat, versions, active] = await Promise.all([
+      const [cat, versions, active, current] = await Promise.all([
         invoke<PhpCatalogEntry[]>("php_catalog"),
         invoke<string[]>("mysql_versions"),
         invoke<string>("mysql_active_version"),
+        invoke<string>("php_default_get"),
       ]);
       setCatalog(cat);
       setMysqlList(versions);
       setMysqlActive(active);
-      // Default PHP isn't a stored value yet — pick the highest installed one
-      // as a best-effort display value. Adding a persistent setting is a
-      // follow-up; the picker still acts as a one-shot installer.
-      const installed = cat.filter((c) => c.installed);
-      setPhpDefault(installed[installed.length - 1]?.version ?? "");
+      setPhpDefault(current);
     } catch (e) {
       setError(String(e));
     }
@@ -202,6 +199,15 @@ function ServicesRows() {
         return;
       }
       setPhpBusy(null);
+    }
+    try {
+      // This used to only set local state, so the picker was really just an
+      // installer with a misleading label — the actual default was fixed when
+      // the app booted and could not be changed at all.
+      await invoke("php_default_set", { version });
+    } catch (e) {
+      setError(String(e));
+      return;
     }
     setPhpDefault(version);
     await refresh();
@@ -434,16 +440,19 @@ function ChannelRow() {
     <Row
       icon={<FiRefreshCw />}
       label={t("settings.updates.channel")}
-      hint={t("settings.updates.channelHint")}
+      hint={t("settings.updates.channelOnlyAlpha")}
     >
       <select
         value={channel}
         onChange={(e) => pick(e.target.value as Channel)}
-        className="px-3 py-1.5 rounded border border-neutral-300 text-sm bg-white focus:outline-none focus:border-sky-500"
+        // Beta and stable don't exist yet: the updater endpoint is a fixed
+        // URL, so picking one would silently keep serving alpha builds.
+        // Offering a choice that does nothing is worse than offering none.
+        disabled
+        title={t("settings.updates.channelOnlyAlpha")}
+        className="px-3 py-1.5 rounded border border-neutral-300 text-sm bg-white focus:outline-none focus:border-sky-500 disabled:opacity-60"
       >
         <option value="alpha">{t("settings.updates.channelAlpha")}</option>
-        <option value="beta">{t("settings.updates.channelBeta")}</option>
-        <option value="stable">{t("settings.updates.channelStable")}</option>
       </select>
     </Row>
   );

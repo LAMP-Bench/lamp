@@ -12,6 +12,7 @@ import {
 } from "react-icons/fi";
 import { SiPhp } from "react-icons/si";
 import { useConfirm, useToast } from "../components/Toast";
+import { useDownloadProgress } from "../useDownloadProgress";
 import type { PhpExtension } from "../types";
 
 /// Categorise a manifest entry name into a UI group. Anything PHP-ish goes
@@ -34,7 +35,9 @@ export function VersionsSection() {
   const [names, setNames] = useState<string[]>([]);
   const [installed, setInstalled] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState<string | null>(null);
   const [showMore, setShowMore] = useState(false);
+  const pct = useDownloadProgress(downloading);
 
   async function refresh() {
     const list = await invoke<string[]>("binary_list").catch(() => []);
@@ -55,6 +58,7 @@ export function VersionsSection() {
 
   async function install(name: string) {
     setBusy(name);
+    setDownloading(name);
     try {
       await invoke("binary_download", { name });
       await refresh();
@@ -63,6 +67,7 @@ export function VersionsSection() {
       toast("error", String(e));
     } finally {
       setBusy(null);
+      setDownloading(null);
     }
   }
 
@@ -143,7 +148,11 @@ export function VersionsSection() {
             className="px-2 py-1 rounded border border-sky-300 text-sky-600 hover:bg-sky-50 text-xs flex items-center gap-1 disabled:opacity-50"
           >
             <FiDownload />
-            {isBusy ? t("versions.installing") : t("versions.install")}
+            {isBusy
+              ? pct !== null
+                ? `${pct}%`
+                : t("versions.installing")
+              : t("versions.install")}
           </button>
         )}
       </div>

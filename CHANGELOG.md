@@ -7,6 +7,37 @@ exact build number while in alpha.
 
 ## Unreleased (alpha)
 
+### The UI stops promising things it can't do
+- The default PHP version is a real, persisted setting. The Settings
+  picker only ever changed a local variable — the value actually used was
+  fixed when the app booted and could not be changed at all.
+- Changing an existing host's PHP version downloads it if needed, which
+  the Add-host form already did. Before, switching a host to an
+  uninstalled version silently kept serving it with the default one while
+  the UI said otherwise.
+- The MySQL version picker lists only versions that are downloaded, and
+  the app no longer boots pointing at one that isn't.
+- The update channel selector is disabled until beta and stable exist.
+  It was writing a choice to localStorage that nothing read, so picking
+  "stable" quietly kept delivering alpha builds.
+- FTPS is shown as coming soon rather than selectable: the backend
+  rejects it (deliberately, rather than downgrading to plaintext), so
+  choosing it could only ever produce an error.
+- Installing a component shows a percentage in the sidebar and in
+  Versions. The progress events existed; only the setup wizard was
+  listening.
+- Removed the FTP card from Tools. Per-host deploy profiles superseded
+  it, and its help text still said stored profiles were a future plan.
+- Translated the Tools dialogs — installing a CMS, creating a Laravel
+  project, the image optimiser — which had stayed English even where
+  translations had already been written for them. Also dropped a
+  Windows-only "triggers a UAC prompt" line that non-Windows users were
+  being shown.
+- New `pnpm scripts:check-i18n` cross-checks the tables against the code
+  in both directions and runs in CI. It found 21 dead keys and two
+  labels that were never wired up; the tables are now exactly consistent
+  with the code.
+
 ### Not losing your data
 - Restoring a snapshot now replaces the document root instead of
   unpacking on top of it. Files added since the snapshot survived the

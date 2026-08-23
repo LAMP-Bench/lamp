@@ -22,6 +22,7 @@ import { useToast } from "./Toast";
 import { useService } from "../useService";
 import { serviceErrorText } from "../serviceError";
 import { usePorts } from "../PortsContext";
+import { useDownloadProgress } from "../useDownloadProgress";
 import type { SectionId, ServiceName } from "../types";
 
 type NavItem = { id: SectionId; icon: ReactNode };
@@ -198,6 +199,7 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
     spec.binaryName == null ? true : null
   );
   const [installing, setInstalling] = useState(false);
+  const pct = useDownloadProgress(installing ? spec.binaryName : null);
   const [expanded, setExpanded] = useState(false);
   const [cfg, setCfg] = useState<PortCfg | null>(null);
   const [versions, setVersions] = useState<string[]>([]);
@@ -327,7 +329,7 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
             title="Download this service"
           >
             <FiDownload className="text-[10px]" />
-            {installing ? "…" : "Install"}
+            {installing ? (pct !== null ? `${pct}%` : "…") : "Install"}
           </button>
         )}
       </div>

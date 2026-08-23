@@ -98,6 +98,11 @@ jobs:
       - name: TypeScript typecheck
         run: pnpm exec tsc --noEmit
 
+      # Catches a t() call whose key was never added (renders the raw key on
+      # screen) and translations nobody references.
+      - name: i18n consistency
+        run: pnpm scripts:check-i18n
+
       - name: Rust clippy (warnings denied)
         run: cargo clippy --manifest-path src-tauri/Cargo.toml --no-deps -- -D warnings
 

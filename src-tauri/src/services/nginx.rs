@@ -56,6 +56,13 @@ impl NginxService {
         self.hosts = hosts;
     }
 
+    /// See `ApacheService::set_default_php`.
+    pub fn set_default_php(&mut self, version: String) {
+        if self.php_installs.iter().any(|p| p.version == version) {
+            self.default_php = version;
+        }
+    }
+
     /// `mailhog_smtp` is here because Nginx seeds `php.ini` too: an
     /// Nginx-only user never starts Apache, and before this their PHP had no
     /// `extension_dir` and no mail routing at all.

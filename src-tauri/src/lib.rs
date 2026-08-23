@@ -135,12 +135,13 @@ fn run_capture(cmd: &mut std::process::Command) -> Result<CommandResult, String>
 }
 
 fn php_exe(state: &AppState, version: Option<&str>) -> Result<PathBuf, String> {
-    let v = version.unwrap_or(&state.default_php);
+    let fallback = effective_default_php(state);
+    let v = version.unwrap_or(&fallback);
     let install = state
         .php_installs
         .iter()
         .find(|p| p.version == v)
-        .or_else(|| state.php_installs.iter().find(|p| p.version == state.default_php))
+        .or_else(|| state.php_installs.iter().find(|p| p.version == fallback))
         .ok_or_else(|| format!("PHP {v} not installed"))?;
     Ok(install
         .dir
@@ -175,6 +176,60 @@ fn build_info() -> BuildInfo {
 fn load_hosts(state: &AppState) -> Result<Vec<Host>, String> {
     let conn = state.db.lock().unwrap();
     hosts::list(&conn)
+}
+
+const SETTING_DEFAULT_PHP: &str = "default_php";
+
+fn setting_get(conn: &Connection, key: &str) -> Option<String> {
+    conn.query_row(
+        "SELECT value FROM app_settings WHERE key = ?1",
+        rusqlite::params![key],
+        |row| row.get(0),
+    )
+    .ok()
+}
+
+fn setting_set(conn: &Connection, key: &str, value: &str) -> Result<(), String> {
+    conn.execute(
+        "INSERT INTO app_settings (key, value) VALUES (?1, ?2) \
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        rusqlite::params![key, value],
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+/// The PHP version the default vhost, phpMyAdmin and any host whose own
+/// version has gone missing all fall back to.
+///
+/// Read fresh from the database rather than from the value discovered at
+/// startup — the Settings picker used to change nothing at all, because the
+/// only copy of this lived in a field fixed when the app booted.
+fn effective_default_php(state: &AppState) -> String {
+    let stored = {
+        let conn = state.db.lock().unwrap();
+        setting_get(&conn, SETTING_DEFAULT_PHP)
+    };
+    match stored {
+        // Ignore a stored version that has since been removed from disk.
+        Some(v) if state.php_installs.iter().any(|p| p.version == v) => v,
+        _ => state.default_php.clone(),
+    }
+}
+
+#[tauri::command]
+fn php_default_get(state: tauri::State<AppState>) -> String {
+    effective_default_php(&state)
+}
+
+#[tauri::command]
+fn php_default_set(version: String, state: tauri::State<AppState>) -> Result<(), String> {
+    let installs = downloads::discover_php_installs(&state.resources_dir);
+    if !installs.iter().any(|p| p.version == version) {
+        return Err(format!("PHP {version} is not installed"));
+    }
+    let conn = state.db.lock().unwrap();
+    setting_set(&conn, SETTING_DEFAULT_PHP, &version)
 }
 
 /// Compiled-in default (port, port2) for a service. port2 is 0 when the
@@ -306,8 +361,10 @@ fn service_start(name: &str, state: tauri::State<AppState>) -> Result<(), String
         "apache" => {
             let hosts = load_hosts(&state)?;
             let installs = downloads::discover_php_installs(&state.resources_dir);
+            let default_php = effective_default_php(&state);
             let mut apache = state.apache.lock().unwrap();
             apache.set_php_installs(installs);
+            apache.set_default_php(default_php);
             apache.set_hosts(hosts);
             apache.set_ports(apache_p, apache_p2, mysql_p, mailhog_smtp);
             apache.start()
@@ -315,8 +372,10 @@ fn service_start(name: &str, state: tauri::State<AppState>) -> Result<(), String
         "nginx" => {
             let hosts = load_hosts(&state)?;
             let installs = downloads::discover_php_installs(&state.resources_dir);
+            let default_php = effective_default_php(&state);
             let mut nginx = state.nginx.lock().unwrap();
             nginx.set_php_installs(installs);
+            nginx.set_default_php(default_php);
             nginx.set_hosts(hosts);
             nginx.set_ports(nginx_p, nginx_p2, mailhog_smtp);
             nginx.start()
@@ -1335,6 +1394,8 @@ pub fn run() {
             service_ports_get,
             service_ports_set,
             php_versions,
+            php_default_get,
+            php_default_set,
             mysql_versions,
             mysql_active_version,
             mysql_set_version,

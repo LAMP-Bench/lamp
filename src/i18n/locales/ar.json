@@ -5,8 +5,7 @@
     "getStarted": "ابدأ",
     "retry": "إعادة المحاولة",
     "skip": "تخطٍّ الآن",
-    "errorTitle": "فشلت بعض التنزيلات",
-    "continueAnyway": "المتابعة إلى التطبيق"
+    "errorTitle": "فشلت بعض التنزيلات"
   },
   "nav": {
     "home": "الرئيسية",
@@ -38,7 +37,6 @@
     "invalidPort": "يجب أن تكون المنافذ بين 1 و65535."
   },
   "settings": {
-    "title": "الإعدادات",
     "cat": {
       "general": "عام",
       "services": "الخدمات",
@@ -58,9 +56,7 @@
       "checking": "جارٍ التحقق…",
       "installNow": "التثبيت وإعادة التشغيل",
       "channel": "قناة الإصدار",
-      "channelAlpha": "ألفا (متجدّد)",
-      "channelBeta": "بيتا",
-      "channelStable": "مستقر"
+      "channelAlpha": "ألفا (متجدّد)"
     },
     "about": {
       "title": "حول",
@@ -91,7 +87,11 @@
     "statusStopped": "متوقف"
   },
   "hosts": {
-    "columns": { "name": "الاسم", "php": "PHP", "extras": "إضافات" },
+    "columns": {
+      "name": "الاسم",
+      "php": "PHP",
+      "extras": "إضافات"
+    },
     "empty": "لا يوجد مضيفون بعد. انقر + لإضافة واحد.",
     "add": "إضافة مضيف",
     "deleteSelected": "حذف المضيف المحدد",
@@ -111,8 +111,6 @@
     "revert": "تراجع",
     "addForm": {
       "title": "إضافة مضيف",
-      "create": "إنشاء",
-      "creating": "جارٍ الإنشاء…",
       "cancel": "إلغاء"
     }
   },
@@ -140,14 +138,12 @@
   },
   "editor": {
     "open": "فتح",
-    "save": "حفظ",
     "saved": "تم الحفظ",
     "dirty": "حفظ *",
     "checkSyntax": "فحص الصياغة",
     "empty": "أدخل مسار ملف بالأعلى واضغط Enter (أو انقر فتح)."
   },
   "versions": {
-    "title": "الإصدارات والمكوّنات",
     "installed": "مُثبَّت",
     "install": "تثبيت",
     "installing": "جارٍ التثبيت…",

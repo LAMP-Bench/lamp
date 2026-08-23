@@ -31,6 +31,14 @@ CREATE TABLE IF NOT EXISTS service_config (
     port2   INTEGER NOT NULL DEFAULT 0
 );
 
+-- Free-form app preferences that need to outlive the process. Only the
+-- default PHP version so far; the frontend keeps its own UI-only choices
+-- (language, update channel) in localStorage.
+CREATE TABLE IF NOT EXISTS app_settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
 -- One stored deploy target per host so the FTP form doesn't have to be
 -- retyped on every upload. Password is stored in plaintext — acceptable
 -- for a local-only dev tool whose entire install dir is already

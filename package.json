@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "tauri": "tauri",
     "scripts:fetch-binaries": "node ./scripts/fetch-binaries.mjs",
-    "scripts:check-binaries": "node ./scripts/check-binaries.mjs"
+    "scripts:check-binaries": "node ./scripts/check-binaries.mjs",
+    "scripts:check-i18n": "node ./scripts/check-i18n.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",

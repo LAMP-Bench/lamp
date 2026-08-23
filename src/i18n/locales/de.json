@@ -5,8 +5,7 @@
     "getStarted": "Loslegen",
     "retry": "Wiederholen",
     "skip": "Vorerst überspringen",
-    "errorTitle": "Einige Downloads sind fehlgeschlagen",
-    "continueAnyway": "Zur App fortfahren"
+    "errorTitle": "Einige Downloads sind fehlgeschlagen"
   },
   "nav": {
     "home": "Start",
@@ -38,7 +37,6 @@
     "invalidPort": "Ports müssen zwischen 1 und 65535 liegen."
   },
   "settings": {
-    "title": "Einstellungen",
     "cat": {
       "general": "Allgemein",
       "services": "Dienste",
@@ -58,9 +56,7 @@
       "checking": "Suche…",
       "installNow": "Installieren & Neustarten",
       "channel": "Release-Kanal",
-      "channelAlpha": "Alpha (rollend)",
-      "channelBeta": "Beta",
-      "channelStable": "Stabil"
+      "channelAlpha": "Alpha (rollend)"
     },
     "about": {
       "title": "Über",
@@ -91,7 +87,11 @@
     "statusStopped": "gestoppt"
   },
   "hosts": {
-    "columns": { "name": "Name", "php": "PHP", "extras": "Extras" },
+    "columns": {
+      "name": "Name",
+      "php": "PHP",
+      "extras": "Extras"
+    },
     "empty": "Noch keine Hosts. Auf + klicken, um einen hinzuzufügen.",
     "add": "Host hinzufügen",
     "deleteSelected": "Ausgewählten Host löschen",
@@ -111,8 +111,6 @@
     "revert": "Zurücksetzen",
     "addForm": {
       "title": "Host hinzufügen",
-      "create": "Erstellen",
-      "creating": "Erstellen…",
       "cancel": "Abbrechen"
     }
   },
@@ -140,14 +138,12 @@
   },
   "editor": {
     "open": "Öffnen",
-    "save": "Speichern",
     "saved": "Gespeichert",
     "dirty": "Speichern *",
     "checkSyntax": "Syntax prüfen",
     "empty": "Dateipfad oben eingeben und Enter drücken (oder Öffnen klicken)."
   },
   "versions": {
-    "title": "Versionen & Komponenten",
     "installed": "Installiert",
     "install": "Installieren",
     "installing": "Installieren…",

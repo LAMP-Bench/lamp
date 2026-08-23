@@ -69,6 +69,16 @@ impl ApacheService {
         self.hosts = hosts;
     }
 
+    /// The version the default vhost and phpMyAdmin run on, and the fallback
+    /// for a host pointing at a PHP that is no longer installed. Applied per
+    /// start so the Settings picker takes effect on the next restart rather
+    /// than never.
+    pub fn set_default_php(&mut self, version: String) {
+        if self.php_installs.iter().any(|p| p.version == version) {
+            self.default_php = version;
+        }
+    }
+
     /// Apply listen ports + dependency ports read from `service_config`.
     /// `mysql_port`/`mailhog_smtp` keep the generated phpMyAdmin and php.ini
     /// configs in sync when the user moves those services off their defaults.

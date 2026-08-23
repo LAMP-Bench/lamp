@@ -32,9 +32,23 @@ impl MysqlService {
         default_version: String,
         runtime_dir: PathBuf,
     ) -> Self {
+        // Prefer the requested default, but don't boot pointing at a version
+        // that was never downloaded — fall back to whatever is on disk.
+        let active = if installs
+            .iter()
+            .any(|i| i.version == default_version && Self::is_present(i))
+        {
+            default_version
+        } else {
+            installs
+                .iter()
+                .find(|i| Self::is_present(i))
+                .map(|i| i.version.clone())
+                .unwrap_or(default_version)
+        };
         Self {
             installs,
-            active: default_version,
+            active,
             runtime_dir,
             port: DEFAULT_PORT,
             child: None,
@@ -45,8 +59,19 @@ impl MysqlService {
         self.port = port;
     }
 
+    /// Versions with files on disk. The picker used to list every version
+    /// the app knows about, so choosing an undownloaded one produced a
+    /// service that refused to start — for a while, silently.
     pub fn versions(&self) -> Vec<String> {
-        self.installs.iter().map(|i| i.version.clone()).collect()
+        self.installs
+            .iter()
+            .filter(|i| Self::is_present(i))
+            .map(|i| i.version.clone())
+            .collect()
+    }
+
+    fn is_present(install: &MysqlInstall) -> bool {
+        bin_path(&install.dir, "mysqld").exists()
     }
 
     pub fn active_version(&self) -> String {
@@ -57,8 +82,14 @@ impl MysqlService {
         if self.child.is_some() {
             return Err("Stop MySQL before switching versions.".into());
         }
-        if !self.installs.iter().any(|i| i.version == version) {
-            return Err(format!("Unknown MySQL version: {version}"));
+        match self.installs.iter().find(|i| i.version == version) {
+            None => return Err(format!("Unknown MySQL version: {version}")),
+            Some(i) if !Self::is_present(i) => {
+                return Err(format!(
+                    "MySQL {version} isn't downloaded yet — install it from Settings → Components."
+                ))
+            }
+            Some(_) => {}
         }
         self.active = version;
         Ok(())
