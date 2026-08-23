@@ -498,7 +498,7 @@ fn host_delete(id: i64, state: tauri::State<AppState>) -> Result<(), String> {
 
 fn apply_host_changes(state: &AppState) -> Result<(), String> {
     let all = load_hosts(state)?;
-    hosts::apply_to_system(&all)?;
+    hosts::apply_to_system(&all, &state.runtime_dir)?;
     let installs = downloads::discover_php_installs(&state.resources_dir);
     {
         let mut apache = state.apache.lock().unwrap();

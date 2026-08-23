@@ -31,6 +31,11 @@ rand = "0.8"
 ureq = { version = "2.10", default-features = false, features = ["tls"] }
 sha2 = "0.10"
 zip = { version = "2", default-features = false, features = ["deflate"] }
+# Unix service binaries ship as tarballs, not zips: MySQL's Linux build is
+# .tar.xz and its macOS build .tar.gz. `flate2`'s default backend is
+# miniz_oxide and `lzma-rs` is pure Rust, so neither adds a system library.
+flate2 = "1"
+lzma-rs = "0.3"
 # Snapshots — tar.zst archive of a host's docroot
 tar = "0.4"
 zstd = { version = "0.13", default-features = false }

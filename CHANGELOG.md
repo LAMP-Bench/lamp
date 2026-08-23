@@ -7,6 +7,34 @@ exact build number while in alpha.
 
 ## Unreleased (alpha)
 
+### Linux and macOS groundwork
+- The downloader understands `.tar.gz`, `.tar.xz` and `.tar` as well as
+  `.zip`, applies the Unix permission bits stored in an archive, and
+  recreates symlinks. This was the actual blocker for non-Windows
+  support: a zip-only extractor that also discarded the executable bit
+  could not have produced a runnable binary from any Unix package, no
+  matter which URLs the manifest pinned.
+- Downloads stream to disk instead of being buffered whole in memory —
+  MySQL's Linux build is ~900 MB — and a stalled connection now times
+  out rather than freezing the first-launch wizard with no way past it.
+- `php-cgi` and `nginx` are located with the platform's executable
+  suffix rather than a hardcoded `.exe`, so the generated Apache and
+  Nginx configs stop referring to binaries that cannot exist off
+  Windows. The Windows-only `FcgidInitialEnv PATH` and the ApacheLounge
+  `modules-extra/` module path are now per-platform.
+- Redis and MailHog fall back to a system-installed binary when nothing
+  is bundled. Both are driven entirely by arguments and a generated
+  config with absolute paths, so a packaged build behaves identically.
+- Pinned the Unix binaries that actually exist: MailHog for Linux and
+  macOS, MySQL 8.0 for both macOS architectures. **Apache, nginx, PHP
+  and Redis publish source tarballs only** — there is nothing to pin, so
+  those come from the package manager on Linux. macOS remains the gap.
+- The elevated hosts-file write no longer stages through a fixed name in
+  world-writable `/tmp` on Unix, where another local user could swap the
+  file and have root copy their content into `/etc/hosts`. It is staged
+  0600 inside the runtime directory. The managed block also uses LF
+  outside Windows instead of writing CRLF into `/etc/hosts`.
+
 ### Configurable ports, actually wired
 - Moving a service off its default port now works everywhere. MySQL's port
   was read from config in exactly one place and hardcoded as 3306 in

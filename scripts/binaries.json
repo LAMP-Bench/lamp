@@ -47,6 +47,18 @@
         "url": "https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-8.0.46-winx64.zip",
         "sha256": "28E9EDA019D88EFF4478D811EA2110B83F02A3966BE157FE91CC55DEF3AB0D4D",
         "strip_root_dir": "mysql-8.0.46-winx64"
+      },
+      "macos-arm64": {
+        "filename": "mysql-8.0.46-macos15-arm64.tar.gz",
+        "url": "https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-8.0.46-macos15-arm64.tar.gz",
+        "sha256": "6CA4A361A45F5019FBF6D500997986B4AAF6F0E30FF9C41179D1E8ECD635F3DB",
+        "strip_root_dir": "mysql-8.0.46-macos15-arm64"
+      },
+      "macos-x64": {
+        "filename": "mysql-8.0.46-macos15-x86_64.tar.gz",
+        "url": "https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-8.0.46-macos15-x86_64.tar.gz",
+        "sha256": "8590BC6C3203FE17F51F757DC9132FB755D1B73CBDAD9D12A67F85025A3C3B8F",
+        "strip_root_dir": "mysql-8.0.46-macos15-x86_64"
       }
     }
   },
@@ -72,6 +84,24 @@
         "filename": "MailHog_windows_amd64.exe",
         "url": "https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_windows_amd64.exe",
         "sha256": "B217990446E97A60FF09EC21D3F86E54415595148904A7F7737F5019D01671CE"
+      },
+      "linux-x64": {
+        "filename": "MailHog_linux_amd64",
+        "url": "https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64",
+        "sha256": "E2ED634DED49929F089B20045581955ED217672078FD86082DD7A6C67C5D09C7",
+        "raw_file": "mailhog/MailHog"
+      },
+      "macos-arm64": {
+        "filename": "MailHog_darwin_amd64",
+        "url": "https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_darwin_amd64",
+        "sha256": "53B45D951DFDB03B9D687CAFDD00E914710572D6F316C1421DD33F76895CF84E",
+        "raw_file": "mailhog/MailHog"
+      },
+      "macos-x64": {
+        "filename": "MailHog_darwin_amd64",
+        "url": "https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_darwin_amd64",
+        "sha256": "53B45D951DFDB03B9D687CAFDD00E914710572D6F316C1421DD33F76895CF84E",
+        "raw_file": "mailhog/MailHog"
       }
     }
   },

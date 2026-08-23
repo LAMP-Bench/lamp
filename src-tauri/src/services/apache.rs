@@ -226,6 +226,30 @@ impl Service for ApacheService {
     }
 }
 
+/// `php-cgi` with the platform's executable suffix, forward-slashed for the
+/// config file. Hardcoding `.exe` here meant the generated vhosts pointed at
+/// a binary that cannot exist off Windows.
+fn php_cgi_path(php_dir: &Path) -> String {
+    posix(&php_dir.join(format!("php-cgi{}", std::env::consts::EXE_SUFFIX)))
+}
+
+/// Where `mod_fcgid.so` sits relative to ServerRoot. The Windows build comes
+/// from ApacheLounge as a separate download that we drop into
+/// `modules-extra/`; a distro package puts it alongside every other module.
+#[cfg(windows)]
+const FCGID_MODULE: &str = "modules-extra/mod_fcgid.so";
+#[cfg(not(windows))]
+const FCGID_MODULE: &str = "modules/mod_fcgid.so";
+
+/// PATH handed to the php-cgi children — they inherit nothing useful
+/// otherwise, and anything PHP shells out to needs it. The Windows value was
+/// previously baked in unconditionally, so on Unix the CGI processes were
+/// handed a path that does not exist.
+#[cfg(windows)]
+const CGI_PATH: &str = "C:/Windows/System32";
+#[cfg(not(windows))]
+const CGI_PATH: &str = "/usr/local/bin:/usr/bin:/bin";
+
 #[allow(clippy::too_many_arguments)]
 fn build_conf(
     apache_dir: &Path,
@@ -242,7 +266,7 @@ fn build_conf(
     let server_root = posix(apache_dir);
     let runtime = posix(runtime_dir);
     let pma = posix(pma_dir);
-    let default_cgi = posix(&default_php_dir.join("php-cgi.exe"));
+    let default_cgi = php_cgi_path(default_php_dir);
     let ssl = posix(ssl_dir);
     let htdocs = posix(htdocs_dir);
 
@@ -263,11 +287,11 @@ fn build_conf(
          LoadModule alias_module modules/mod_alias.so\n\
          LoadModule rewrite_module modules/mod_rewrite.so\n\
          LoadModule actions_module modules/mod_actions.so\n\
-         LoadModule fcgid_module modules-extra/mod_fcgid.so\n\
+         LoadModule fcgid_module {FCGID_MODULE}\n\
          LoadModule socache_shmcb_module modules/mod_socache_shmcb.so\n\
          LoadModule ssl_module modules/mod_ssl.so\n\
          \n\
-         FcgidInitialEnv PATH \"C:/Windows/System32\"\n\
+         FcgidInitialEnv PATH \"{CGI_PATH}\"\n\
          # php-cgi retires itself after PHP_FCGI_MAX_REQUESTS (default 500)\n\
          # requests. That is lower than FcgidMaxRequestsPerProcess below, so\n\
          # the process would vanish while mod_fcgid still believed it was\n\
@@ -339,7 +363,7 @@ fn build_conf(
 
     for host in hosts {
         let docroot = posix(Path::new(&host.docroot));
-        let cgi = posix(&php_dir_for(&host.php_version).join("php-cgi.exe"));
+        let cgi = php_cgi_path(&php_dir_for(&host.php_version));
         let extras = render_extras(&host.apache_extra);
         let host_inner = format!(
             "\x20   ServerName {name}\n\

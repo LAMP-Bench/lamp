@@ -99,11 +99,14 @@ async function main() {
 
     // `raw_file` mode: download a single file into an existing dir without
     // wiping its parent. Used for things like Xdebug DLLs that drop into
-    // an existing PHP install's `ext/` folder.
-    if (entry.raw_file) {
-      const target = join(resourcesDir, entry.raw_file);
+    // an existing PHP install's `ext/` folder. A platform may override the
+    // destination — MailHog lands at `MailHog.exe` on Windows and plain
+    // `MailHog` everywhere else.
+    const rawFile = p.raw_file ?? entry.raw_file;
+    if (rawFile) {
+      const target = join(resourcesDir, rawFile);
       if (existsSync(target) && !force) {
-        console.log(`[skip] ${name} already at ${entry.raw_file} (use --force to redownload)`);
+        console.log(`[skip] ${name} already at ${rawFile} (use --force to redownload)`);
         continue;
       }
       console.log(`[fetch] ${name} ${entry.version}`);
@@ -124,7 +127,7 @@ async function main() {
       }
       await mkdir(dirname(target), { recursive: true });
       await copyFile(cached, target);
-      console.log(`  done -> resources/${entry.raw_file}`);
+      console.log(`  done -> resources/${rawFile}`);
       continue;
     }
 

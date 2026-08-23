@@ -141,7 +141,9 @@ impl NginxService {
             // never load.
             crate::php::ensure_managed_ini(&p.dir, self.mailhog_smtp_port)?;
             let port = PHP_BASE_PORT + (i as u16);
-            let php_cgi = p.dir.join("php-cgi.exe");
+            let php_cgi = p
+                .dir
+                .join(format!("php-cgi{}", std::env::consts::EXE_SUFFIX));
             if !php_cgi.exists() {
                 return Err(format!(
                     "php-cgi not found at {} (PHP {})",
@@ -182,13 +184,15 @@ impl Service for NginxService {
         self.spawn_php_pools()?;
 
         let conf = self.ensure_conf()?;
-        let nginx = self.nginx_dir.join("nginx.exe");
+        let nginx = self
+            .nginx_dir
+            .join(format!("nginx{}", std::env::consts::EXE_SUFFIX));
         if !nginx.exists() {
             // Best-effort: tear down the pools we just spawned.
             for mut c in self.php_pools.drain(..) {
                 kill_tree(&mut c);
             }
-            return Err(format!("nginx.exe not found at {}", nginx.display()));
+            return Err(format!("nginx binary not found at {}", nginx.display()));
         }
         let child = hidden_command(&nginx)
             .arg("-p")

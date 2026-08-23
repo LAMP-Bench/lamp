@@ -41,6 +41,62 @@ pub fn hidden_command<S: AsRef<OsStr>>(program: S) -> Command {
     cmd
 }
 
+/// Directories worth searching for a service binary beyond `PATH`.
+///
+/// Daemons live in `sbin`, which is not on a desktop user's `PATH` on most
+/// distros — `apache2`, `mysqld` and `redis-server` are all typically there.
+#[cfg(not(windows))]
+const EXTRA_BIN_DIRS: [&str; 4] = ["/usr/local/sbin", "/usr/sbin", "/sbin", "/opt/homebrew/bin"];
+
+/// First directory in `dirs` that holds an executable called `name`.
+///
+/// Split out from `which` so the lookup itself is testable without depending
+/// on whatever happens to be installed on the machine running the tests.
+#[cfg(not(windows))]
+fn find_in_dirs(dirs: &[PathBuf], name: &str) -> Option<PathBuf> {
+    dirs.iter()
+        .map(|d| d.join(name))
+        .find(|candidate| candidate.is_file())
+}
+
+#[cfg(not(windows))]
+fn which(name: &str) -> Option<PathBuf> {
+    let mut dirs: Vec<PathBuf> = std::env::var_os("PATH")
+        .map(|p| std::env::split_paths(&p).collect())
+        .unwrap_or_default();
+    dirs.extend(EXTRA_BIN_DIRS.iter().map(PathBuf::from));
+    find_in_dirs(&dirs, name)
+}
+
+/// Locate a service executable: the bundled copy first, then whatever the
+/// system provides.
+///
+/// This exists because upstream simply does not publish prebuilt Unix
+/// binaries for most of what Lamp Bench supervises — Apache, nginx, PHP and
+/// Redis ship source tarballs only, so on Linux and macOS the package manager
+/// is the realistic source. Windows never falls through: there the bundled
+/// copy is the only supported one, and silently picking up some unrelated
+/// `nginx.exe` from `PATH` would be worse than a clear error.
+///
+/// Note this resolves the *binary* only. A system Apache or MySQL also needs
+/// a config written for its own layout, so those two still require the
+/// bundled install; Redis and MailHog are driven entirely by arguments and a
+/// generated config with absolute paths, and work either way.
+pub fn resolve_binary(bundled: PathBuf, _system_names: &[&str]) -> Option<PathBuf> {
+    if bundled.is_file() {
+        return Some(bundled);
+    }
+    #[cfg(not(windows))]
+    {
+        for name in _system_names {
+            if let Some(found) = which(name) {
+                return Some(found);
+            }
+        }
+    }
+    None
+}
+
 /// Apache, MySQL and friends want forward slashes in their config files even
 /// on Windows. This converts a path to that form.
 pub fn posix(p: &Path) -> String {

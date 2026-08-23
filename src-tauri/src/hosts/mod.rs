@@ -220,13 +220,28 @@ pub fn delete(conn: &Connection, id: i64, runtime_dir: &Path) -> Result<(), Stri
 const MANAGED_BEGIN: &str = "# === Lamp Bench managed — do not edit between these markers ===";
 const MANAGED_END: &str = "# === Lamp Bench end ===";
 
+/// Line ending for the managed block. CRLF was written on every platform,
+/// which left stray carriage returns in a Unix `/etc/hosts` — cosmetic at
+/// best, and a parser that treats `\\r` as part of the hostname at worst.
+#[cfg(windows)]
+const EOL: &str = "\r\n";
+#[cfg(not(windows))]
+const EOL: &str = "\n";
+
 #[cfg(windows)]
 const HOSTS_PATH: &str = r"C:\Windows\System32\drivers\etc\hosts";
 
 #[cfg(not(windows))]
 const HOSTS_PATH: &str = "/etc/hosts";
 
-pub fn apply_to_system(hosts: &[Host]) -> Result<(), String> {
+/// Reconcile the managed block in the system hosts file.
+///
+/// `runtime_dir` is where the staged copy is written before the elevated
+/// command picks it up. On Unix that matters: the staged file used to live at
+/// a fixed name in the world-writable `/tmp`, so between our write and
+/// `pkexec cp` any local user could swap it and have root copy their content
+/// into `/etc/hosts`.
+pub fn apply_to_system(hosts: &[Host], runtime_dir: &Path) -> Result<(), String> {
     let current = fs::read_to_string(HOSTS_PATH)
         .map_err(|e| format!("read {HOSTS_PATH}: {e}"))?;
     let desired_section = build_managed_section(hosts);
@@ -236,15 +251,19 @@ pub fn apply_to_system(hosts: &[Host]) -> Result<(), String> {
     }
     #[cfg(windows)]
     {
+        // %TEMP% is per-user on Windows, so it is already private — more so
+        // than the install dir, which the installer deliberately grants the
+        // Users group write access to.
+        let _ = runtime_dir;
         write_elevated_windows(&desired)
     }
     #[cfg(target_os = "macos")]
     {
-        write_elevated_macos(&desired)
+        write_elevated_macos(&desired, runtime_dir)
     }
     #[cfg(target_os = "linux")]
     {
-        write_elevated_linux(&desired)
+        write_elevated_linux(&desired, runtime_dir)
     }
     #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
     {
@@ -259,12 +278,12 @@ fn build_managed_section(hosts: &[Host]) -> String {
     }
     let mut s = String::new();
     s.push_str(MANAGED_BEGIN);
-    s.push_str("\r\n");
+    s.push_str(EOL);
     for h in hosts {
-        s.push_str(&format!("127.0.0.1\t{}\r\n", h.name));
+        s.push_str(&format!("127.0.0.1\t{}{EOL}", h.name));
     }
     s.push_str(MANAGED_END);
-    s.push_str("\r\n");
+    s.push_str(EOL);
     s
 }
 
@@ -286,7 +305,7 @@ fn replace_section(current: &str, new_section: &str) -> String {
         _ => {
             let mut s = current.to_string();
             if !s.is_empty() && !s.ends_with('\n') {
-                s.push_str("\r\n");
+                s.push_str(EOL);
             }
             s.push_str(new_section);
             s
@@ -340,13 +359,34 @@ fn write_elevated_windows(new_content: &str) -> Result<(), String> {
     Ok(())
 }
 
+/// Write the staged hosts file somewhere only this user can reach, and
+/// create it 0600 *before* any content lands in it so there is no window
+/// where it is world-readable either.
+#[cfg(any(target_os = "macos", target_os = "linux"))]
+fn stage_private(runtime_dir: &Path, content: &str) -> Result<std::path::PathBuf, String> {
+    use std::io::Write;
+    use std::os::unix::fs::OpenOptionsExt;
+
+    fs::create_dir_all(runtime_dir).map_err(|e| format!("create runtime dir: {e}"))?;
+    let path = runtime_dir.join("hosts.staged");
+    let mut f = fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .mode(0o600)
+        .open(&path)
+        .map_err(|e| format!("stage hosts file: {e}"))?;
+    f.write_all(content.as_bytes())
+        .map_err(|e| format!("write staged hosts: {e}"))?;
+    Ok(path)
+}
+
 #[cfg(target_os = "macos")]
-fn write_elevated_macos(new_content: &str) -> Result<(), String> {
-    // macOS path: write to a tmp file we own, then have osascript run `cp`
-    // with administrator privileges. The single Touch ID / password prompt
-    // is the macOS equivalent of UAC; cached per app for ~5 min.
-    let tmp = std::env::temp_dir().join("lamp-bench-hosts.tmp");
-    fs::write(&tmp, new_content).map_err(|e| format!("write tmp hosts: {e}"))?;
+fn write_elevated_macos(new_content: &str, runtime_dir: &Path) -> Result<(), String> {
+    // macOS path: stage a file we own, then have osascript run `cp` with
+    // administrator privileges. The single Touch ID / password prompt is the
+    // macOS equivalent of UAC; cached per app for ~5 min.
+    let tmp = stage_private(runtime_dir, new_content)?;
     let src = tmp.display().to_string().replace('"', "\\\"");
     let script = format!(
         "do shell script \"cp '{src}' '{HOSTS_PATH}'\" with administrator privileges"
@@ -366,13 +406,12 @@ fn write_elevated_macos(new_content: &str) -> Result<(), String> {
 }
 
 #[cfg(target_os = "linux")]
-fn write_elevated_linux(new_content: &str) -> Result<(), String> {
+fn write_elevated_linux(new_content: &str, runtime_dir: &Path) -> Result<(), String> {
     // Linux path: prefer pkexec (graphical polkit prompt, no terminal needed).
     // Fall back to sudo -n in case we're being run in a CLI context where the
     // user already authenticated. Both invoke `cp` rather than a redirect so
     // we don't have to worry about shell quoting.
-    let tmp = std::env::temp_dir().join("lamp-bench-hosts.tmp");
-    fs::write(&tmp, new_content).map_err(|e| format!("write tmp hosts: {e}"))?;
+    let tmp = stage_private(runtime_dir, new_content)?;
 
     let runners: [&str; 2] = ["pkexec", "sudo"];
     let mut last_err = String::from("no privilege escalation tool found (need pkexec or sudo)");

@@ -1,4 +1,4 @@
-use super::{hidden_command, kill_tree, Service, ServiceStatus};
+use super::{hidden_command, kill_tree, resolve_binary, Service, ServiceStatus};
 use std::fs;
 use std::path::PathBuf;
 use std::process::Child;
@@ -37,17 +37,17 @@ impl Service for MailhogService {
         if self.child.is_some() {
             return Ok(());
         }
-        // MailHog ships as a single executable on Windows. The fetched file
-        // lives at `resources/mailhog/MailHog.exe` (see binaries.json).
-        let bin = self
+        // MailHog is a single executable driven entirely by flags — no
+        // config file to get wrong — so a packaged one is as good as ours.
+        let bundled = self
             .mailhog_dir
             .join(format!("MailHog{}", std::env::consts::EXE_SUFFIX));
-        if !bin.exists() {
-            return Err(format!(
+        let bin = resolve_binary(bundled.clone(), &["MailHog", "mailhog"]).ok_or_else(|| {
+            format!(
                 "MailHog binary not found at {}. Install it from the sidebar first.",
-                bin.display()
-            ));
-        }
+                bundled.display()
+            )
+        })?;
         let messages_dir = self.runtime_dir.join("mailhog").join("messages");
         fs::create_dir_all(&messages_dir).map_err(|e| e.to_string())?;
         let log_path = self.runtime_dir.join("mailhog").join("mailhog.log");

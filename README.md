@@ -71,11 +71,32 @@ each launch.
 ## Platform support
 
 The app, UI, hosts-file reconciliation, CA trust and DynDNS are
-cross-platform. The **bundled service binaries** (Apache, MySQL, PHP,
-nginx, Redis, MailHog, mod_fcgid, Xdebug) are currently pinned for Windows
-only in `scripts/binaries.json` — the OS-agnostic pieces (Composer,
-phpMyAdmin, the CMSes) work everywhere. Linux/macOS native service
-binaries are the remaining gap.
+cross-platform, and so is the downloader (zip, tar, tar.gz and tar.xz,
+with Unix permissions and symlinks preserved).
+
+The **service binaries** are a different story, and it's worth being
+precise about why:
+
+| Component | Windows | Linux | macOS |
+|---|---|---|---|
+| Composer, phpMyAdmin, the CMSes | bundled | bundled | bundled |
+| MailHog | bundled | bundled | bundled |
+| MySQL | bundled | package manager | bundled |
+| Apache, nginx, PHP, Redis | bundled | package manager | **gap** |
+
+Upstream publishes prebuilt Windows binaries for everything, but for
+Unix, Apache, nginx, PHP and Redis ship **source tarballs only** —
+there is nothing to pin. On Linux that's fine: those all have good
+distro packages, and Redis and MailHog already run from a system install
+if one is present. Making Apache, nginx and MySQL do the same needs the
+config generators to become layout-aware (a distro Apache expects its
+own `ServerRoot` and module paths), which is the next piece of work.
+
+MySQL's Linux build is deliberately not pinned: the only one offered is
+a 892 MB tarball, against a few tens of MB from `apt`.
+
+macOS is the weak spot — no system package manager to fall back on, and
+no upstream binaries for four of the six services.
 
 ## Prerequisites (development)
 

@@ -1,4 +1,4 @@
-use super::{hidden_command, kill_tree, posix, Service, ServiceStatus};
+use super::{hidden_command, kill_tree, posix, resolve_binary, Service, ServiceStatus};
 use std::fs;
 use std::path::PathBuf;
 use std::process::Child;
@@ -58,12 +58,20 @@ impl Service for RedisService {
         }
         let conf = self.ensure_conf()?;
         // tporadowski's Redis-x64 zip drops redis-server.exe at the root.
-        let server = self
+        // Redis publishes no Unix binaries, only source, so on Linux and
+        // macOS we accept a packaged one — the generated redis.conf uses
+        // absolute paths and is passed as the sole argument, so it does not
+        // care which build reads it.
+        let bundled = self
             .redis_dir
             .join(format!("redis-server{}", std::env::consts::EXE_SUFFIX));
-        if !server.exists() {
-            return Err(format!("redis-server not found at {}", server.display()));
-        }
+        let server = resolve_binary(bundled.clone(), &["redis-server"]).ok_or_else(|| {
+            format!(
+                "redis-server not found at {} and none on PATH — install Redis from the sidebar, \
+                 or via your package manager",
+                bundled.display()
+            )
+        })?;
         let child = hidden_command(&server)
             .arg(&conf)
             .spawn()
