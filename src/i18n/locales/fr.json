@@ -65,7 +65,8 @@
     "saved": "Enregistré — redémarrez pour appliquer",
     "restartHint": "Redémarrez le service pour appliquer les changements de port.",
     "stopFirst": "Arrêtez le service avant de changer sa version.",
-    "invalidPort": "Les ports doivent être entre 1 et 65535."
+    "invalidPort": "Les ports doivent être entre 1 et 65535.",
+    "running": "En cours"
   },
   "settings": {
     "title": "Réglages",
@@ -248,7 +249,11 @@
     "empty": "Saisissez un chemin de fichier ci-dessus et appuyez sur Entrée (ou cliquez sur Ouvrir)."
   },
   "hosts": {
-    "columns": { "name": "Nom", "php": "PHP", "extras": "Extras" },
+    "columns": {
+      "name": "Nom",
+      "php": "PHP",
+      "extras": "Extras"
+    },
     "empty": "Aucun hôte pour l'instant. Cliquez sur + pour en ajouter un.",
     "add": "Ajouter un hôte",
     "deleteSelected": "Supprimer l'hôte sélectionné",
@@ -354,5 +359,8 @@
     "quickMobileQR": "QR mobile",
     "statusRunning": "en cours",
     "statusStopped": "arrêté"
+  },
+  "services": {
+    "exitedImmediately": "{{service}} a démarré puis s’est arrêté aussitôt. Le port est probablement déjà utilisé — une autre copie en cours, ou un processus resté d’une session précédente. Consultez Logs → {{service}} pour la raison."
   }
 }

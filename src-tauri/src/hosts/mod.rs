@@ -1,8 +1,9 @@
 //! Virtual host CRUD + reconciliation of the system `hosts` file.
 
-use rusqlite::{params, Connection};
+use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use std::fs;
+use std::path::Path;
 #[cfg(any(target_os = "windows", target_os = "linux", target_os = "macos"))]
 use crate::services::hidden_command;
 
@@ -16,6 +17,65 @@ pub struct Host {
     pub apache_extra: String,
     #[serde(default)]
     pub nginx_extra: String,
+}
+
+/// Trim, lowercase and validate a user-supplied host name.
+///
+/// This is the only gate on a string that then travels somewhere expensive:
+///
+/// 1. an **elevated** write to `C:\Windows\…\hosts` / `/etc/hosts` — a bare
+///    `\n` would let a typo append arbitrary entries to the system's name
+///    resolution,
+/// 2. a raw `ServerName` inside the generated Apache vhost,
+/// 3. a **filename** under `runtime/ssl/`, where `../..` escapes the dir.
+///
+/// Lowercasing is not cosmetic either: SQLite's `UNIQUE` index is
+/// case-sensitive, so `Site.local` and `site.local` used to coexist as two
+/// rows resolving to the same name.
+pub fn normalize_hostname(raw: &str) -> Result<String, String> {
+    // A trailing dot is legal DNS (fully-qualified) but meaningless here and
+    // would produce an empty final label.
+    let name = raw.trim().trim_end_matches('.').to_ascii_lowercase();
+
+    if name.is_empty() {
+        return Err("name is required".into());
+    }
+    if name.len() > 253 {
+        return Err("host name is too long (max 253 characters)".into());
+    }
+    if name == "localhost" {
+        return Err(
+            "`localhost` is reserved — it already serves the default htdocs vhost".into(),
+        );
+    }
+    for label in name.split('.') {
+        if label.is_empty() {
+            return Err("host name has an empty part (check for a double dot)".into());
+        }
+        if label.len() > 63 {
+            return Err(format!("`{label}` is longer than 63 characters"));
+        }
+        if label.starts_with('-') || label.ends_with('-') {
+            return Err(format!("`{label}` must not start or end with a hyphen"));
+        }
+        if let Some(bad) = label.chars().find(|c| !c.is_ascii_alphanumeric() && *c != '-') {
+            return Err(format!(
+                "`{name}` contains `{bad}` — only letters, digits, hyphens and dots are allowed"
+            ));
+        }
+    }
+    // An all-numeric name is an IP literal. Mapping an address to itself in
+    // the hosts file is always a mistake, and Apache would take it as a
+    // literal ServerName that no browser sends.
+    if name
+        .split('.')
+        .all(|l| l.bytes().all(|b| b.is_ascii_digit()))
+    {
+        return Err(
+            "that looks like an IP address — use a name such as `myproject.local`".into(),
+        );
+    }
+    Ok(name)
 }
 
 pub fn list(conn: &Connection) -> Result<Vec<Host>, String> {
@@ -47,12 +107,9 @@ pub fn create(
     docroot: &str,
     php_version: &str,
 ) -> Result<Host, String> {
-    let name = name.trim();
+    let name = normalize_hostname(name)?;
     let docroot = docroot.trim();
     let php_version = php_version.trim();
-    if name.is_empty() {
-        return Err("name is required".into());
-    }
     if docroot.is_empty() {
         return Err("docroot is required".into());
     }
@@ -63,7 +120,7 @@ pub fn create(
         "INSERT INTO hosts (name, docroot, php_version) VALUES (?1, ?2, ?3)",
         params![name, docroot, php_version],
     )
-    .map_err(|e| e.to_string())?;
+    .map_err(|e| friendly_constraint_error(e, &name))?;
     Ok(Host {
         id: conn.last_insert_rowid(),
         name: name.to_string(),
@@ -83,12 +140,9 @@ pub fn update(
     apache_extra: &str,
     nginx_extra: &str,
 ) -> Result<Host, String> {
-    let name = name.trim();
+    let name = normalize_hostname(name)?;
     let docroot = docroot.trim();
     let php_version = php_version.trim();
-    if name.is_empty() {
-        return Err("name is required".into());
-    }
     if docroot.is_empty() {
         return Err("docroot is required".into());
     }
@@ -101,7 +155,7 @@ pub fn update(
              apache_extra=?4, nginx_extra=?5 WHERE id=?6",
             params![name, docroot, php_version, apache_extra, nginx_extra, id],
         )
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| friendly_constraint_error(e, &name))?;
     if affected == 0 {
         return Err(format!("no host with id {id}"));
     }
@@ -115,9 +169,49 @@ pub fn update(
     })
 }
 
-pub fn delete(conn: &Connection, id: i64) -> Result<(), String> {
+/// Turn SQLite's raw constraint text into something a user can act on.
+fn friendly_constraint_error(e: rusqlite::Error, name: &str) -> String {
+    let raw = e.to_string();
+    if raw.contains("UNIQUE constraint failed") {
+        format!("a host named `{name}` already exists")
+    } else {
+        raw
+    }
+}
+
+/// Delete a host and everything it owns.
+///
+/// The `ON DELETE CASCADE` clauses (now that `PRAGMA foreign_keys` is
+/// actually on) clear the `snapshots` and `deploy_profiles` rows, but nothing
+/// in the database knows about the files those rows pointed at. Sweeping them
+/// here is what keeps a deleted host from leaving its `.tar.zst` archives —
+/// often hundreds of MB — and its leaf certificate behind forever.
+pub fn delete(conn: &Connection, id: i64, runtime_dir: &Path) -> Result<(), String> {
+    // Read the name before the row goes away; the cert files are keyed by it.
+    let name: Option<String> = conn
+        .query_row("SELECT name FROM hosts WHERE id = ?1", params![id], |r| {
+            r.get(0)
+        })
+        .optional()
+        .map_err(|e| e.to_string())?;
+
     conn.execute("DELETE FROM hosts WHERE id = ?1", params![id])
         .map_err(|e| e.to_string())?;
+
+    // Snapshots live under a numeric directory, so there's nothing to
+    // sanitise here.
+    let _ = fs::remove_dir_all(runtime_dir.join("snapshots").join(id.to_string()));
+
+    // Rows predating `normalize_hostname` could hold anything, and this value
+    // is about to be used as a path component — re-validate before touching
+    // the filesystem rather than trusting what's already stored.
+    if let Some(name) = name {
+        if let Ok(safe) = normalize_hostname(&name) {
+            let ssl = runtime_dir.join("ssl");
+            let _ = fs::remove_file(ssl.join(format!("{safe}.crt")));
+            let _ = fs::remove_file(ssl.join(format!("{safe}.key")));
+        }
+    }
     Ok(())
 }
 
@@ -366,6 +460,55 @@ mod tests {
         assert!(!second.contains("old.local"));
         // user line preserved exactly once
         assert_eq!(second.matches("127.0.0.1 localhost").count(), 1);
+    }
+
+    #[test]
+    fn hostname_is_trimmed_and_lowercased() {
+        assert_eq!(normalize_hostname("  MySite.Local  ").unwrap(), "mysite.local");
+        // A fully-qualified trailing dot is legal DNS but would produce an
+        // empty final label here.
+        assert_eq!(normalize_hostname("site.local.").unwrap(), "site.local");
+        // Single-label names are fine — the hosts file resolves them.
+        assert_eq!(normalize_hostname("myproject").unwrap(), "myproject");
+    }
+
+    #[test]
+    fn hostname_rejects_injection_and_traversal() {
+        // The value is written to the system hosts file with elevation.
+        assert!(normalize_hostname("ok.local\n127.0.0.1 evil.com").is_err());
+        // ...and used as a filename under runtime/ssl/.
+        assert!(normalize_hostname("../../etc/passwd").is_err());
+        assert!(normalize_hostname("a/b").is_err());
+        // ...and interpolated raw into the Apache vhost.
+        assert!(normalize_hostname("x\"\n</VirtualHost>").is_err());
+    }
+
+    #[test]
+    fn hostname_rejects_malformed_names() {
+        assert!(normalize_hostname("").is_err());
+        assert!(normalize_hostname("   ").is_err());
+        assert!(normalize_hostname("has space.local").is_err());
+        assert!(normalize_hostname("double..dot").is_err());
+        assert!(normalize_hostname("-leading.local").is_err());
+        assert!(normalize_hostname("trailing-.local").is_err());
+        assert!(normalize_hostname(&"a".repeat(64)).is_err());
+        assert!(normalize_hostname("localhost").is_err());
+        assert!(normalize_hostname("LocalHost").is_err());
+        assert!(normalize_hostname("127.0.0.1").is_err());
+        assert!(normalize_hostname("8").is_err());
+    }
+
+    #[test]
+    fn hostname_accepts_realistic_names() {
+        for good in [
+            "myproject.local",
+            "my-project.local",
+            "api.my-project.test",
+            "shop2.local",
+            &"a".repeat(63),
+        ] {
+            assert!(normalize_hostname(good).is_ok(), "rejected: {good}");
+        }
     }
 
     #[test]

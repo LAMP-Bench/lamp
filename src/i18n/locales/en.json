@@ -65,7 +65,8 @@
     "saved": "Saved — restart to apply",
     "restartHint": "Restart the service to apply port changes.",
     "stopFirst": "Stop the service before changing its version.",
-    "invalidPort": "Ports must be 1–65535."
+    "invalidPort": "Ports must be 1–65535.",
+    "running": "Running"
   },
   "settings": {
     "title": "Settings",
@@ -248,7 +249,11 @@
     "empty": "Type a file path above and press Enter (or click Open)."
   },
   "hosts": {
-    "columns": { "name": "Name", "php": "PHP", "extras": "Extras" },
+    "columns": {
+      "name": "Name",
+      "php": "PHP",
+      "extras": "Extras"
+    },
     "empty": "No hosts yet. Click + to add one.",
     "add": "Add host",
     "deleteSelected": "Delete selected host",
@@ -354,5 +359,8 @@
     "quickMobileQR": "Mobile QR",
     "statusRunning": "running",
     "statusStopped": "stopped"
+  },
+  "services": {
+    "exitedImmediately": "{{service}} started and then stopped right away. The port is probably already in use — another copy still running, or a leftover process from a previous session. Check Logs → {{service}} for the reason."
   }
 }

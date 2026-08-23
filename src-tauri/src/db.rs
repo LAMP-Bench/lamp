@@ -52,6 +52,12 @@ pub fn open(path: &Path) -> Result<Connection, rusqlite::Error> {
         std::fs::create_dir_all(parent).ok();
     }
     let conn = Connection::open(path)?;
+    // SQLite ships with foreign key enforcement OFF and it's a per-connection
+    // setting, so without this every `ON DELETE CASCADE` declared below is
+    // decorative: deleting a host used to leave its snapshots and deploy
+    // profile behind as unreachable rows. Must run before any transaction —
+    // the pragma is a silent no-op inside one.
+    conn.execute_batch("PRAGMA foreign_keys = ON;")?;
     conn.execute_batch(INITIAL_SCHEMA)?;
     migrate(&conn)?;
     Ok(conn)

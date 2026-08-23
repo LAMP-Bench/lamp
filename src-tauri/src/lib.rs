@@ -490,7 +490,7 @@ fn snapshot_delete(id: i64, state: tauri::State<AppState>) -> Result<(), String>
 fn host_delete(id: i64, state: tauri::State<AppState>) -> Result<(), String> {
     {
         let conn = state.db.lock().unwrap();
-        hosts::delete(&conn, id)?;
+        hosts::delete(&conn, id, &state.runtime_dir)?;
     }
     apply_host_changes(&state)?;
     Ok(())
@@ -1002,6 +1002,46 @@ fn read_tail(path: &Path, lines: usize) -> Result<String, String> {
     Ok(collected[start..].join("\n"))
 }
 
+/// Tear down every supervised service before the process goes away.
+///
+/// Without this, quitting from the tray (`app.exit(0)`) left httpd, mysqld,
+/// nginx, the php-cgi pools, redis-server and MailHog running as orphans:
+/// Windows has no job object tying them to us and Unix has no PDEATHSIG. The
+/// next launch then reported "stopped" for everything (the `Child` handles
+/// died with the old process) while the ports were still held and MySQL's
+/// data dir was still locked — an unrecoverable-looking state with no error
+/// message anywhere.
+///
+/// Best-effort by design: this runs on the way out, so a poisoned mutex or a
+/// stubborn child must not stop the remaining services from being cleaned up.
+fn stop_all_services(app: &tauri::AppHandle) {
+    if let Some(state) = app.try_state::<AppState>() {
+        stop_services(state.inner());
+    }
+}
+
+fn stop_services(state: &AppState) {
+    // MySQL first, and on its own: it's the only one that loses data to a
+    // hard kill, and `stop()` gives it up to 20s to flush. Apache/Nginx are
+    // stopped after so they aren't left serving requests against a database
+    // that's already halfway through shutdown.
+    if let Ok(mut mysql) = state.mysql.lock() {
+        let _ = mysql.stop();
+    }
+    if let Ok(mut apache) = state.apache.lock() {
+        let _ = apache.stop();
+    }
+    if let Ok(mut nginx) = state.nginx.lock() {
+        let _ = nginx.stop();
+    }
+    if let Ok(mut redis) = state.redis.lock() {
+        let _ = redis.stop();
+    }
+    if let Ok(mut mailhog) = state.mailhog.lock() {
+        let _ = mailhog.stop();
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -1137,7 +1177,14 @@ pub fn run() {
                             let _ = w.set_focus();
                         }
                     }
-                    "quit" => app.exit(0),
+                    // Belt and braces: `RunEvent::Exit` reaps the children
+                    // too, but this is the path a user actually takes, so
+                    // stop them here where we know the runtime is still
+                    // healthy. Both are idempotent (`child.take()`).
+                    "quit" => {
+                        stop_all_services(app);
+                        app.exit(0);
+                    }
                     _ => {}
                 })
                 .on_tray_icon_event(|tray, event| {
@@ -1219,6 +1266,15 @@ pub fn run() {
             file_write,
             php_lint,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        // `run` with a callback instead of the plain `run()` so we get the
+        // exit events. `Exit` is the last thing Tauri emits before the
+        // process goes away — the only reliable place to reap the service
+        // children we spawned. See `stop_all_services`.
+        .run(|app, event| {
+            if let tauri::RunEvent::Exit = event {
+                stop_all_services(app);
+            }
+        });
 }

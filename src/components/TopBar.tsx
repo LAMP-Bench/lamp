@@ -2,9 +2,12 @@ import { FiEdit2, FiGlobe, FiPower } from "react-icons/fi";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useTranslation } from "react-i18next";
 import { useService } from "../useService";
+import { useToast } from "./Toast";
+import { serviceErrorText } from "../serviceError";
 
 export function TopBar({ title }: { title: string }) {
   const { t } = useTranslation();
+  const toast = useToast();
   const apache = useService("apache");
   const nginx = useService("nginx");
   const mysql = useService("mysql");
@@ -14,15 +17,26 @@ export function TopBar({ title }: { title: string }) {
     nginx.status?.kind === "running" ||
     mysql.status?.kind === "running";
 
+  /// Flip one service and report the failure instead of dropping it. These
+  /// buttons drive two or three services in a row, so a silent failure here
+  /// used to leave the user with a "Start" button that visibly did nothing.
+  async function flip(
+    svc: ReturnType<typeof useService>,
+    label: string,
+  ): Promise<void> {
+    const failure = await svc.toggle();
+    if (failure) toast("error", serviceErrorText(t, label, failure));
+  }
+
   async function stopAll() {
-    if (apache.status?.kind === "running") await apache.toggle();
-    if (nginx.status?.kind === "running") await nginx.toggle();
-    if (mysql.status?.kind === "running") await mysql.toggle();
+    if (apache.status?.kind === "running") await flip(apache, "Apache");
+    if (nginx.status?.kind === "running") await flip(nginx, "Nginx");
+    if (mysql.status?.kind === "running") await flip(mysql, "MySQL");
   }
 
   async function startCore() {
-    if (apache.status?.kind !== "running") await apache.toggle();
-    if (mysql.status?.kind !== "running") await mysql.toggle();
+    if (mysql.status?.kind !== "running") await flip(mysql, "MySQL");
+    if (apache.status?.kind !== "running") await flip(apache, "Apache");
   }
 
   const webStart = () => openUrl("http://localhost:8080/");

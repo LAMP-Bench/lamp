@@ -27,6 +27,14 @@ export type PhpExtension = {
 
 export type LogName = "apache" | "mysql" | "nginx" | "redis" | "mailhog";
 
+/// Why a start/stop attempt failed. `backend` carries the message the Rust
+/// side returned; `exited` means the spawn itself succeeded but the process
+/// was gone moments later — almost always a busy port or a bad config, and
+/// the component translates it rather than showing a raw string.
+export type ServiceError =
+  | { kind: "backend"; message: string }
+  | { kind: "exited" };
+
 export type ServiceName =
   | "apache"
   | "mysql"

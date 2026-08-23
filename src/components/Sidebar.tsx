@@ -12,6 +12,7 @@ import {
   FiChevronUp,
   FiSettings,
   FiDownload,
+  FiAlertTriangle,
 } from "react-icons/fi";
 import { SiApache, SiNginx, SiMysql, SiRedis } from "react-icons/si";
 import { FiMail } from "react-icons/fi";
@@ -19,6 +20,7 @@ import { LuLamp } from "react-icons/lu";
 import { Toggle } from "./Toggle";
 import { useToast } from "./Toast";
 import { useService } from "../useService";
+import { serviceErrorText } from "../serviceError";
 import type { SectionId, ServiceName } from "../types";
 
 type NavItem = { id: SectionId; icon: ReactNode };
@@ -184,7 +186,7 @@ type PortCfg = { port: number; port2: number; has_secondary: boolean };
 
 function ServiceRow({ spec }: { spec: SvcSpec }) {
   const { t } = useTranslation();
-  const { status, busy, toggle } = useService(spec.name);
+  const { status, busy, error, toggle } = useService(spec.name);
   const toast = useToast();
   const running = status?.kind === "running";
   const Icon = spec.icon;
@@ -206,6 +208,14 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
       .then(setInstalled)
       .catch(() => setInstalled(false));
   }, [spec.binaryName]);
+
+  /// The toggle used to swallow every failure: the switch flipped, sprang
+  /// back, and nothing said why. Surface it as a toast — error toasts stay
+  /// until dismissed, so the message survives long enough to read.
+  async function onToggle() {
+    const failure = await toggle();
+    if (failure) toast("error", serviceErrorText(t, spec.label, failure));
+  }
 
   async function install() {
     if (spec.binaryName == null) return;
@@ -277,7 +287,15 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
           {running && (
             <span
               className="size-1.5 rounded-full bg-emerald-500 shrink-0"
-              title="running"
+              title={t("svcConfig.running")}
+            />
+          )}
+          {!running && error && (
+            // The toast can be dismissed; this keeps the failure visible
+            // until the next attempt succeeds.
+            <FiAlertTriangle
+              className="text-red-500 text-[12px] shrink-0"
+              title={serviceErrorText(t, spec.label, error)}
             />
           )}
         </div>
@@ -295,7 +313,7 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
         {installed === null ? (
           <span className="text-[10px] text-neutral-400 font-mono">…</span>
         ) : installed ? (
-          <Toggle checked={running} onChange={toggle} disabled={busy} />
+          <Toggle checked={running} onChange={onToggle} disabled={busy} />
         ) : (
           <button
             onClick={install}

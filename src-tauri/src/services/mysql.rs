@@ -2,8 +2,15 @@ use super::{bin_path, hidden_command, kill_tree, posix, Service, ServiceStatus};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Child;
+use std::time::{Duration, Instant};
 
 pub const DEFAULT_PORT: u16 = 3306;
+
+/// How long we wait for `mysqladmin shutdown` to land before falling back to
+/// `kill_tree`. A healthy dev database flushes in well under a second; the
+/// generous ceiling is for the case where InnoDB has a large dirty buffer
+/// pool to write out and we'd rather wait than corrupt it.
+const SHUTDOWN_GRACE: Duration = Duration::from_secs(20);
 
 #[derive(Debug, Clone)]
 pub struct MysqlInstall {
@@ -111,6 +118,48 @@ impl MysqlService {
         fs::write(&conf_path, conf).map_err(|e| e.to_string())?;
         Ok(conf_path)
     }
+
+    /// Ask mysqld to shut itself down over the network, the way `mysqladmin`
+    /// does. Returns false when the client isn't on disk or the command
+    /// failed — the caller then falls back to `kill_tree`.
+    ///
+    /// This matters more than it looks: `kill_tree` is `taskkill /F /T` on
+    /// Windows and `SIGKILL` elsewhere, i.e. a hard crash. Doing that on
+    /// every single stop means InnoDB replays its redo log on every single
+    /// start, and a kill landing mid-checkpoint is exactly how a dev
+    /// database ends up unopenable.
+    fn request_shutdown(&self) -> bool {
+        let install = self.active_install();
+        let admin = bin_path(&install.dir, "mysqladmin");
+        if !admin.exists() {
+            return false;
+        }
+        hidden_command(&admin)
+            .args(["--protocol=TCP", "-h", "127.0.0.1", "-P"])
+            .arg(self.port.to_string())
+            .args(["-u", "root", "shutdown"])
+            .output()
+            .map(|o| o.status.success())
+            .unwrap_or(false)
+    }
+}
+
+/// Poll `try_wait` until the child is gone or the deadline passes. Returns
+/// true when the process exited on its own.
+fn wait_for_exit(child: &mut Child, timeout: Duration) -> bool {
+    let deadline = Instant::now() + timeout;
+    loop {
+        match child.try_wait() {
+            Ok(Some(_)) => return true,
+            Ok(None) => {
+                if Instant::now() >= deadline {
+                    return false;
+                }
+                std::thread::sleep(Duration::from_millis(150));
+            }
+            Err(_) => return false,
+        }
+    }
 }
 
 impl Service for MysqlService {
@@ -155,6 +204,10 @@ impl Service for MysqlService {
 
     fn stop(&mut self) -> Result<(), String> {
         if let Some(mut child) = self.child.take() {
+            // Clean shutdown first, hard kill only if it doesn't land.
+            if self.request_shutdown() && wait_for_exit(&mut child, SHUTDOWN_GRACE) {
+                return Ok(());
+            }
             kill_tree(&mut child);
         }
         Ok(())

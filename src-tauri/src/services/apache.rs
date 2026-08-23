@@ -322,6 +322,12 @@ fn build_conf(
          LoadModule ssl_module modules/mod_ssl.so\n\
          \n\
          FcgidInitialEnv PATH \"C:/Windows/System32\"\n\
+         # php-cgi retires itself after PHP_FCGI_MAX_REQUESTS (default 500)\n\
+         # requests. That is lower than FcgidMaxRequestsPerProcess below, so\n\
+         # the process would vanish while mod_fcgid still believed it was\n\
+         # alive — surfacing as intermittent 500s and \"exit(communication\n\
+         # error)\" in the error log. Hand the recycling to mod_fcgid alone.\n\
+         FcgidInitialEnv PHP_FCGI_MAX_REQUESTS 0\n\
          FcgidIOTimeout 60\n\
          FcgidIdleTimeout 300\n\
          FcgidMaxRequestsPerProcess 1000\n\

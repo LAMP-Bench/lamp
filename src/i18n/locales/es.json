@@ -65,7 +65,8 @@
     "saved": "Guardado — reinicia para aplicar",
     "restartHint": "Reinicia el servicio para aplicar los cambios de puerto.",
     "stopFirst": "Detén el servicio antes de cambiar su versión.",
-    "invalidPort": "Los puertos deben ser 1–65535."
+    "invalidPort": "Los puertos deben ser 1–65535.",
+    "running": "En ejecución"
   },
   "settings": {
     "title": "Ajustes",
@@ -248,7 +249,11 @@
     "empty": "Escribe una ruta arriba y pulsa Enter (o haz clic en Abrir)."
   },
   "hosts": {
-    "columns": { "name": "Nombre", "php": "PHP", "extras": "Extras" },
+    "columns": {
+      "name": "Nombre",
+      "php": "PHP",
+      "extras": "Extras"
+    },
     "empty": "Aún no hay hosts. Pulsa + para añadir uno.",
     "add": "Añadir host",
     "deleteSelected": "Eliminar host seleccionado",
@@ -354,5 +359,8 @@
     "quickMobileQR": "QR móvil",
     "statusRunning": "en ejecución",
     "statusStopped": "detenido"
+  },
+  "services": {
+    "exitedImmediately": "{{service}} arrancó y se detuvo inmediatamente. Lo más probable es que el puerto ya esté ocupado — otra copia en marcha, o un proceso que quedó de una sesión anterior. Mira Logs → {{service}} para ver el motivo."
   }
 }

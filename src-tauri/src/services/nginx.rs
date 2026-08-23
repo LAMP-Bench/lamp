@@ -139,7 +139,19 @@ impl NginxService {
                     p.version
                 ));
             }
+            // PHP_FCGI_MAX_REQUESTS defaults to 500: php-cgi in FastCGI mode
+            // exits *by itself* after that many requests. Nothing here
+            // supervises the pool, so nginx starts answering 502 mid-session
+            // and the only cure is toggling the service. 0 means unlimited,
+            // which is what a dev server wants.
+            //
+            // PHP_FCGI_CHILDREN makes the pool fork workers instead of
+            // handling one request at a time — without it any page that
+            // fires a parallel PHP sub-request stalls behind itself. It's a
+            // no-op on Windows (no fork), harmless to set on both.
             let child = hidden_command(&php_cgi)
+                .env("PHP_FCGI_MAX_REQUESTS", "0")
+                .env("PHP_FCGI_CHILDREN", "8")
                 .arg("-b")
                 .arg(format!("127.0.0.1:{port}"))
                 .spawn()
