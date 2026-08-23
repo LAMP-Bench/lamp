@@ -5,7 +5,8 @@
     "getStarted": "Başla",
     "retry": "Yeniden dene",
     "skip": "Şimdilik atla",
-    "errorTitle": "Bazı indirmeler başarısız oldu"
+    "errorTitle": "Bazı indirmeler başarısız oldu",
+    "errorHint": "Lamp Bench çalışacak, ancak indirmesi başarısız olan hizmetler yeniden denenene kadar başlatılamaz."
   },
   "nav": {
     "home": "Ana sayfa",
@@ -34,7 +35,8 @@
     "saved": "Kaydedildi — uygulamak için yeniden başlatın",
     "restartHint": "Bağlantı noktası değişikliklerini uygulamak için hizmeti yeniden başlatın.",
     "stopFirst": "Sürümü değiştirmeden önce hizmeti durdurun.",
-    "invalidPort": "Bağlantı noktaları 1 ile 65535 arasında olmalıdır."
+    "invalidPort": "Bağlantı noktaları 1 ile 65535 arasında olmalıdır.",
+    "running": "Çalışıyor"
   },
   "settings": {
     "cat": {
@@ -56,7 +58,12 @@
       "checking": "Denetleniyor…",
       "installNow": "Yükle ve yeniden başlat",
       "channel": "Sürüm kanalı",
-      "channelAlpha": "Alfa (sürekli)"
+      "channelAlpha": "Alfa (sürekli)",
+      "upToDate": "En son sürümü kullanıyorsunuz ({{version}}).",
+      "available": "{{version}} sürümü mevcut.",
+      "error": "Güncelleme denetimi başarısız: {{message}}",
+      "autoHint": "Lamp Bench her açılışta güncellemeleri denetler. Elle yeniden denetlemek için bu düğmeyi kullanın.",
+      "channelOnlyAlpha": "Şimdilik yalnızca alfa kanalı var. Beta ve kararlı kanallar, yönlendirilecek yapılar oluştuğunda burada görünecek."
     },
     "about": {
       "title": "Hakkında",
@@ -65,11 +72,36 @@
       "github": "GitHub",
       "license": "Lisans",
       "openRepo": "Depoyu aç"
+    },
+    "services": {
+      "title": "Hizmetler",
+      "phpVersion": "Varsayılan PHP sürümü",
+      "phpHint": "Yeni ana makineler bu PHP sürümünü kullanır. Henüz kurulmamış birini seçerseniz hemen indirilir.",
+      "phpInstalling": "PHP {{version}} indiriliyor…",
+      "mysqlVersion": "MySQL sürümü",
+      "mysqlHint": "Etkin MySQL sunucusu. Değiştirdiğinizde çalışan durdurulur ve seçilen sürüm başlatılır. Veri dizinleri her sürüm için ayrı tutulur.",
+      "mysqlSwitching": "MySQL değiştiriliyor…",
+      "download": " — indir"
+    },
+    "dyndns": {
+      "title": "Dinamik DNS",
+      "hint": "Bir dinamik DNS ana makine adını bu bilgisayarın güncel genel IP'sine yönlendirin. Kimlik bilgileri tarayıcı profilinizde yerel olarak saklanır.",
+      "provider": "Sağlayıcı",
+      "hostname": "Ana makine adı",
+      "hostnamePlaceholder": "sunucum.ddns.net",
+      "user": "Kullanıcı adı",
+      "password": "Parola / belirteç",
+      "update": "Şimdi güncelle",
+      "updating": "Güncelleniyor…",
+      "ok": "DNS güncellendi: {{status}}",
+      "failed": "Güncelleme başarısız: {{status}}"
     }
   },
   "updateBanner": {
     "install": "Yükle ve yeniden başlat",
-    "downloading": "Güncelleme indiriliyor…"
+    "downloading": "Güncelleme indiriliyor…",
+    "available": "Lamp Bench <strong>{{version}}</strong> yayımlandı.",
+    "failed": "Güncelleme başarısız: {{message}}"
   },
   "home": {
     "services": "Hizmetler",
@@ -84,7 +116,12 @@
     "quickPhpMyAdmin": "phpMyAdmin",
     "quickMobileQR": "Mobil QR",
     "statusRunning": "çalışıyor",
-    "statusStopped": "durduruldu"
+    "statusStopped": "durduruldu",
+    "htdocsHint": "Proje klasörlerinizi buraya bırakın veya",
+    "htdocsHintLink": "Araçlar → CMS Ekleri",
+    "htdocsHintTail": "ile tek tıkla kurun.",
+    "noHosts": "Henüz sanal ana makine yok. Yukarıdaki varsayılan htdocs şu adreste zaten çalışıyor:",
+    "moreHosts": "+ {{count}} tane daha"
   },
   "hosts": {
     "columns": {
@@ -111,7 +148,70 @@
     "revert": "Geri al",
     "addForm": {
       "title": "Ana bilgisayar ekle",
-      "cancel": "İptal"
+      "cancel": "İptal",
+      "hostnamePlaceholder": "projem.local",
+      "docrootPlaceholder": "C:/projenin/yolu",
+      "gitInit": "oluşturduktan sonra bu klasörde git init çalıştır",
+      "phpDownloadOnSave": "PHP {{version}} kaydettiğinizde indirilecek."
+    },
+    "tabDisabled": "Daha sonraki bir aşamada gelecek",
+    "deploy": {
+      "intro": "Bu ana makinenin belge kökünü uzak bir sunucuya yükleyin. Ayarlar her ana makine için ayrı kaydedilir. Parola, yerel uygulama veritabanında düz metin olarak saklanır.",
+      "protocol": "Protokol",
+      "host": "Sunucu",
+      "hostPlaceholder": "ftp.example.com",
+      "port": "Bağlantı noktası",
+      "user": "Kullanıcı",
+      "password": "Parola",
+      "remoteDir": "Uzak klasör",
+      "remoteDirPlaceholder": "/public_html",
+      "save": "Profili kaydet",
+      "saved": "Profil kaydedildi.",
+      "deployNow": "Şimdi yükle",
+      "deploying": "Yükleniyor…",
+      "result": "{{files}} dosya · {{bytes}} aktarıldı",
+      "withErrors": "{{files}} dosya yüklendi, {{errors}} hata (aşağıya bakın)",
+      "ftpsNote": "FTPS bağlantıyı şifreler. Düz FTP kimlik bilgilerini açık metin olarak gönderir.",
+      "ftpsSoon": "FTPS (yakında)"
+    },
+    "general": {
+      "hostName": "Ana makine adı",
+      "phpVersion": "PHP sürümü",
+      "phpDownloadHint": "«download» ile işaretli sürümler kaydederken indirilir.",
+      "docroot": "Belge kökü",
+      "open": "Aç",
+      "ports": "Bağlantı noktaları",
+      "portsValue": "Apache :{{apacheHttp}} (HTTP) · :{{apacheHttps}} (HTTPS) · Nginx :{{nginxHttp}} / :{{nginxHttps}}"
+    },
+    "extrasTab": {
+      "apacheLabel": "Ek Apache yönergeleri (bu ana makinenin <VirtualHost> bloğuna eklenir)",
+      "apachePlaceholder": "# Örnek:\nDirectoryIndex index.php\n<Directory \".../public\">\n    AllowOverride All\n</Directory>",
+      "nginxLabel": "Ek Nginx yönergeleri (bu ana makinenin server { } bloğuna eklenir)",
+      "nginxPlaceholder": "# Örnek:\nclient_max_body_size 50m;\nrewrite ^/eski-sayfa$ /yeni-sayfa permanent;",
+      "footer": "Bu ana makinenin parçası olarak kaydedilir. Satırlar olduğu gibi eklenir. Kaydettikten sonra Apache yeniden başlar."
+    },
+    "ssl": {
+      "intro": "Her ana makine, yerel Lamp Bench sertifika yetkilisi tarafından imzalanmış, otomatik oluşturulan bir sertifika alır. Bu yetkili, Apache ilk kez başlatıldığında sisteminizin kullanıcı güven deposuna eklenir.",
+      "certFile": "Sertifika dosyası",
+      "keyFile": "Anahtar dosyası",
+      "httpsUrl": "HTTPS adresi",
+      "firefoxNote": "Firefox kendi NSS güven deposunu kullanır. Ya {{about}} içinde {{pref}} ayarını açın ya da {{path}} konumundaki sertifikayı elle içe aktarın."
+    },
+    "snapshots": {
+      "labelPlaceholder": "Etiket (örn. «eklenti güncellemesinden önce»)",
+      "take": "Anlık görüntü al",
+      "includeDb": "MySQL veritabanını dahil et",
+      "dbPlaceholder": "veritabanı adı (örn. wp_projem)",
+      "intro": "Anlık görüntüler {{docroot}} dizinini tek bir .tar.zst arşivinde saklar. Dosyaların yanına bir mysqldump --databases eklemek için «MySQL veritabanını dahil et» seçeneğini işaretleyin.",
+      "noSnapshots": "Henüz anlık görüntü yok.",
+      "restore": "Geri yükle",
+      "deleteSnap": "Anlık görüntüyü sil",
+      "withDb": "Bir mysqldump içerir",
+      "confirmRestoreFiles": "Bu anlık görüntü geri yüklensin mi? Belge kökü önce boşaltılır, dolayısıyla anlık görüntü alındıktan sonra eklenen her şey silinir.",
+      "confirmRestoreDb": "Bu anlık görüntü geri yüklensin mi? Belge kökü boşaltılıp anlık görüntüyle değiştirilir VE içerdiği MySQL veritabanı silinip yeniden içe aktarılır. Sonradan eklenen her şey kaybolur.",
+      "confirmDelete": "Bu anlık görüntü silinsin mi? .tar.zst dosyası kaldırılacak.",
+      "restored": "Geri yüklendi.",
+      "versionWarning": "\n\n⚠ Bu anlık görüntünün veritabanı MySQL {{snap}} ile alındı, ancak şu anda {{active}} etkin. Farklı ana sürümler arasında geri yükleme başarısız olabilir veya harmanlamaları sessizce bozabilir."
     }
   },
   "tools": {
@@ -123,25 +223,106 @@
       "php": "PHP",
       "cms": "CMS"
     },
-    "open": "Aç"
+    "open": "Aç",
+    "pma": {
+      "title": "phpMyAdmin",
+      "subtitle": "Veritabanı yönetimi — Apache ve MySQL'in çalışıyor olması gerekir"
+    },
+    "mailhog": {
+      "title": "MailHog gelen kutusu",
+      "subtitle": "PHP'nin mail() çağrılarını yakalar ve bir web arayüzünde gösterir. Önce MailHog'u başlatın."
+    },
+    "composer": {
+      "title": "Composer"
+    },
+    "laravel": {
+      "title": "Laravel",
+      "subtitle": "composer create-project ile yeni bir Laravel uygulaması oluşturun",
+      "newProject": "Yeni proje",
+      "dialogTitle": "Laravel projesi oluştur",
+      "created": "Proje oluşturuldu. public dizini aşağıda — Hosts bölümünden ana makine olarak ekleyin.",
+      "projectName": "Proje adı",
+      "parentDir": "Üst dizin",
+      "create": "Oluştur",
+      "creating": "Oluşturuluyor…",
+      "running": "composer create-project çalışıyor — ilk indirme 1–3 dakika sürer.",
+      "hint": "Composer, Laravel'i ve bağımlılıklarını indirecek."
+    },
+    "cms": {
+      "wordpressTitle": "WordPress",
+      "wordpressSubtitle": "Tek tıkla kurulum. Veritabanı, yeni salt değerleriyle wp-config.php, dosyalar htdocs'a kopyalanır.",
+      "joomlaTitle": "Joomla",
+      "joomlaSubtitle": "Tek tıkla kurulum. Veritabanı oluşturuldu. Kurulumu web yükleyicisinde tamamlayın.",
+      "drupalTitle": "Drupal",
+      "drupalSubtitle": "Drupal 11. Veritabanı oluşturuldu. Web yükleyicisinde tamamlayın.",
+      "mediawikiTitle": "MediaWiki",
+      "mediawikiSubtitle": "Veritabanı oluşturuldu. Kurulumu tamamlamak için /mw-config/ adresine gidin.",
+      "install": "Kur",
+      "newSite": "Yeni site",
+      "installTitle": "{{name}} kur",
+      "installed": "Kuruldu. Kurulum sihirbazını tamamlamak için adresi açın:",
+      "openSite": "Siteyi aç",
+      "done": "Tamam",
+      "siteName": "Site adı",
+      "installIn": "Şuraya kur",
+      "phpVersion": "PHP sürümü",
+      "hostname": "Ana makine adı",
+      "alsoHost": "Sanal ana makine olarak da kaydet",
+      "alsoHostHint": "{{example}} gibi özel bir ana makine adı — hosts dosyasını değiştirmek için yönetici izni gerekir. Atlarsanız siteye {{fallback}} altındaki bir yoldan ulaşırsınız.",
+      "stageDownloading": "CMS dosyaları indiriliyor… (yalnızca ilk kurulumda, bir dakika sürebilir)",
+      "stageInstalling": "Dosyalar kopyalanıyor, veritabanı oluşturuluyor…",
+      "stageIdle": "MySQL çalışıyor olmalı.",
+      "installing": "Kuruluyor…"
+    },
+    "checking": "denetleniyor…",
+    "images": {
+      "title": "Görsel iyileştirici",
+      "subtitle": "JPG'leri hedeflenen kalitede yeniden kodlar ve PNG'leri yerinde, kayıpsız küçültür. Atomik — bir dosyayı asla büyütmez.",
+      "folder": "Klasör",
+      "folderPlaceholder": "C:/gorsellerin/yolu",
+      "jpegQuality": "JPG kalitesi ({{quality}})",
+      "includeJpg": ".jpg/.jpeg yeniden kodla",
+      "includePng": ".png iyileştir",
+      "run": "Çalıştır",
+      "running": "Çalışıyor…",
+      "summary": "{{changed}}/{{total}} küçültüldü · {{saved}} kazanıldı (%{{pct}})"
+    },
+    "cancel": "İptal"
   },
   "config": {
     "loading": "Yollar yükleniyor…",
     "php": "PHP",
     "servers": "Sunucular",
-    "edit": "Düzenle"
+    "edit": "Düzenle",
+    "phpIni": "php.ini — PHP {{version}}",
+    "apacheHttpd": "Apache httpd.conf",
+    "apacheHint": "Her Apache başlangıcında yeniden oluşturulur — elle yapılan değişiklikler kaybolur. Ana makineye özel yönergeler için o makinenin Apache sekmesini kullanın.",
+    "nginxConf": "Nginx nginx.conf",
+    "nginxHint": "Her Nginx başlangıcında yeniden oluşturulur. Ana makineye özel yönergeler için o makinenin Nginx sekmesini kullanın.",
+    "mysqlCnf": "MySQL my.cnf",
+    "mysqlHint": "Yol, etkin MySQL sürümüne bağlıdır. Dosyanın var olması için başlattıktan sonra düzenleyin.",
+    "footer": "Düzenlemeler ayrı bir Monaco penceresinde açılır. Kaydetmek için Ctrl+S. php.ini değişikliklerinin etkili olması için sunucu süreçlerinin durdurulup yeniden başlatılması gerekir — dosya süreç açılırken okunur.",
+    "openError": "Düzenleyici açılamadı: {{message}}"
   },
   "logs": {
     "noContent": "(henüz günlük içeriği yok)",
     "pause": "Duraklat",
-    "resume": "Sürdür"
+    "resume": "Sürdür",
+    "pauseTitle": "Yenilemeyi duraklat",
+    "resumeTitle": "Yenilemeyi sürdür"
   },
   "editor": {
     "open": "Aç",
     "saved": "Kaydedildi",
     "dirty": "Kaydet *",
     "checkSyntax": "Söz dizimini denetle",
-    "empty": "Yukarıya bir dosya yolu yazın ve Enter'a basın (veya Aç'a tıklayın)."
+    "empty": "Yukarıya bir dosya yolu yazın ve Enter'a basın (veya Aç'a tıklayın).",
+    "pathPlaceholder": "C:/dosyanin/yolu.php (açmak için Enter)",
+    "savedMessage": "Kaydedildi.",
+    "noErrors": "Sözdizimi hatası bulunamadı.",
+    "lintFailed": "Denetim başarısız.",
+    "notUtf8": "Bu dosya geçerli UTF-8 değil, bu yüzden salt okunur açıldı. Kaydetmek, çözücünün tanımadığı her baytı değiştirirdi.",
+    "readOnly": "Salt okunur"
   },
   "versions": {
     "installed": "Yüklü",
@@ -150,6 +331,25 @@
     "remove": "Kaldır",
     "removing": "Kaldırılıyor…",
     "downloadMore": "Daha fazla indir",
-    "hideMore": "Gizle"
+    "hideMore": "Gizle",
+    "intro": "Birlikte gelen çalışma zamanlarını ve araçları kurun, güncelleyin veya kaldırın. Etkin MySQL'i ya da varsayılan PHP'yi kaldırmak, yeniden kurulana kadar ilgili hizmetleri durdurur.",
+    "confirmRemove": "{{name}} kaldırılsın mı? Disk alanı boşaltır; bileşen yeniden kurulana kadar kullanılamaz.",
+    "moreHint": "İndirilebilecek ek sürümler. Her biri sabitlenmiş bir SHA-256 ile doğrulanır.",
+    "groupRuntimes": "Sunucular ve çalışma zamanları",
+    "groupPhp": "PHP sürümleri",
+    "groupTools": "Araçlar ve ekler",
+    "phpSection": "PHP uzantıları ve yükleyicileri",
+    "phpPick": "PHP sürümü",
+    "extensions": "Uzantılar",
+    "extensionsHint": "Birlikte gelen PHP uzantılarını açıp kapatın. Değişikliklerin geçerli olması için Apache/Nginx'i durdurup yeniden başlatın.",
+    "ioncube": "ionCube Loader",
+    "ioncubeHint": "ionCube ile kodlanmış betikler (XenForo, WHMCS…) için tescilli yükleyici. Bu PHP sürümüne uyan yapıyı seçer. Kurduktan sonra hizmetleri yeniden başlatın.",
+    "ioncubeInstall": "ionCube'ü kur",
+    "ioncubeInstalling": "Kuruluyor…",
+    "ioncubeDone": "ionCube, PHP {{version}} için kuruldu. Apache/Nginx'i yeniden başlatın.",
+    "noPhp": "Henüz kurulu PHP sürümü yok — önce yukarıdan bir tane kurun."
+  },
+  "services": {
+    "exitedImmediately": "{{service}} başladı ve hemen durdu. Büyük olasılıkla bağlantı noktası zaten kullanımda — çalışan başka bir kopya ya da önceki oturumdan kalan bir süreç. Nedeni Günlükler → {{service}} bölümünde."
   }
 }

@@ -5,7 +5,8 @@
     "getStarted": "開始",
     "retry": "再試行",
     "skip": "今はスキップ",
-    "errorTitle": "一部のダウンロードに失敗しました"
+    "errorTitle": "一部のダウンロードに失敗しました",
+    "errorHint": "Lamp Bench は動作しますが、ダウンロードに失敗したサービスは再試行するまで起動できません。"
   },
   "nav": {
     "home": "ホーム",
@@ -34,7 +35,8 @@
     "saved": "保存しました — 再起動で反映",
     "restartHint": "ポートの変更を反映するにはサービスを再起動してください。",
     "stopFirst": "バージョンを変更する前にサービスを停止してください。",
-    "invalidPort": "ポートは 1〜65535 の範囲で指定してください。"
+    "invalidPort": "ポートは 1〜65535 の範囲で指定してください。",
+    "running": "実行中"
   },
   "settings": {
     "cat": {
@@ -56,7 +58,12 @@
       "checking": "確認中…",
       "installNow": "インストールして再起動",
       "channel": "リリースチャンネル",
-      "channelAlpha": "アルファ（ローリング）"
+      "channelAlpha": "アルファ（ローリング）",
+      "upToDate": "最新バージョンです（{{version}}）。",
+      "available": "バージョン {{version}} が利用できます。",
+      "error": "更新の確認に失敗しました: {{message}}",
+      "autoHint": "Lamp Bench は起動のたびに更新を確認します。このボタンで手動で再確認できます。",
+      "channelOnlyAlpha": "現在はアルファチャンネルのみです。対応するビルドができ次第、ベータと安定版がここに表示されます。"
     },
     "about": {
       "title": "情報",
@@ -65,11 +72,36 @@
       "github": "GitHub",
       "license": "ライセンス",
       "openRepo": "リポジトリを開く"
+    },
+    "services": {
+      "title": "サービス",
+      "phpVersion": "既定の PHP バージョン",
+      "phpHint": "新しいホストはこの PHP バージョンを使います。未インストールのものを選ぶと、その場でダウンロードします。",
+      "phpInstalling": "PHP {{version}} をダウンロード中…",
+      "mysqlVersion": "MySQL のバージョン",
+      "mysqlHint": "使用中の MySQL サーバーです。切り替えると現在のものを停止し、選んだバージョンを起動します。データディレクトリはバージョンごとに分かれています。",
+      "mysqlSwitching": "MySQL を切り替え中…",
+      "download": " — 要ダウンロード"
+    },
+    "dyndns": {
+      "title": "ダイナミック DNS",
+      "hint": "ダイナミック DNS のホスト名をこのマシンの現在のグローバル IP に向けます。認証情報はブラウザープロファイル内にローカル保存されます。",
+      "provider": "プロバイダー",
+      "hostname": "ホスト名",
+      "hostnamePlaceholder": "myhost.ddns.net",
+      "user": "ユーザー名",
+      "password": "パスワード / トークン",
+      "update": "今すぐ更新",
+      "updating": "更新中…",
+      "ok": "DNS を更新しました: {{status}}",
+      "failed": "更新に失敗しました: {{status}}"
     }
   },
   "updateBanner": {
     "install": "インストールして再起動",
-    "downloading": "アップデートをダウンロード中…"
+    "downloading": "アップデートをダウンロード中…",
+    "available": "Lamp Bench <strong>{{version}}</strong> が利用できます。",
+    "failed": "更新に失敗しました: {{message}}"
   },
   "home": {
     "services": "サービス",
@@ -84,7 +116,12 @@
     "quickPhpMyAdmin": "phpMyAdmin",
     "quickMobileQR": "モバイル QR",
     "statusRunning": "実行中",
-    "statusStopped": "停止中"
+    "statusStopped": "停止中",
+    "htdocsHint": "プロジェクトのフォルダーをここに置くか、",
+    "htdocsHintLink": "ツール → CMS 追加機能",
+    "htdocsHintTail": "からワンクリックでインストールしてください。",
+    "noHosts": "バーチャルホストはまだありません。上の既定の htdocs は次のアドレスですでに動作しています:",
+    "moreHosts": "他 {{count}} 件"
   },
   "hosts": {
     "columns": {
@@ -111,7 +148,70 @@
     "revert": "元に戻す",
     "addForm": {
       "title": "ホストを追加",
-      "cancel": "キャンセル"
+      "cancel": "キャンセル",
+      "hostnamePlaceholder": "myproject.local",
+      "docrootPlaceholder": "C:/プロジェクト/のパス",
+      "gitInit": "作成後にこのフォルダーで git init を実行する",
+      "phpDownloadOnSave": "保存時に PHP {{version}} をダウンロードします。"
+    },
+    "tabDisabled": "後のフェーズで対応します",
+    "deploy": {
+      "intro": "このホストのドキュメントルートをリモートサーバーにアップロードします。設定はホストごとに保存されます。パスワードはローカルのアプリデータベースに平文で保存されます。",
+      "protocol": "プロトコル",
+      "host": "ホスト",
+      "hostPlaceholder": "ftp.example.com",
+      "port": "ポート",
+      "user": "ユーザー",
+      "password": "パスワード",
+      "remoteDir": "リモートフォルダー",
+      "remoteDirPlaceholder": "/public_html",
+      "save": "プロファイルを保存",
+      "saved": "プロファイルを保存しました。",
+      "deployNow": "今すぐデプロイ",
+      "deploying": "アップロード中…",
+      "result": "{{files}} ファイル · {{bytes}} を転送",
+      "withErrors": "{{files}} ファイルをアップロード、{{errors}} 件のエラー（下記参照）",
+      "ftpsNote": "FTPS は接続を暗号化します。通常の FTP は認証情報を平文で送信します。",
+      "ftpsSoon": "FTPS（近日対応）"
+    },
+    "general": {
+      "hostName": "ホスト名",
+      "phpVersion": "PHP のバージョン",
+      "phpDownloadHint": "「download」と表示されたバージョンは保存時に取得されます。",
+      "docroot": "ドキュメントルート",
+      "open": "開く",
+      "ports": "ポート",
+      "portsValue": "Apache :{{apacheHttp}}（HTTP）· :{{apacheHttps}}（HTTPS）· Nginx :{{nginxHttp}} / :{{nginxHttps}}"
+    },
+    "extrasTab": {
+      "apacheLabel": "追加の Apache ディレクティブ（このホストの <VirtualHost> 内に挿入されます）",
+      "apachePlaceholder": "# 例:\nDirectoryIndex index.php\n<Directory \".../public\">\n    AllowOverride All\n</Directory>",
+      "nginxLabel": "追加の Nginx ディレクティブ（このホストの server { } ブロック内に挿入されます）",
+      "nginxPlaceholder": "# 例:\nclient_max_body_size 50m;\nrewrite ^/old-page$ /new-page permanent;",
+      "footer": "このホストの一部として保存されます。各行はそのまま挿入されます。保存後に Apache が再起動します。"
+    },
+    "ssl": {
+      "intro": "各ホストには、ローカルの Lamp Bench CA が署名した証明書が自動生成されます。この CA は、Apache の初回起動時にお使いのプラットフォームのユーザー信頼ストアへ登録されます。",
+      "certFile": "証明書ファイル",
+      "keyFile": "鍵ファイル",
+      "httpsUrl": "HTTPS URL",
+      "firefoxNote": "Firefox は独自の NSS 信頼ストアを使います。{{about}} で {{pref}} を有効にするか、{{path}} にある CA を手動でインポートしてください。"
+    },
+    "snapshots": {
+      "labelPlaceholder": "ラベル（例:「プラグイン更新前」）",
+      "take": "スナップショットを取得",
+      "includeDb": "MySQL データベースを含める",
+      "dbPlaceholder": "DB 名（例: wp_myproject）",
+      "intro": "スナップショットは {{docroot}} を 1 つの .tar.zst アーカイブとして保存します。「MySQL データベースを含める」にチェックを入れると、mysqldump --databases も同梱します。",
+      "noSnapshots": "スナップショットはまだありません。",
+      "restore": "復元",
+      "deleteSnap": "スナップショットを削除",
+      "withDb": "mysqldump を同梱",
+      "confirmRestoreFiles": "このスナップショットを復元しますか？ ドキュメントルートは先に空にされるため、スナップショット取得後に追加されたものはすべて削除されます。",
+      "confirmRestoreDb": "このスナップショットを復元しますか？ ドキュメントルートを空にしてスナップショットの内容に置き換え、さらに同梱の MySQL データベースを削除して再インポートします。その後に追加したものはすべて失われます。",
+      "confirmDelete": "このスナップショットを削除しますか？ .tar.zst ファイルが削除されます。",
+      "restored": "復元しました。",
+      "versionWarning": "\n\n⚠ このスナップショットのデータベースは MySQL {{snap}} で取得されましたが、現在は {{active}} が有効です。メジャーバージョンをまたぐ復元は失敗したり、照合順序を静かに壊したりすることがあります。"
     }
   },
   "tools": {
@@ -123,25 +223,106 @@
       "php": "PHP",
       "cms": "CMS"
     },
-    "open": "開く"
+    "open": "開く",
+    "pma": {
+      "title": "phpMyAdmin",
+      "subtitle": "データベース管理 — Apache と MySQL が起動している必要があります"
+    },
+    "mailhog": {
+      "title": "MailHog 受信トレイ",
+      "subtitle": "PHP の mail() を捕捉して Web UI に表示します。先に MailHog を起動してください。"
+    },
+    "composer": {
+      "title": "Composer"
+    },
+    "laravel": {
+      "title": "Laravel",
+      "subtitle": "composer create-project で新しい Laravel アプリを作成",
+      "newProject": "新規プロジェクト",
+      "dialogTitle": "Laravel プロジェクトを作成",
+      "created": "プロジェクトを作成しました。下が public ディレクトリです — 「ホスト」でホストとして追加してください。",
+      "projectName": "プロジェクト名",
+      "parentDir": "親ディレクトリ",
+      "create": "作成",
+      "creating": "作成中…",
+      "running": "composer create-project を実行中 — 初回のダウンロードは 1〜3 分かかります。",
+      "hint": "Composer が Laravel とその依存関係をダウンロードします。"
+    },
+    "cms": {
+      "wordpressTitle": "WordPress",
+      "wordpressSubtitle": "ワンクリックでインストール。データベース、新しいソルト付きの wp-config.php、ファイルを htdocs にコピーします。",
+      "joomlaTitle": "Joomla",
+      "joomlaSubtitle": "ワンクリックでインストール。データベースを作成します。設定は Web インストーラーで完了してください。",
+      "drupalTitle": "Drupal",
+      "drupalSubtitle": "Drupal 11。データベースを作成します。Web インストーラーで完了してください。",
+      "mediawikiTitle": "MediaWiki",
+      "mediawikiSubtitle": "データベースを作成しました。/mw-config/ を開いて設定を完了してください。",
+      "install": "インストール",
+      "newSite": "新しいサイト",
+      "installTitle": "{{name}} をインストール",
+      "installed": "インストールしました。次の URL を開いてセットアップウィザードを完了してください:",
+      "openSite": "サイトを開く",
+      "done": "完了",
+      "siteName": "サイト名",
+      "installIn": "インストール先",
+      "phpVersion": "PHP のバージョン",
+      "hostname": "ホスト名",
+      "alsoHost": "バーチャルホストとしても登録する",
+      "alsoHostHint": "{{example}} のような独自ホスト名 — hosts ファイルの変更に管理者の許可が必要です。設定しない場合は {{fallback}} 配下のパスでアクセスできます。",
+      "stageDownloading": "CMS のファイルをダウンロード中…（初回のみ、1 分ほどかかることがあります）",
+      "stageInstalling": "ファイルをコピーし、データベースを作成中…",
+      "stageIdle": "MySQL が起動している必要があります。",
+      "installing": "インストール中…"
+    },
+    "checking": "確認中…",
+    "images": {
+      "title": "画像オプティマイザー",
+      "subtitle": "JPG を指定した品質で再エンコードし、PNG をその場で可逆圧縮します。アトミックに処理し、ファイルが大きくなることはありません。",
+      "folder": "フォルダー",
+      "folderPlaceholder": "C:/画像/のパス",
+      "jpegQuality": "JPG 品質（{{quality}}）",
+      "includeJpg": ".jpg/.jpeg を再エンコード",
+      "includePng": ".png を最適化",
+      "run": "実行",
+      "running": "処理中…",
+      "summary": "{{changed}}/{{total}} 件を圧縮 · {{saved}} 削減（{{pct}}%）"
+    },
+    "cancel": "キャンセル"
   },
   "config": {
     "loading": "パスを読み込み中…",
     "php": "PHP",
     "servers": "サーバー",
-    "edit": "編集"
+    "edit": "編集",
+    "phpIni": "php.ini — PHP {{version}}",
+    "apacheHttpd": "Apache httpd.conf",
+    "apacheHint": "Apache の起動ごとに再生成されます — 手動の編集は上書きされます。ホストごとのディレクティブは、そのホストの Apache タブを使ってください。",
+    "nginxConf": "Nginx nginx.conf",
+    "nginxHint": "Nginx の起動ごとに再生成されます。ホストごとのディレクティブは、そのホストの Nginx タブを使ってください。",
+    "mysqlCnf": "MySQL my.cnf",
+    "mysqlHint": "パスは使用中の MySQL バージョンによって変わります。ファイルが存在するよう、起動後に編集してください。",
+    "footer": "編集は別の Monaco ウィンドウで開きます。保存は Ctrl+S です。php.ini の変更を反映するにはサーバープロセスの停止と再起動が必要です — プロセス起動時に読み込まれるためです。",
+    "openError": "エディターを開けませんでした: {{message}}"
   },
   "logs": {
     "noContent": "（ログ内容はまだありません）",
     "pause": "一時停止",
-    "resume": "再開"
+    "resume": "再開",
+    "pauseTitle": "更新を一時停止",
+    "resumeTitle": "更新を再開"
   },
   "editor": {
     "open": "開く",
     "saved": "保存済み",
     "dirty": "保存 *",
     "checkSyntax": "構文チェック",
-    "empty": "上にファイルパスを入力して Enter を押してください（または「開く」をクリック）。"
+    "empty": "上にファイルパスを入力して Enter を押してください（または「開く」をクリック）。",
+    "pathPlaceholder": "C:/ファイル/のパス.php（Enter で開く）",
+    "savedMessage": "保存しました。",
+    "noErrors": "構文エラーは見つかりませんでした。",
+    "lintFailed": "チェックに失敗しました。",
+    "notUtf8": "このファイルは有効な UTF-8 ではないため、読み取り専用で開いています。保存すると、デコーダーが認識できなかったバイトがすべて置き換えられてしまいます。",
+    "readOnly": "読み取り専用"
   },
   "versions": {
     "installed": "インストール済み",
@@ -150,6 +331,25 @@
     "remove": "削除",
     "removing": "削除中…",
     "downloadMore": "さらにダウンロード",
-    "hideMore": "隠す"
+    "hideMore": "隠す",
+    "intro": "同梱のランタイムとツールをインストール・更新・削除します。使用中の MySQL や既定の PHP を削除すると、再インストールするまで関連サービスは停止します。",
+    "confirmRemove": "{{name}} を削除しますか？ ディスク容量が空きますが、再インストールするまでこのコンポーネントは使えません。",
+    "moreHint": "ダウンロードできる追加バージョンです。いずれも固定された SHA-256 で検証されます。",
+    "groupRuntimes": "サーバーとランタイム",
+    "groupPhp": "PHP のバージョン",
+    "groupTools": "ツールと追加機能",
+    "phpSection": "PHP 拡張とローダー",
+    "phpPick": "PHP のバージョン",
+    "extensions": "拡張機能",
+    "extensionsHint": "同梱の PHP 拡張を切り替えます。変更を反映するには Apache/Nginx を停止して再起動してください。",
+    "ioncube": "ionCube Loader",
+    "ioncubeHint": "ionCube でエンコードされたスクリプト（XenForo、WHMCS など）用のプロプライエタリなローダーです。この PHP バージョンに合うビルドを選びます。インストール後はサービスを再起動してください。",
+    "ioncubeInstall": "ionCube をインストール",
+    "ioncubeInstalling": "インストール中…",
+    "ioncubeDone": "PHP {{version}} 用に ionCube をインストールしました。Apache/Nginx を再起動してください。",
+    "noPhp": "PHP がまだインストールされていません — 先に上でインストールしてください。"
+  },
+  "services": {
+    "exitedImmediately": "{{service}} は起動直後に停止しました。ポートがすでに使用中の可能性が高いです — 別のコピーが動いているか、前回のセッションのプロセスが残っています。理由は ログ → {{service}} を確認してください。"
   }
 }

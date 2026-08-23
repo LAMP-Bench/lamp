@@ -5,7 +5,8 @@
     "getStarted": "शुरू करें",
     "retry": "पुनः प्रयास",
     "skip": "अभी छोड़ें",
-    "errorTitle": "कुछ डाउनलोड विफल रहे"
+    "errorTitle": "कुछ डाउनलोड विफल रहे",
+    "errorHint": "Lamp Bench चलेगा, लेकिन जिन सेवाओं का डाउनलोड विफल रहा वे दोबारा कोशिश करने तक शुरू नहीं होंगी।"
   },
   "nav": {
     "home": "होम",
@@ -34,7 +35,8 @@
     "saved": "सहेजा गया — लागू करने के लिए पुनः आरंभ करें",
     "restartHint": "पोर्ट परिवर्तन लागू करने के लिए सेवा को पुनः आरंभ करें।",
     "stopFirst": "संस्करण बदलने से पहले सेवा रोकें।",
-    "invalidPort": "पोर्ट 1 से 65535 के बीच होने चाहिए।"
+    "invalidPort": "पोर्ट 1 से 65535 के बीच होने चाहिए।",
+    "running": "चल रहा है"
   },
   "settings": {
     "cat": {
@@ -56,7 +58,12 @@
       "checking": "जाँच रहे हैं…",
       "installNow": "इंस्टॉल करें और पुनः आरंभ करें",
       "channel": "रिलीज़ चैनल",
-      "channelAlpha": "अल्फ़ा (रोलिंग)"
+      "channelAlpha": "अल्फ़ा (रोलिंग)",
+      "upToDate": "आपके पास नवीनतम संस्करण है ({{version}})।",
+      "available": "संस्करण {{version}} उपलब्ध है।",
+      "error": "अपडेट जाँच विफल: {{message}}",
+      "autoHint": "Lamp Bench हर बार शुरू होने पर अपडेट जाँचता है। दोबारा मैन्युअल जाँच के लिए इस बटन का उपयोग करें।",
+      "channelOnlyAlpha": "फ़िलहाल केवल अल्फ़ा चैनल है। जब उनके बिल्ड बनेंगे तब बीटा और स्टेबल यहाँ दिखाई देंगे।"
     },
     "about": {
       "title": "परिचय",
@@ -65,11 +72,36 @@
       "github": "GitHub",
       "license": "लाइसेंस",
       "openRepo": "रिपॉज़िटरी खोलें"
+    },
+    "services": {
+      "title": "सेवाएँ",
+      "phpVersion": "डिफ़ॉल्ट PHP संस्करण",
+      "phpHint": "नए होस्ट यही PHP संस्करण इस्तेमाल करते हैं। ऐसा संस्करण चुनने पर जो अभी इंस्टॉल नहीं है, वह तुरंत डाउनलोड हो जाएगा।",
+      "phpInstalling": "PHP {{version}} डाउनलोड हो रहा है…",
+      "mysqlVersion": "MySQL संस्करण",
+      "mysqlHint": "सक्रिय MySQL सर्वर। बदलने पर मौजूदा रुकता है और चुना गया संस्करण शुरू होता है। हर संस्करण की डेटा डायरेक्टरी अलग रखी जाती है।",
+      "mysqlSwitching": "MySQL बदला जा रहा है…",
+      "download": " — डाउनलोड करें"
+    },
+    "dyndns": {
+      "title": "डायनामिक DNS",
+      "hint": "किसी डायनामिक-DNS होस्टनेम को इस मशीन के मौजूदा सार्वजनिक IP पर इंगित करें। क्रेडेंशियल आपके ब्राउज़र प्रोफ़ाइल में स्थानीय रूप से सहेजे जाते हैं।",
+      "provider": "प्रदाता",
+      "hostname": "होस्टनेम",
+      "hostnamePlaceholder": "myhost.ddns.net",
+      "user": "उपयोक्ता नाम",
+      "password": "पासवर्ड / टोकन",
+      "update": "अभी अपडेट करें",
+      "updating": "अपडेट हो रहा है…",
+      "ok": "DNS अपडेट हुआ: {{status}}",
+      "failed": "अपडेट विफल: {{status}}"
     }
   },
   "updateBanner": {
     "install": "इंस्टॉल करें और पुनः आरंभ करें",
-    "downloading": "अपडेट डाउनलोड हो रहा है…"
+    "downloading": "अपडेट डाउनलोड हो रहा है…",
+    "available": "Lamp Bench <strong>{{version}}</strong> उपलब्ध है।",
+    "failed": "अपडेट विफल: {{message}}"
   },
   "home": {
     "services": "सेवाएँ",
@@ -84,7 +116,12 @@
     "quickPhpMyAdmin": "phpMyAdmin",
     "quickMobileQR": "मोबाइल QR",
     "statusRunning": "चल रहा है",
-    "statusStopped": "रुका हुआ"
+    "statusStopped": "रुका हुआ",
+    "htdocsHint": "प्रोजेक्ट फ़ोल्डर यहाँ रखें, या",
+    "htdocsHintLink": "उपकरण → CMS अतिरिक्त",
+    "htdocsHintTail": "से एक क्लिक में इंस्टॉल करें।",
+    "noHosts": "अभी कोई वर्चुअल होस्ट नहीं है। ऊपर दिया डिफ़ॉल्ट htdocs पहले से यहाँ काम करता है:",
+    "moreHosts": "+ {{count}} और"
   },
   "hosts": {
     "columns": {
@@ -111,7 +148,70 @@
     "revert": "वापस लें",
     "addForm": {
       "title": "होस्ट जोड़ें",
-      "cancel": "रद्द करें"
+      "cancel": "रद्द करें",
+      "hostnamePlaceholder": "myproject.local",
+      "docrootPlaceholder": "C:/project/का/पथ",
+      "gitInit": "बनाने के बाद इस फ़ोल्डर में git init चलाएँ",
+      "phpDownloadOnSave": "सहेजते समय PHP {{version}} डाउनलोड किया जाएगा।"
+    },
+    "tabDisabled": "किसी बाद के चरण में आएगा",
+    "deploy": {
+      "intro": "इस होस्ट की डॉक्युमेंट रूट किसी दूरस्थ सर्वर पर अपलोड करें। सेटिंग्स हर होस्ट के लिए अलग सहेजी जाती हैं। पासवर्ड स्थानीय ऐप डेटाबेस में सादे पाठ में रखा जाता है।",
+      "protocol": "प्रोटोकॉल",
+      "host": "सर्वर",
+      "hostPlaceholder": "ftp.example.com",
+      "port": "पोर्ट",
+      "user": "उपयोक्ता",
+      "password": "पासवर्ड",
+      "remoteDir": "दूरस्थ फ़ोल्डर",
+      "remoteDirPlaceholder": "/public_html",
+      "save": "प्रोफ़ाइल सहेजें",
+      "saved": "प्रोफ़ाइल सहेजी गई।",
+      "deployNow": "अभी डिप्लॉय करें",
+      "deploying": "अपलोड हो रहा है…",
+      "result": "{{files}} फ़ाइलें · {{bytes}} अपलोड हुआ",
+      "withErrors": "{{files}} फ़ाइलें अपलोड हुईं, {{errors}} त्रुटियाँ (नीचे देखें)",
+      "ftpsNote": "FTPS कनेक्शन को एन्क्रिप्ट करता है। सादा FTP क्रेडेंशियल खुले रूप में भेजता है।",
+      "ftpsSoon": "FTPS (जल्द आ रहा है)"
+    },
+    "general": {
+      "hostName": "होस्ट का नाम",
+      "phpVersion": "PHP संस्करण",
+      "phpDownloadHint": "«download» चिह्नित संस्करण सहेजते समय डाउनलोड होते हैं।",
+      "docroot": "डॉक्युमेंट रूट",
+      "open": "खोलें",
+      "ports": "पोर्ट",
+      "portsValue": "Apache :{{apacheHttp}} (HTTP) · :{{apacheHttps}} (HTTPS) · Nginx :{{nginxHttp}} / :{{nginxHttps}}"
+    },
+    "extrasTab": {
+      "apacheLabel": "अतिरिक्त Apache निर्देश (इस होस्ट के <VirtualHost> के भीतर डाले जाते हैं)",
+      "apachePlaceholder": "# उदाहरण:\nDirectoryIndex index.php\n<Directory \".../public\">\n    AllowOverride All\n</Directory>",
+      "nginxLabel": "अतिरिक्त Nginx निर्देश (इस होस्ट के server { } ब्लॉक के भीतर डाले जाते हैं)",
+      "nginxPlaceholder": "# उदाहरण:\nclient_max_body_size 50m;\nrewrite ^/old-page$ /new-page permanent;",
+      "footer": "इस होस्ट के हिस्से के रूप में सहेजा जाता है। पंक्तियाँ ज्यों की त्यों डाली जाती हैं। सहेजने के बाद Apache दोबारा शुरू होता है।"
+    },
+    "ssl": {
+      "intro": "हर होस्ट को स्थानीय Lamp Bench CA द्वारा हस्ताक्षरित, स्वतः बना प्रमाणपत्र मिलता है। पहली बार Apache शुरू होने पर यह CA आपके सिस्टम के उपयोक्ता ट्रस्ट स्टोर में इंस्टॉल हो जाता है।",
+      "certFile": "प्रमाणपत्र फ़ाइल",
+      "keyFile": "कुंजी फ़ाइल",
+      "httpsUrl": "HTTPS URL",
+      "firefoxNote": "Firefox अपना अलग NSS ट्रस्ट स्टोर रखता है। या तो {{about}} में {{pref}} चालू करें, या {{path}} पर मौजूद CA को हाथ से आयात करें।"
+    },
+    "snapshots": {
+      "labelPlaceholder": "लेबल (जैसे «प्लगइन अपडेट से पहले»)",
+      "take": "स्नैपशॉट लें",
+      "includeDb": "MySQL डेटाबेस शामिल करें",
+      "dbPlaceholder": "DB नाम (जैसे wp_myproject)",
+      "intro": "स्नैपशॉट {{docroot}} को एक ही .tar.zst संग्रह में सहेजते हैं। फ़ाइलों के साथ mysqldump --databases जोड़ने के लिए «MySQL डेटाबेस शामिल करें» चुनें।",
+      "noSnapshots": "अभी कोई स्नैपशॉट नहीं है।",
+      "restore": "पुनर्स्थापित करें",
+      "deleteSnap": "स्नैपशॉट हटाएँ",
+      "withDb": "इसमें mysqldump शामिल है",
+      "confirmRestoreFiles": "यह स्नैपशॉट पुनर्स्थापित करें? डॉक्युमेंट रूट पहले खाली किया जाता है, इसलिए स्नैपशॉट लेने के बाद जोड़ी गई हर चीज़ मिट जाएगी।",
+      "confirmRestoreDb": "यह स्नैपशॉट पुनर्स्थापित करें? डॉक्युमेंट रूट खाली करके स्नैपशॉट से बदला जाएगा, और साथ में शामिल MySQL डेटाबेस हटाकर दोबारा आयात किया जाएगा। उसके बाद जोड़ी गई हर चीज़ खो जाएगी।",
+      "confirmDelete": "यह स्नैपशॉट हटाएँ? .tar.zst फ़ाइल मिटा दी जाएगी।",
+      "restored": "पुनर्स्थापित हो गया।",
+      "versionWarning": "\n\n⚠ इस स्नैपशॉट का डेटाबेस MySQL {{snap}} पर लिया गया था, पर अभी {{active}} सक्रिय है। अलग-अलग मुख्य संस्करणों के बीच पुनर्स्थापना विफल हो सकती है या चुपचाप कोलेशन बिगाड़ सकती है।"
     }
   },
   "tools": {
@@ -123,25 +223,106 @@
       "php": "PHP",
       "cms": "CMS"
     },
-    "open": "खोलें"
+    "open": "खोलें",
+    "pma": {
+      "title": "phpMyAdmin",
+      "subtitle": "डेटाबेस प्रशासन — Apache और MySQL का चलना आवश्यक है"
+    },
+    "mailhog": {
+      "title": "MailHog इनबॉक्स",
+      "subtitle": "PHP के mail() को पकड़कर वेब इंटरफ़ेस में दिखाता है। पहले MailHog शुरू करें।"
+    },
+    "composer": {
+      "title": "Composer"
+    },
+    "laravel": {
+      "title": "Laravel",
+      "subtitle": "composer create-project से नया Laravel ऐप बनाएँ",
+      "newProject": "नया प्रोजेक्ट",
+      "dialogTitle": "Laravel प्रोजेक्ट बनाएँ",
+      "created": "प्रोजेक्ट बन गया। नीचे public डायरेक्टरी है — इसे «होस्ट» में होस्ट के रूप में जोड़ें।",
+      "projectName": "प्रोजेक्ट का नाम",
+      "parentDir": "मूल डायरेक्टरी",
+      "create": "बनाएँ",
+      "creating": "बन रहा है…",
+      "running": "composer create-project चल रहा है — पहला डाउनलोड 1–3 मिनट लेता है।",
+      "hint": "Composer, Laravel और उसकी निर्भरताएँ डाउनलोड करेगा।"
+    },
+    "cms": {
+      "wordpressTitle": "WordPress",
+      "wordpressSubtitle": "एक क्लिक में इंस्टॉल। डेटाबेस, नए salt वाला wp-config.php, और फ़ाइलें htdocs में कॉपी।",
+      "joomlaTitle": "Joomla",
+      "joomlaSubtitle": "एक क्लिक में इंस्टॉल। डेटाबेस बन गया। सेटअप वेब इंस्टॉलर में पूरा करें।",
+      "drupalTitle": "Drupal",
+      "drupalSubtitle": "Drupal 11। डेटाबेस बन गया। वेब इंस्टॉलर में पूरा करें।",
+      "mediawikiTitle": "MediaWiki",
+      "mediawikiSubtitle": "डेटाबेस बन गया। सेटअप पूरा करने के लिए /mw-config/ खोलें।",
+      "install": "इंस्टॉल करें",
+      "newSite": "नई साइट",
+      "installTitle": "{{name}} इंस्टॉल करें",
+      "installed": "इंस्टॉल हो गया। सेटअप विज़ार्ड पूरा करने के लिए यह URL खोलें:",
+      "openSite": "साइट खोलें",
+      "done": "पूर्ण",
+      "siteName": "साइट का नाम",
+      "installIn": "यहाँ इंस्टॉल करें",
+      "phpVersion": "PHP संस्करण",
+      "hostname": "होस्टनेम",
+      "alsoHost": "वर्चुअल होस्ट के रूप में भी पंजीकृत करें",
+      "alsoHostHint": "{{example}} जैसा अपना होस्टनेम — hosts फ़ाइल बदलने के लिए प्रशासक की अनुमति चाहिए। इसे छोड़ दें तो साइट {{fallback}} के नीचे एक पथ पर मिलेगी।",
+      "stageDownloading": "CMS फ़ाइलें डाउनलोड हो रही हैं… (केवल पहली बार, इसमें एक मिनट लग सकता है)",
+      "stageInstalling": "फ़ाइलें कॉपी हो रही हैं, डेटाबेस बन रहा है…",
+      "stageIdle": "MySQL का चलना आवश्यक है।",
+      "installing": "इंस्टॉल हो रहा है…"
+    },
+    "checking": "जाँच हो रही है…",
+    "images": {
+      "title": "इमेज ऑप्टिमाइज़र",
+      "subtitle": "JPG को चुनी हुई गुणवत्ता पर दोबारा एन्कोड करता है और PNG को बिना गुणवत्ता खोए वहीं छोटा करता है। परमाण्विक — फ़ाइल कभी बड़ी नहीं होती।",
+      "folder": "फ़ोल्डर",
+      "folderPlaceholder": "C:/images/का/पथ",
+      "jpegQuality": "JPG गुणवत्ता ({{quality}})",
+      "includeJpg": ".jpg/.jpeg दोबारा एन्कोड करें",
+      "includePng": ".png ऑप्टिमाइज़ करें",
+      "run": "चलाएँ",
+      "running": "चल रहा है…",
+      "summary": "{{total}} में से {{changed}} छोटी हुईं · {{saved}} बचा ({{pct}}%)"
+    },
+    "cancel": "रद्द करें"
   },
   "config": {
     "loading": "पथ लोड हो रहे हैं…",
     "php": "PHP",
     "servers": "सर्वर",
-    "edit": "संपादित करें"
+    "edit": "संपादित करें",
+    "phpIni": "php.ini — PHP {{version}}",
+    "apacheHttpd": "Apache httpd.conf",
+    "apacheHint": "हर बार Apache शुरू होने पर दोबारा बनती है — हाथ से किए बदलाव मिट जाते हैं। किसी एक होस्ट के निर्देशों के लिए उस होस्ट का Apache टैब इस्तेमाल करें।",
+    "nginxConf": "Nginx nginx.conf",
+    "nginxHint": "हर बार Nginx शुरू होने पर दोबारा बनती है। किसी एक होस्ट के निर्देशों के लिए उस होस्ट का Nginx टैब इस्तेमाल करें।",
+    "mysqlCnf": "MySQL my.cnf",
+    "mysqlHint": "पथ सक्रिय MySQL संस्करण पर निर्भर करता है। फ़ाइल मौजूद हो इसके लिए शुरू करने के बाद संपादित करें।",
+    "footer": "संपादन एक अलग Monaco विंडो में खुलता है। सहेजने के लिए Ctrl+S दबाएँ। php.ini के बदलाव लागू करने के लिए सर्वर प्रक्रियाओं को रोककर दोबारा शुरू करना पड़ता है — यह फ़ाइल प्रक्रिया शुरू होते समय पढ़ी जाती है।",
+    "openError": "संपादक नहीं खुल सका: {{message}}"
   },
   "logs": {
     "noContent": "(अभी कोई लॉग सामग्री नहीं)",
     "pause": "रोकें",
-    "resume": "जारी रखें"
+    "resume": "जारी रखें",
+    "pauseTitle": "अपडेट रोकें",
+    "resumeTitle": "अपडेट फिर से शुरू करें"
   },
   "editor": {
     "open": "खोलें",
     "saved": "सहेजा गया",
     "dirty": "सहेजें *",
     "checkSyntax": "सिंटैक्स जाँचें",
-    "empty": "ऊपर फ़ाइल पथ लिखें और Enter दबाएँ (या खोलें पर क्लिक करें)।"
+    "empty": "ऊपर फ़ाइल पथ लिखें और Enter दबाएँ (या खोलें पर क्लिक करें)।",
+    "pathPlaceholder": "C:/फ़ाइल/का/पथ.php (खोलने के लिए Enter)",
+    "savedMessage": "सहेजा गया।",
+    "noErrors": "कोई सिंटैक्स त्रुटि नहीं मिली।",
+    "lintFailed": "जाँच विफल रही।",
+    "notUtf8": "यह फ़ाइल मान्य UTF-8 नहीं है, इसलिए केवल पढ़ने के लिए खुली है। सहेजने पर डिकोडर द्वारा न पहचाना गया हर बाइट बदल दिया जाता।",
+    "readOnly": "केवल पढ़ने योग्य"
   },
   "versions": {
     "installed": "इंस्टॉल किया गया",
@@ -150,6 +331,25 @@
     "remove": "हटाएँ",
     "removing": "हटा रहे हैं…",
     "downloadMore": "और डाउनलोड करें",
-    "hideMore": "छिपाएँ"
+    "hideMore": "छिपाएँ",
+    "intro": "साथ आने वाले रनटाइम और उपकरण इंस्टॉल, अपडेट या हटाएँ। सक्रिय MySQL या डिफ़ॉल्ट PHP हटाने पर संबंधित सेवाएँ दोबारा इंस्टॉल करने तक रुकी रहेंगी।",
+    "confirmRemove": "{{name}} हटाएँ? डिस्क जगह खाली होगी; दोबारा इंस्टॉल करने तक यह घटक इस्तेमाल नहीं हो सकेगा।",
+    "moreHint": "डाउनलोड के लिए और संस्करण उपलब्ध हैं। हर एक की जाँच एक तय SHA-256 से की जाती है।",
+    "groupRuntimes": "सर्वर और रनटाइम",
+    "groupPhp": "PHP संस्करण",
+    "groupTools": "उपकरण और अतिरिक्त",
+    "phpSection": "PHP एक्सटेंशन और लोडर",
+    "phpPick": "PHP संस्करण",
+    "extensions": "एक्सटेंशन",
+    "extensionsHint": "साथ आने वाले PHP एक्सटेंशन चालू या बंद करें। बदलाव लागू करने के लिए Apache/Nginx को रोककर दोबारा शुरू करें।",
+    "ioncube": "ionCube Loader",
+    "ioncubeHint": "ionCube से एन्कोड की गई स्क्रिप्ट (XenForo, WHMCS आदि) के लिए मालिकाना लोडर। यह इस PHP संस्करण से मेल खाता बिल्ड चुनता है। इंस्टॉल के बाद सेवाएँ दोबारा शुरू करें।",
+    "ioncubeInstall": "ionCube इंस्टॉल करें",
+    "ioncubeInstalling": "इंस्टॉल हो रहा है…",
+    "ioncubeDone": "PHP {{version}} के लिए ionCube इंस्टॉल हो गया। Apache/Nginx दोबारा शुरू करें।",
+    "noPhp": "अभी कोई PHP संस्करण इंस्टॉल नहीं है — पहले ऊपर से एक इंस्टॉल करें।"
+  },
+  "services": {
+    "exitedImmediately": "{{service}} शुरू होकर तुरंत रुक गया। संभवतः पोर्ट पहले से इस्तेमाल में है — कोई दूसरी प्रति चल रही है, या पिछली बार का कोई प्रोसेस बचा है। कारण लॉग → {{service}} में देखें।"
   }
 }

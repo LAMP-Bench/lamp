@@ -7,6 +7,18 @@ exact build number while in alpha.
 
 ## Unreleased (alpha)
 
+### Translations
+- All 13 languages are complete. German, Russian, Portuguese, Italian,
+  Chinese, Japanese, Korean, Arabic, Hindi and Turkish were sitting at
+  39%, covering the sidebar and settings while every longer string fell
+  back to English — so most of the app read as untranslated in ten of
+  the thirteen.
+- `pnpm scripts:check-i18n` now validates translated *values*, not just
+  which keys exist: a translation that drops an interpolation
+  placeholder would render it literally ("Version {{version}} is
+  available"), and the update banner's `<strong>` slot has to survive
+  too. Both are checked for every locale and gate CI.
+
 ### The UI stops promising things it can't do
 - The default PHP version is a real, persisted setting. The Settings
   picker only ever changed a local variable — the value actually used was

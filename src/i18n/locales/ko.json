@@ -5,7 +5,8 @@
     "getStarted": "시작하기",
     "retry": "다시 시도",
     "skip": "지금은 건너뛰기",
-    "errorTitle": "일부 다운로드 실패"
+    "errorTitle": "일부 다운로드 실패",
+    "errorHint": "Lamp Bench는 실행되지만, 다운로드에 실패한 서비스는 다시 시도하기 전까지 시작할 수 없습니다."
   },
   "nav": {
     "home": "홈",
@@ -34,7 +35,8 @@
     "saved": "저장됨 — 다시 시작해야 적용",
     "restartHint": "포트 변경을 적용하려면 서비스를 다시 시작하세요.",
     "stopFirst": "버전을 변경하기 전에 서비스를 중지하세요.",
-    "invalidPort": "포트는 1~65535 사이여야 합니다."
+    "invalidPort": "포트는 1~65535 사이여야 합니다.",
+    "running": "실행 중"
   },
   "settings": {
     "cat": {
@@ -56,7 +58,12 @@
       "checking": "확인 중…",
       "installNow": "설치 후 다시 시작",
       "channel": "릴리스 채널",
-      "channelAlpha": "알파(롤링)"
+      "channelAlpha": "알파(롤링)",
+      "upToDate": "최신 버전입니다({{version}}).",
+      "available": "버전 {{version}}을(를) 사용할 수 있습니다.",
+      "error": "업데이트 확인 실패: {{message}}",
+      "autoHint": "Lamp Bench는 실행할 때마다 업데이트를 확인합니다. 이 버튼으로 직접 다시 확인할 수 있습니다.",
+      "channelOnlyAlpha": "현재는 알파 채널만 있습니다. 해당 빌드가 준비되면 베타와 안정 채널이 여기에 표시됩니다."
     },
     "about": {
       "title": "정보",
@@ -65,11 +72,36 @@
       "github": "GitHub",
       "license": "라이선스",
       "openRepo": "저장소 열기"
+    },
+    "services": {
+      "title": "서비스",
+      "phpVersion": "기본 PHP 버전",
+      "phpHint": "새 호스트는 이 PHP 버전을 사용합니다. 아직 설치되지 않은 버전을 선택하면 지금 내려받습니다.",
+      "phpInstalling": "PHP {{version}} 다운로드 중…",
+      "mysqlVersion": "MySQL 버전",
+      "mysqlHint": "사용 중인 MySQL 서버입니다. 전환하면 현재 실행 중인 것을 중지하고 선택한 버전을 시작합니다. 데이터 디렉터리는 버전별로 분리되어 있습니다.",
+      "mysqlSwitching": "MySQL 전환 중…",
+      "download": " — 다운로드 필요"
+    },
+    "dyndns": {
+      "title": "동적 DNS",
+      "hint": "동적 DNS 호스트 이름을 이 컴퓨터의 현재 공인 IP로 연결합니다. 자격 증명은 브라우저 프로필에 로컬로 저장됩니다.",
+      "provider": "제공업체",
+      "hostname": "호스트 이름",
+      "hostnamePlaceholder": "myhost.ddns.net",
+      "user": "사용자 이름",
+      "password": "비밀번호 / 토큰",
+      "update": "지금 업데이트",
+      "updating": "업데이트 중…",
+      "ok": "DNS를 업데이트했습니다: {{status}}",
+      "failed": "업데이트 실패: {{status}}"
     }
   },
   "updateBanner": {
     "install": "설치 후 다시 시작",
-    "downloading": "업데이트 다운로드 중…"
+    "downloading": "업데이트 다운로드 중…",
+    "available": "Lamp Bench <strong>{{version}}</strong>을(를) 사용할 수 있습니다.",
+    "failed": "업데이트 실패: {{message}}"
   },
   "home": {
     "services": "서비스",
@@ -84,7 +116,12 @@
     "quickPhpMyAdmin": "phpMyAdmin",
     "quickMobileQR": "모바일 QR",
     "statusRunning": "실행 중",
-    "statusStopped": "중지됨"
+    "statusStopped": "중지됨",
+    "htdocsHint": "여기에 프로젝트 폴더를 넣거나,",
+    "htdocsHintLink": "도구 → CMS 부가 기능",
+    "htdocsHintTail": "에서 한 번의 클릭으로 설치하세요.",
+    "noHosts": "아직 가상 호스트가 없습니다. 위의 기본 htdocs는 다음 주소에서 이미 동작합니다:",
+    "moreHosts": "외 {{count}}개"
   },
   "hosts": {
     "columns": {
@@ -111,7 +148,70 @@
     "revert": "되돌리기",
     "addForm": {
       "title": "호스트 추가",
-      "cancel": "취소"
+      "cancel": "취소",
+      "hostnamePlaceholder": "myproject.local",
+      "docrootPlaceholder": "C:/프로젝트/경로",
+      "gitInit": "만든 뒤 이 폴더에서 git init 실행",
+      "phpDownloadOnSave": "저장할 때 PHP {{version}}을(를) 내려받습니다."
+    },
+    "tabDisabled": "이후 단계에서 제공됩니다",
+    "deploy": {
+      "intro": "이 호스트의 문서 루트를 원격 서버에 업로드합니다. 설정은 호스트별로 저장됩니다. 비밀번호는 로컬 앱 데이터베이스에 평문으로 보관됩니다.",
+      "protocol": "프로토콜",
+      "host": "호스트",
+      "hostPlaceholder": "ftp.example.com",
+      "port": "포트",
+      "user": "사용자",
+      "password": "비밀번호",
+      "remoteDir": "원격 폴더",
+      "remoteDirPlaceholder": "/public_html",
+      "save": "프로필 저장",
+      "saved": "프로필을 저장했습니다.",
+      "deployNow": "지금 배포",
+      "deploying": "업로드 중…",
+      "result": "파일 {{files}}개 · {{bytes}} 전송",
+      "withErrors": "파일 {{files}}개 업로드, 오류 {{errors}}건(아래 참조)",
+      "ftpsNote": "FTPS는 연결을 암호화합니다. 일반 FTP는 자격 증명을 평문으로 보냅니다.",
+      "ftpsSoon": "FTPS(준비 중)"
+    },
+    "general": {
+      "hostName": "호스트 이름",
+      "phpVersion": "PHP 버전",
+      "phpDownloadHint": "「download」로 표시된 버전은 저장할 때 내려받습니다.",
+      "docroot": "문서 루트",
+      "open": "열기",
+      "ports": "포트",
+      "portsValue": "Apache :{{apacheHttp}}(HTTP) · :{{apacheHttps}}(HTTPS) · Nginx :{{nginxHttp}} / :{{nginxHttps}}"
+    },
+    "extrasTab": {
+      "apacheLabel": "추가 Apache 지시어(이 호스트의 <VirtualHost> 안에 삽입됩니다)",
+      "apachePlaceholder": "# 예:\nDirectoryIndex index.php\n<Directory \".../public\">\n    AllowOverride All\n</Directory>",
+      "nginxLabel": "추가 Nginx 지시어(이 호스트의 server { } 블록 안에 삽입됩니다)",
+      "nginxPlaceholder": "# 예:\nclient_max_body_size 50m;\nrewrite ^/old-page$ /new-page permanent;",
+      "footer": "이 호스트의 일부로 저장됩니다. 각 줄은 그대로 삽입됩니다. 저장 후 Apache가 재시작됩니다."
+    },
+    "ssl": {
+      "intro": "각 호스트에는 로컬 Lamp Bench CA가 서명한 인증서가 자동으로 발급됩니다. 이 CA는 Apache를 처음 시작할 때 사용자 신뢰 저장소에 설치됩니다.",
+      "certFile": "인증서 파일",
+      "keyFile": "키 파일",
+      "httpsUrl": "HTTPS 주소",
+      "firefoxNote": "Firefox는 자체 NSS 신뢰 저장소를 사용합니다. {{about}}에서 {{pref}}를 켜거나, {{path}}의 CA를 직접 가져오세요."
+    },
+    "snapshots": {
+      "labelPlaceholder": "라벨(예: 「플러그인 업데이트 전」)",
+      "take": "스냅숏 만들기",
+      "includeDb": "MySQL 데이터베이스 포함",
+      "dbPlaceholder": "DB 이름(예: wp_myproject)",
+      "intro": "스냅숏은 {{docroot}}을(를) 하나의 .tar.zst 아카이브로 저장합니다. 「MySQL 데이터베이스 포함」을 선택하면 mysqldump --databases도 함께 넣습니다.",
+      "noSnapshots": "아직 스냅숏이 없습니다.",
+      "restore": "복원",
+      "deleteSnap": "스냅숏 삭제",
+      "withDb": "mysqldump 포함",
+      "confirmRestoreFiles": "이 스냅숏을 복원할까요? 문서 루트를 먼저 비우므로, 스냅숏을 만든 뒤에 추가된 것은 모두 삭제됩니다.",
+      "confirmRestoreDb": "이 스냅숏을 복원할까요? 문서 루트를 비우고 스냅숏 내용으로 대체하며, 포함된 MySQL 데이터베이스도 삭제 후 다시 가져옵니다. 이후에 추가된 것은 모두 사라집니다.",
+      "confirmDelete": "이 스냅숏을 삭제할까요? .tar.zst 파일이 제거됩니다.",
+      "restored": "복원했습니다.",
+      "versionWarning": "\n\n⚠ 이 스냅숏의 데이터베이스는 MySQL {{snap}}에서 덤프했지만 지금은 {{active}}이(가) 사용 중입니다. 주 버전이 다른 상태로 복원하면 실패하거나 정렬 규칙이 조용히 손상될 수 있습니다."
     }
   },
   "tools": {
@@ -123,25 +223,106 @@
       "php": "PHP",
       "cms": "CMS"
     },
-    "open": "열기"
+    "open": "열기",
+    "pma": {
+      "title": "phpMyAdmin",
+      "subtitle": "데이터베이스 관리 — Apache와 MySQL이 실행 중이어야 합니다"
+    },
+    "mailhog": {
+      "title": "MailHog 받은편지함",
+      "subtitle": "PHP의 mail()을 가로채 웹 UI에 표시합니다. MailHog를 먼저 시작하세요."
+    },
+    "composer": {
+      "title": "Composer"
+    },
+    "laravel": {
+      "title": "Laravel",
+      "subtitle": "composer create-project로 새 Laravel 앱 만들기",
+      "newProject": "새 프로젝트",
+      "dialogTitle": "Laravel 프로젝트 만들기",
+      "created": "프로젝트를 만들었습니다. 아래가 public 디렉터리입니다 — 호스트에서 호스트로 추가하세요.",
+      "projectName": "프로젝트 이름",
+      "parentDir": "상위 디렉터리",
+      "create": "만들기",
+      "creating": "만드는 중…",
+      "running": "composer create-project 실행 중 — 첫 다운로드는 1~3분 걸립니다.",
+      "hint": "Composer가 Laravel과 의존성을 내려받습니다."
+    },
+    "cms": {
+      "wordpressTitle": "WordPress",
+      "wordpressSubtitle": "원클릭 설치. 데이터베이스, 새 솔트가 적용된 wp-config.php, 파일은 htdocs로 복사됩니다.",
+      "joomlaTitle": "Joomla",
+      "joomlaSubtitle": "원클릭 설치. 데이터베이스를 만들었습니다. 웹 설치 마법사에서 설정을 마치세요.",
+      "drupalTitle": "Drupal",
+      "drupalSubtitle": "Drupal 11. 데이터베이스를 만들었습니다. 웹 설치 마법사에서 마무리하세요.",
+      "mediawikiTitle": "MediaWiki",
+      "mediawikiSubtitle": "데이터베이스를 만들었습니다. /mw-config/에 접속해 설정을 마치세요.",
+      "install": "설치",
+      "newSite": "새 사이트",
+      "installTitle": "{{name}} 설치",
+      "installed": "설치했습니다. 아래 주소를 열어 설치 마법사를 완료하세요:",
+      "openSite": "사이트 열기",
+      "done": "완료",
+      "siteName": "사이트 이름",
+      "installIn": "설치 위치",
+      "phpVersion": "PHP 버전",
+      "hostname": "호스트 이름",
+      "alsoHost": "가상 호스트로도 등록",
+      "alsoHostHint": "{{example}} 같은 사용자 지정 호스트 이름 — hosts 파일을 수정하려면 관리자 승인이 필요합니다. 건너뛰면 {{fallback}} 아래의 경로로 사이트에 접속합니다.",
+      "stageDownloading": "CMS 파일 다운로드 중… (최초 설치에만 해당하며 1분 정도 걸릴 수 있습니다)",
+      "stageInstalling": "파일을 복사하고 데이터베이스를 만드는 중…",
+      "stageIdle": "MySQL이 실행 중이어야 합니다.",
+      "installing": "설치 중…"
+    },
+    "checking": "확인 중…",
+    "images": {
+      "title": "이미지 최적화 도구",
+      "subtitle": "JPG를 지정한 품질로 다시 인코딩하고 PNG를 제자리에서 무손실 압축합니다. 원자적으로 처리하며 파일이 커지는 일은 없습니다.",
+      "folder": "폴더",
+      "folderPlaceholder": "C:/이미지/경로",
+      "jpegQuality": "JPG 품질({{quality}})",
+      "includeJpg": ".jpg/.jpeg 다시 인코딩",
+      "includePng": ".png 최적화",
+      "run": "실행",
+      "running": "처리 중…",
+      "summary": "{{changed}}/{{total}}개 축소 · {{saved}} 절약({{pct}}%)"
+    },
+    "cancel": "취소"
   },
   "config": {
     "loading": "경로 불러오는 중…",
     "php": "PHP",
     "servers": "서버",
-    "edit": "편집"
+    "edit": "편집",
+    "phpIni": "php.ini — PHP {{version}}",
+    "apacheHttpd": "Apache httpd.conf",
+    "apacheHint": "Apache를 시작할 때마다 다시 생성됩니다 — 직접 수정한 내용은 덮어써집니다. 호스트별 지시어는 해당 호스트의 Apache 탭을 사용하세요.",
+    "nginxConf": "Nginx nginx.conf",
+    "nginxHint": "Nginx를 시작할 때마다 다시 생성됩니다. 호스트별 지시어는 해당 호스트의 Nginx 탭을 사용하세요.",
+    "mysqlCnf": "MySQL my.cnf",
+    "mysqlHint": "경로는 사용 중인 MySQL 버전에 따라 달라집니다. 파일이 존재하도록 시작한 뒤에 편집하세요.",
+    "footer": "편집은 별도의 Monaco 창에서 열립니다. Ctrl+S로 저장하세요. php.ini 변경을 적용하려면 서버 프로세스를 중지했다가 다시 시작해야 합니다 — 프로세스가 시작될 때 읽어 들이기 때문입니다.",
+    "openError": "편집기를 열 수 없습니다: {{message}}"
   },
   "logs": {
     "noContent": "(아직 로그 내용 없음)",
     "pause": "일시정지",
-    "resume": "재개"
+    "resume": "재개",
+    "pauseTitle": "새로고침 일시중지",
+    "resumeTitle": "새로고침 재개"
   },
   "editor": {
     "open": "열기",
     "saved": "저장됨",
     "dirty": "저장 *",
     "checkSyntax": "구문 검사",
-    "empty": "위에 파일 경로를 입력하고 Enter를 누르세요(또는 열기 클릭)."
+    "empty": "위에 파일 경로를 입력하고 Enter를 누르세요(또는 열기 클릭).",
+    "pathPlaceholder": "C:/파일/경로.php (Enter로 열기)",
+    "savedMessage": "저장했습니다.",
+    "noErrors": "구문 오류가 없습니다.",
+    "lintFailed": "검사에 실패했습니다.",
+    "notUtf8": "이 파일은 올바른 UTF-8이 아니어서 읽기 전용으로 열렸습니다. 저장하면 디코더가 인식하지 못한 모든 바이트가 대체됩니다.",
+    "readOnly": "읽기 전용"
   },
   "versions": {
     "installed": "설치됨",
@@ -150,6 +331,25 @@
     "remove": "제거",
     "removing": "제거 중…",
     "downloadMore": "더 다운로드",
-    "hideMore": "숨기기"
+    "hideMore": "숨기기",
+    "intro": "함께 제공되는 런타임과 도구를 설치, 업데이트 또는 제거합니다. 사용 중인 MySQL이나 기본 PHP를 제거하면 다시 설치할 때까지 관련 서비스가 중지됩니다.",
+    "confirmRemove": "{{name}}을(를) 제거할까요? 디스크 공간이 확보되지만, 다시 설치하기 전까지 이 구성 요소는 사용할 수 없습니다.",
+    "moreHint": "내려받을 수 있는 추가 버전입니다. 각각 고정된 SHA-256으로 검증됩니다.",
+    "groupRuntimes": "서버 및 런타임",
+    "groupPhp": "PHP 버전",
+    "groupTools": "도구 및 부가 기능",
+    "phpSection": "PHP 확장 및 로더",
+    "phpPick": "PHP 버전",
+    "extensions": "확장",
+    "extensionsHint": "함께 제공되는 PHP 확장을 켜고 끕니다. 변경 사항을 적용하려면 Apache/Nginx를 중지했다가 다시 시작하세요.",
+    "ioncube": "ionCube Loader",
+    "ioncubeHint": "ionCube로 인코딩된 스크립트(XenForo, WHMCS 등)를 위한 독점 로더입니다. 이 PHP 버전에 맞는 빌드를 선택합니다. 설치 후 서비스를 재시작하세요.",
+    "ioncubeInstall": "ionCube 설치",
+    "ioncubeInstalling": "설치 중…",
+    "ioncubeDone": "PHP {{version}}용 ionCube를 설치했습니다. Apache/Nginx를 재시작하세요.",
+    "noPhp": "설치된 PHP 버전이 없습니다 — 위에서 먼저 설치하세요."
+  },
+  "services": {
+    "exitedImmediately": "{{service}}이(가) 시작된 직후 중지되었습니다. 포트가 이미 사용 중일 가능성이 높습니다 — 다른 사본이 실행 중이거나 이전 세션의 프로세스가 남아 있습니다. 이유는 로그 → {{service}}에서 확인하세요."
   }
 }

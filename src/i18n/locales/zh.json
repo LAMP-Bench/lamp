@@ -5,7 +5,8 @@
     "getStarted": "开始使用",
     "retry": "重试",
     "skip": "暂时跳过",
-    "errorTitle": "部分下载失败"
+    "errorTitle": "部分下载失败",
+    "errorHint": "Lamp Bench 可以正常运行，但下载失败的服务在重试之前无法启动。"
   },
   "nav": {
     "home": "主页",
@@ -34,7 +35,8 @@
     "saved": "已保存 — 重启后生效",
     "restartHint": "重启服务以应用端口更改。",
     "stopFirst": "更改版本前请先停止服务。",
-    "invalidPort": "端口必须在 1 到 65535 之间。"
+    "invalidPort": "端口必须在 1 到 65535 之间。",
+    "running": "运行中"
   },
   "settings": {
     "cat": {
@@ -56,7 +58,12 @@
       "checking": "检查中…",
       "installNow": "安装并重启",
       "channel": "发布通道",
-      "channelAlpha": "Alpha（滚动）"
+      "channelAlpha": "Alpha（滚动）",
+      "upToDate": "已是最新版本（{{version}}）。",
+      "available": "{{version}} 版本可用。",
+      "error": "检查更新失败：{{message}}",
+      "autoHint": "Lamp Bench 每次启动时都会检查更新。点此按钮可手动再次检查。",
+      "channelOnlyAlpha": "目前只有 alpha 通道。等有对应的构建后，beta 和稳定通道会出现在这里。"
     },
     "about": {
       "title": "关于",
@@ -65,11 +72,36 @@
       "github": "GitHub",
       "license": "许可证",
       "openRepo": "打开仓库"
+    },
+    "services": {
+      "title": "服务",
+      "phpVersion": "默认 PHP 版本",
+      "phpHint": "新建的主机默认使用该 PHP 版本。若选择尚未安装的版本，会立即下载。",
+      "phpInstalling": "正在下载 PHP {{version}}…",
+      "mysqlVersion": "MySQL 版本",
+      "mysqlHint": "当前使用的 MySQL 服务器。切换时会停止正在运行的版本并启动所选版本。各版本的数据目录彼此独立。",
+      "mysqlSwitching": "正在切换 MySQL…",
+      "download": " — 需下载"
+    },
+    "dyndns": {
+      "title": "动态 DNS",
+      "hint": "将动态 DNS 主机名指向本机当前的公网 IP。凭据保存在本地浏览器配置中。",
+      "provider": "服务商",
+      "hostname": "主机名",
+      "hostnamePlaceholder": "myhost.ddns.net",
+      "user": "用户名",
+      "password": "密码 / 令牌",
+      "update": "立即更新",
+      "updating": "正在更新…",
+      "ok": "DNS 已更新：{{status}}",
+      "failed": "更新失败：{{status}}"
     }
   },
   "updateBanner": {
     "install": "安装并重启",
-    "downloading": "正在下载更新…"
+    "downloading": "正在下载更新…",
+    "available": "Lamp Bench <strong>{{version}}</strong> 已发布。",
+    "failed": "更新失败：{{message}}"
   },
   "home": {
     "services": "服务",
@@ -84,7 +116,12 @@
     "quickPhpMyAdmin": "phpMyAdmin",
     "quickMobileQR": "手机二维码",
     "statusRunning": "运行中",
-    "statusStopped": "已停止"
+    "statusStopped": "已停止",
+    "htdocsHint": "把项目文件夹放到这里，或使用",
+    "htdocsHintLink": "工具 → CMS 附加组件",
+    "htdocsHintTail": "一键安装。",
+    "noHosts": "尚无虚拟主机。上方的默认 htdocs 已经可以通过以下地址访问：",
+    "moreHosts": "还有 {{count}} 个"
   },
   "hosts": {
     "columns": {
@@ -111,7 +148,70 @@
     "revert": "还原",
     "addForm": {
       "title": "添加主机",
-      "cancel": "取消"
+      "cancel": "取消",
+      "hostnamePlaceholder": "myproject.local",
+      "docrootPlaceholder": "C:/项目/路径",
+      "gitInit": "创建后在该文件夹执行 git init",
+      "phpDownloadOnSave": "保存时将下载 PHP {{version}}。"
+    },
+    "tabDisabled": "将在后续阶段推出",
+    "deploy": {
+      "intro": "将该主机的文档根目录上传到远程服务器。设置按主机分别保存。密码以明文形式存放在本地应用数据库中。",
+      "protocol": "协议",
+      "host": "服务器",
+      "hostPlaceholder": "ftp.example.com",
+      "port": "端口",
+      "user": "用户",
+      "password": "密码",
+      "remoteDir": "远程文件夹",
+      "remoteDirPlaceholder": "/public_html",
+      "save": "保存配置",
+      "saved": "配置已保存。",
+      "deployNow": "立即部署",
+      "deploying": "上传中…",
+      "result": "{{files}} 个文件 · 已上传 {{bytes}}",
+      "withErrors": "已上传 {{files}} 个文件，{{errors}} 个错误（见下方）",
+      "ftpsNote": "FTPS 会加密连接。普通 FTP 以明文发送凭据。",
+      "ftpsSoon": "FTPS（即将推出）"
+    },
+    "general": {
+      "hostName": "主机名",
+      "phpVersion": "PHP 版本",
+      "phpDownloadHint": "标记为“download”的版本会在保存时下载。",
+      "docroot": "文档根目录",
+      "open": "打开",
+      "ports": "端口",
+      "portsValue": "Apache :{{apacheHttp}}（HTTP）· :{{apacheHttps}}（HTTPS）· Nginx :{{nginxHttp}} / :{{nginxHttps}}"
+    },
+    "extrasTab": {
+      "apacheLabel": "额外的 Apache 指令（插入到该主机的 <VirtualHost> 内）",
+      "apachePlaceholder": "# 示例：\nDirectoryIndex index.php\n<Directory \".../public\">\n    AllowOverride All\n</Directory>",
+      "nginxLabel": "额外的 Nginx 指令（插入到该主机的 server { } 块内）",
+      "nginxPlaceholder": "# 示例：\nclient_max_body_size 50m;\nrewrite ^/old-page$ /new-page permanent;",
+      "footer": "作为该主机的一部分保存。这些行会原样插入。保存后 Apache 会重启。"
+    },
+    "ssl": {
+      "intro": "每个主机都会获得一张自动生成、由本地 Lamp Bench CA 签发的证书。首次启动 Apache 时，该 CA 会安装到系统的用户信任存储中。",
+      "certFile": "证书文件",
+      "keyFile": "密钥文件",
+      "httpsUrl": "HTTPS 地址",
+      "firefoxNote": "Firefox 使用自己的 NSS 信任存储。请在 {{about}} 中开启 {{pref}}，或手动导入位于 {{path}} 的 CA 证书。"
+    },
+    "snapshots": {
+      "labelPlaceholder": "标签（例如“插件更新前”）",
+      "take": "创建快照",
+      "includeDb": "包含 MySQL 数据库",
+      "dbPlaceholder": "数据库名（例如 wp_myproject）",
+      "intro": "快照会将 {{docroot}} 打包为单个 .tar.zst 归档。勾选“包含 MySQL 数据库”可同时附带一份 mysqldump --databases。",
+      "noSnapshots": "尚无快照。",
+      "restore": "还原",
+      "deleteSnap": "删除快照",
+      "withDb": "附带 mysqldump",
+      "confirmRestoreFiles": "要还原该快照吗？文档根目录会先被清空，因此创建快照之后新增的内容都会被删除。",
+      "confirmRestoreDb": "要还原该快照吗？文档根目录会被清空并替换为快照内容，同时其中包含的 MySQL 数据库会被删除并重新导入。之后新增的内容都会丢失。",
+      "confirmDelete": "要删除该快照吗？对应的 .tar.zst 文件会被移除。",
+      "restored": "已还原。",
+      "versionWarning": "\n\n⚠ 该快照的数据库是在 MySQL {{snap}} 下导出的，而当前使用的是 {{active}}。跨主版本还原可能失败，也可能悄悄破坏排序规则。"
     }
   },
   "tools": {
@@ -123,25 +223,106 @@
       "php": "PHP",
       "cms": "CMS"
     },
-    "open": "打开"
+    "open": "打开",
+    "pma": {
+      "title": "phpMyAdmin",
+      "subtitle": "数据库管理 — 需要 Apache 和 MySQL 正在运行"
+    },
+    "mailhog": {
+      "title": "MailHog 收件箱",
+      "subtitle": "拦截 PHP 的 mail() 并在网页界面中显示。请先启动 MailHog。"
+    },
+    "composer": {
+      "title": "Composer"
+    },
+    "laravel": {
+      "title": "Laravel",
+      "subtitle": "使用 composer create-project 创建新的 Laravel 应用",
+      "newProject": "新建项目",
+      "dialogTitle": "创建 Laravel 项目",
+      "created": "项目已创建。下方是 public 目录 — 请在“主机”中将其添加为主机。",
+      "projectName": "项目名称",
+      "parentDir": "上级目录",
+      "create": "创建",
+      "creating": "正在创建…",
+      "running": "正在执行 composer create-project — 首次下载需要 1–3 分钟。",
+      "hint": "Composer 将下载 Laravel 及其依赖。"
+    },
+    "cms": {
+      "wordpressTitle": "WordPress",
+      "wordpressSubtitle": "一键安装。创建数据库、生成带全新 salt 的 wp-config.php，并将文件复制到 htdocs。",
+      "joomlaTitle": "Joomla",
+      "joomlaSubtitle": "一键安装。数据库已创建。请在网页安装程序中完成设置。",
+      "drupalTitle": "Drupal",
+      "drupalSubtitle": "Drupal 11。数据库已创建。请在网页安装程序中完成。",
+      "mediawikiTitle": "MediaWiki",
+      "mediawikiSubtitle": "数据库已创建。访问 /mw-config/ 完成设置。",
+      "install": "安装",
+      "newSite": "新建站点",
+      "installTitle": "安装 {{name}}",
+      "installed": "安装完成。打开该网址以完成设置向导：",
+      "openSite": "打开站点",
+      "done": "完成",
+      "siteName": "站点名称",
+      "installIn": "安装到",
+      "phpVersion": "PHP 版本",
+      "hostname": "主机名",
+      "alsoHost": "同时注册为虚拟主机",
+      "alsoHostHint": "类似 {{example}} 的自定义主机名 — 修改 hosts 文件需要管理员授权。跳过则可通过 {{fallback}} 下的路径访问站点。",
+      "stageDownloading": "正在下载 CMS 文件…（仅首次安装，可能需要一分钟）",
+      "stageInstalling": "正在复制文件并创建数据库…",
+      "stageIdle": "MySQL 必须处于运行状态。",
+      "installing": "正在安装…"
+    },
+    "checking": "检查中…",
+    "images": {
+      "title": "图片优化器",
+      "subtitle": "按指定质量重新编码 JPG，并就地无损压缩 PNG。原子写入 — 绝不会让文件变大。",
+      "folder": "文件夹",
+      "folderPlaceholder": "C:/图片/路径",
+      "jpegQuality": "JPG 质量（{{quality}}）",
+      "includeJpg": "重新编码 .jpg/.jpeg",
+      "includePng": "优化 .png",
+      "run": "运行",
+      "running": "处理中…",
+      "summary": "已压缩 {{changed}}/{{total}} · 节省 {{saved}}（{{pct}}%）"
+    },
+    "cancel": "取消"
   },
   "config": {
     "loading": "正在加载路径…",
     "php": "PHP",
     "servers": "服务器",
-    "edit": "编辑"
+    "edit": "编辑",
+    "phpIni": "php.ini — PHP {{version}}",
+    "apacheHttpd": "Apache httpd.conf",
+    "apacheHint": "每次启动 Apache 时都会重新生成 — 手动修改会被覆盖。若需针对单个主机的指令，请使用该主机的 Apache 选项卡。",
+    "nginxConf": "Nginx nginx.conf",
+    "nginxHint": "每次启动 Nginx 时都会重新生成。若需针对单个主机的指令，请使用该主机的 Nginx 选项卡。",
+    "mysqlCnf": "MySQL my.cnf",
+    "mysqlHint": "路径取决于当前使用的 MySQL 版本。请在启动后再编辑，以确保文件已存在。",
+    "footer": "编辑会在独立的 Monaco 窗口中打开。按 Ctrl+S 保存。php.ini 的修改需要停止并重新启动服务器进程才会生效 — 该文件在进程启动时读取。",
+    "openError": "无法打开编辑器：{{message}}"
   },
   "logs": {
     "noContent": "（暂无日志内容）",
     "pause": "暂停",
-    "resume": "继续"
+    "resume": "继续",
+    "pauseTitle": "暂停刷新",
+    "resumeTitle": "继续刷新"
   },
   "editor": {
     "open": "打开",
     "saved": "已保存",
     "dirty": "保存 *",
     "checkSyntax": "检查语法",
-    "empty": "在上方输入文件路径并按回车（或点击打开）。"
+    "empty": "在上方输入文件路径并按回车（或点击打开）。",
+    "pathPlaceholder": "C:/文件/路径.php（按 Enter 打开）",
+    "savedMessage": "已保存。",
+    "noErrors": "未发现语法错误。",
+    "lintFailed": "检查失败。",
+    "notUtf8": "该文件不是有效的 UTF-8，因此以只读方式打开。保存会替换掉解码器无法识别的每一个字节。",
+    "readOnly": "只读"
   },
   "versions": {
     "installed": "已安装",
@@ -150,6 +331,25 @@
     "remove": "移除",
     "removing": "移除中…",
     "downloadMore": "下载更多",
-    "hideMore": "隐藏"
+    "hideMore": "隐藏",
+    "intro": "安装、更新或移除随附的运行时和工具。移除当前使用的 MySQL 或默认 PHP 会使相关服务停止，直到重新安装为止。",
+    "confirmRemove": "移除 {{name}}？可释放磁盘空间；重新安装之前该组件将无法使用。",
+    "moreHint": "还有更多版本可供下载。每个版本都会与固定的 SHA-256 校验值比对。",
+    "groupRuntimes": "服务器与运行时",
+    "groupPhp": "PHP 版本",
+    "groupTools": "工具与附加组件",
+    "phpSection": "PHP 扩展与加载器",
+    "phpPick": "PHP 版本",
+    "extensions": "扩展",
+    "extensionsHint": "启用或停用随附的 PHP 扩展。需停止并重新启动 Apache/Nginx 才会生效。",
+    "ioncube": "ionCube Loader",
+    "ioncubeHint": "用于 ionCube 加密脚本（XenForo、WHMCS 等）的专有加载器。会选择与该 PHP 版本匹配的构建。安装后请重启服务。",
+    "ioncubeInstall": "安装 ionCube",
+    "ioncubeInstalling": "正在安装…",
+    "ioncubeDone": "已为 PHP {{version}} 安装 ionCube。请重启 Apache/Nginx。",
+    "noPhp": "尚未安装任何 PHP 版本 — 请先在上方安装一个。"
+  },
+  "services": {
+    "exitedImmediately": "{{service}} 启动后立即停止了。端口很可能已被占用 — 可能有另一个副本仍在运行，或上次会话遗留了进程。原因请查看 日志 → {{service}}。"
   }
 }

@@ -5,7 +5,8 @@
     "getStarted": "ابدأ",
     "retry": "إعادة المحاولة",
     "skip": "تخطٍّ الآن",
-    "errorTitle": "فشلت بعض التنزيلات"
+    "errorTitle": "فشلت بعض التنزيلات",
+    "errorHint": "سيعمل Lamp Bench، لكن الخدمات التي فشل تنزيلها لن تبدأ حتى تعيد المحاولة."
   },
   "nav": {
     "home": "الرئيسية",
@@ -34,7 +35,8 @@
     "saved": "تم الحفظ — أعد التشغيل للتطبيق",
     "restartHint": "أعد تشغيل الخدمة لتطبيق تغييرات المنفذ.",
     "stopFirst": "أوقف الخدمة قبل تغيير إصدارها.",
-    "invalidPort": "يجب أن تكون المنافذ بين 1 و65535."
+    "invalidPort": "يجب أن تكون المنافذ بين 1 و65535.",
+    "running": "قيد التشغيل"
   },
   "settings": {
     "cat": {
@@ -56,7 +58,12 @@
       "checking": "جارٍ التحقق…",
       "installNow": "التثبيت وإعادة التشغيل",
       "channel": "قناة الإصدار",
-      "channelAlpha": "ألفا (متجدّد)"
+      "channelAlpha": "ألفا (متجدّد)",
+      "upToDate": "لديك أحدث إصدار ({{version}}).",
+      "available": "الإصدار {{version}} متاح.",
+      "error": "فشل التحقق من التحديثات: {{message}}",
+      "autoHint": "يبحث Lamp Bench عن التحديثات عند كل تشغيل. استخدم هذا الزر للتحقق يدويًا مرة أخرى.",
+      "channelOnlyAlpha": "لا توجد حتى الآن سوى قناة ألفا. ستظهر هنا قناتا بيتا والمستقر عند توفر إصدارات لهما."
     },
     "about": {
       "title": "حول",
@@ -65,11 +72,36 @@
       "github": "GitHub",
       "license": "الترخيص",
       "openRepo": "فتح المستودع"
+    },
+    "services": {
+      "title": "الخدمات",
+      "phpVersion": "إصدار PHP الافتراضي",
+      "phpHint": "تستخدم المضيفات الجديدة إصدار PHP هذا. اختيار إصدار غير مثبّت سيؤدي إلى تنزيله الآن.",
+      "phpInstalling": "جارٍ تنزيل PHP {{version}}…",
+      "mysqlVersion": "إصدار MySQL",
+      "mysqlHint": "خادم MySQL النشط. التبديل يوقف الخادم الحالي ويشغّل الإصدار المختار. تُحفظ أدلة البيانات منفصلة لكل إصدار.",
+      "mysqlSwitching": "جارٍ تبديل MySQL…",
+      "download": " — تنزيل"
+    },
+    "dyndns": {
+      "title": "DNS الديناميكي",
+      "hint": "وجّه اسم مضيف DNS ديناميكي إلى عنوان IP العام الحالي لهذا الجهاز. تُحفظ بيانات الاعتماد محليًا في ملف تعريف المتصفح.",
+      "provider": "المزوّد",
+      "hostname": "اسم المضيف",
+      "hostnamePlaceholder": "myhost.ddns.net",
+      "user": "اسم المستخدم",
+      "password": "كلمة المرور / الرمز",
+      "update": "حدّث الآن",
+      "updating": "جارٍ التحديث…",
+      "ok": "تم تحديث DNS: {{status}}",
+      "failed": "فشل التحديث: {{status}}"
     }
   },
   "updateBanner": {
     "install": "التثبيت وإعادة التشغيل",
-    "downloading": "جارٍ تنزيل التحديث…"
+    "downloading": "جارٍ تنزيل التحديث…",
+    "available": "الإصدار <strong>{{version}}</strong> من Lamp Bench متاح.",
+    "failed": "فشل التحديث: {{message}}"
   },
   "home": {
     "services": "الخدمات",
@@ -84,7 +116,12 @@
     "quickPhpMyAdmin": "phpMyAdmin",
     "quickMobileQR": "رمز QR للجوال",
     "statusRunning": "قيد التشغيل",
-    "statusStopped": "متوقف"
+    "statusStopped": "متوقف",
+    "htdocsHint": "ضع مجلدات مشاريعك هنا، أو استخدم",
+    "htdocsHintLink": "الأدوات ← إضافات أنظمة إدارة المحتوى",
+    "htdocsHintTail": "للتثبيت بنقرة واحدة.",
+    "noHosts": "لا توجد مضيفات افتراضية بعد. مجلد htdocs الافتراضي أعلاه يعمل بالفعل على",
+    "moreHosts": "+ {{count}} أخرى"
   },
   "hosts": {
     "columns": {
@@ -111,7 +148,70 @@
     "revert": "تراجع",
     "addForm": {
       "title": "إضافة مضيف",
-      "cancel": "إلغاء"
+      "cancel": "إلغاء",
+      "hostnamePlaceholder": "myproject.local",
+      "docrootPlaceholder": "C:/مسار/المشروع",
+      "gitInit": "تنفيذ git init في هذا المجلد بعد الإنشاء",
+      "phpDownloadOnSave": "سيُنزَّل PHP {{version}} عند الحفظ."
+    },
+    "tabDisabled": "سيأتي في مرحلة لاحقة",
+    "deploy": {
+      "intro": "ارفع الدليل الجذري لهذا المضيف إلى خادم بعيد. تُحفظ الإعدادات لكل مضيف على حدة. تُخزَّن كلمة المرور كنص عادي في قاعدة بيانات التطبيق المحلية.",
+      "protocol": "البروتوكول",
+      "host": "الخادم",
+      "hostPlaceholder": "ftp.example.com",
+      "port": "المنفذ",
+      "user": "المستخدم",
+      "password": "كلمة المرور",
+      "remoteDir": "المجلد البعيد",
+      "remoteDirPlaceholder": "/public_html",
+      "save": "حفظ الملف الشخصي",
+      "saved": "تم حفظ الملف الشخصي.",
+      "deployNow": "انشر الآن",
+      "deploying": "جارٍ الرفع…",
+      "result": "{{files}} ملفًا · تم رفع {{bytes}}",
+      "withErrors": "تم رفع {{files}} ملفًا، مع {{errors}} أخطاء (انظر أدناه)",
+      "ftpsNote": "يشفّر FTPS الاتصال. أما FTP العادي فيرسل بيانات الاعتماد بنص واضح.",
+      "ftpsSoon": "FTPS (قريبًا)"
+    },
+    "general": {
+      "hostName": "اسم المضيف",
+      "phpVersion": "إصدار PHP",
+      "phpDownloadHint": "الإصدارات المعلَّمة بـ «download» تُنزَّل عند الحفظ.",
+      "docroot": "الدليل الجذري",
+      "open": "فتح",
+      "ports": "المنافذ",
+      "portsValue": "Apache :{{apacheHttp}} (HTTP) · :{{apacheHttps}} (HTTPS) · Nginx :{{nginxHttp}} / :{{nginxHttps}}"
+    },
+    "extrasTab": {
+      "apacheLabel": "توجيهات Apache إضافية (تُدرَج داخل <VirtualHost> هذا المضيف)",
+      "apachePlaceholder": "# مثال:\nDirectoryIndex index.php\n<Directory \".../public\">\n    AllowOverride All\n</Directory>",
+      "nginxLabel": "توجيهات Nginx إضافية (تُدرَج داخل كتلة server { } لهذا المضيف)",
+      "nginxPlaceholder": "# مثال:\nclient_max_body_size 50m;\nrewrite ^/old-page$ /new-page permanent;",
+      "footer": "تُحفظ كجزء من هذا المضيف. تُدرَج الأسطر كما هي حرفيًا. يُعاد تشغيل Apache بعد الحفظ."
+    },
+    "ssl": {
+      "intro": "يحصل كل مضيف على شهادة مُولّدة تلقائيًا وموقّعة من سلطة الشهادات المحلية الخاصة بـ Lamp Bench. تُثبَّت هذه السلطة في مخزن الثقة الخاص بمستخدم نظامك عند أول تشغيل لـ Apache.",
+      "certFile": "ملف الشهادة",
+      "keyFile": "ملف المفتاح",
+      "httpsUrl": "رابط HTTPS",
+      "firefoxNote": "يحتفظ Firefox بمخزن ثقة NSS خاص به. فعّل {{pref}} في {{about}}، أو استورد الشهادة من {{path}} يدويًا."
+    },
+    "snapshots": {
+      "labelPlaceholder": "تسمية (مثل «قبل تحديث الإضافة»)",
+      "take": "إنشاء لقطة",
+      "includeDb": "تضمين قاعدة بيانات MySQL",
+      "dbPlaceholder": "اسم قاعدة البيانات (مثل wp_myproject)",
+      "intro": "تحفظ اللقطات {{docroot}} في أرشيف ‎.tar.zst‎ واحد. فعّل «تضمين قاعدة بيانات MySQL» لإرفاق ملف mysqldump --databases مع الملفات.",
+      "noSnapshots": "لا توجد لقطات بعد.",
+      "restore": "استعادة",
+      "deleteSnap": "حذف اللقطة",
+      "withDb": "تتضمن mysqldump",
+      "confirmRestoreFiles": "استعادة هذه اللقطة؟ يُفرَّغ الدليل الجذري أولاً، لذا سيُحذف كل ما أُضيف بعد إنشاء اللقطة.",
+      "confirmRestoreDb": "استعادة هذه اللقطة؟ سيُفرَّغ الدليل الجذري ويُستبدل بمحتوى اللقطة، كما ستُحذف قاعدة بيانات MySQL المرفقة ويُعاد استيرادها. سيُفقد كل ما أُضيف بعد ذلك.",
+      "confirmDelete": "حذف هذه اللقطة؟ سيُزال ملف ‎.tar.zst‎.",
+      "restored": "تمت الاستعادة.",
+      "versionWarning": "\n\n⚠ أُخذت قاعدة بيانات هذه اللقطة على MySQL {{snap}}، بينما الإصدار النشط الآن هو {{active}}. قد تفشل الاستعادة بين إصدارين رئيسيين مختلفين أو تُفسد ترتيب المحارف دون تنبيه."
     }
   },
   "tools": {
@@ -123,25 +223,106 @@
       "php": "PHP",
       "cms": "CMS"
     },
-    "open": "فتح"
+    "open": "فتح",
+    "pma": {
+      "title": "phpMyAdmin",
+      "subtitle": "إدارة قاعدة البيانات — يتطلب تشغيل Apache وMySQL"
+    },
+    "mailhog": {
+      "title": "صندوق وارد MailHog",
+      "subtitle": "يلتقط دالة mail() في PHP ويعرض الرسائل في واجهة ويب. شغّل MailHog أولاً."
+    },
+    "composer": {
+      "title": "Composer"
+    },
+    "laravel": {
+      "title": "Laravel",
+      "subtitle": "إنشاء تطبيق Laravel جديد باستخدام composer create-project",
+      "newProject": "مشروع جديد",
+      "dialogTitle": "إنشاء مشروع Laravel",
+      "created": "تم إنشاء المشروع. دليل public موجود أدناه — أضفه كمضيف في «المضيفات».",
+      "projectName": "اسم المشروع",
+      "parentDir": "الدليل الأصل",
+      "create": "إنشاء",
+      "creating": "جارٍ الإنشاء…",
+      "running": "جارٍ تنفيذ composer create-project — يستغرق التنزيل الأول من دقيقة إلى ثلاث.",
+      "hint": "سيقوم Composer بتنزيل Laravel وتبعياته."
+    },
+    "cms": {
+      "wordpressTitle": "WordPress",
+      "wordpressSubtitle": "تثبيت بنقرة واحدة. قاعدة بيانات، وملف wp-config.php بمفاتيح salt جديدة، والملفات منسوخة إلى htdocs.",
+      "joomlaTitle": "Joomla",
+      "joomlaSubtitle": "تثبيت بنقرة واحدة. أُنشئت قاعدة البيانات. أكمل الإعداد في مثبّت الويب.",
+      "drupalTitle": "Drupal",
+      "drupalSubtitle": "Drupal 11. أُنشئت قاعدة البيانات. أكمل الإعداد في مثبّت الويب.",
+      "mediawikiTitle": "MediaWiki",
+      "mediawikiSubtitle": "أُنشئت قاعدة البيانات. افتح ‎/mw-config/‎ لإكمال الإعداد.",
+      "install": "تثبيت",
+      "newSite": "موقع جديد",
+      "installTitle": "تثبيت {{name}}",
+      "installed": "تم التثبيت. افتح الرابط لإكمال معالج الإعداد:",
+      "openSite": "فتح الموقع",
+      "done": "تم",
+      "siteName": "اسم الموقع",
+      "installIn": "التثبيت في",
+      "phpVersion": "إصدار PHP",
+      "hostname": "اسم المضيف",
+      "alsoHost": "تسجيله أيضًا كمضيف افتراضي",
+      "alsoHostHint": "اسم مضيف مخصص مثل {{example}} — يتطلب إذن مسؤول لتعديل ملف hosts. تجاوز ذلك للوصول إلى الموقع عبر مسار ضمن {{fallback}}.",
+      "stageDownloading": "جارٍ تنزيل ملفات نظام إدارة المحتوى… (عند التثبيت الأول فقط، وقد يستغرق دقيقة)",
+      "stageInstalling": "جارٍ نسخ الملفات وإنشاء قاعدة البيانات…",
+      "stageIdle": "يجب أن يكون MySQL قيد التشغيل.",
+      "installing": "جارٍ التثبيت…"
+    },
+    "checking": "جارٍ التحقق…",
+    "images": {
+      "title": "محسّن الصور",
+      "subtitle": "يعيد ترميز ملفات JPG بجودة محددة ويضغط ملفات PNG دون فقدان في مكانها. عملية ذرّية — لا يزيد حجم أي ملف أبدًا.",
+      "folder": "المجلد",
+      "folderPlaceholder": "C:/مسار/الصور",
+      "jpegQuality": "جودة JPG ({{quality}})",
+      "includeJpg": "إعادة ترميز ‎.jpg/.jpeg‎",
+      "includePng": "تحسين ‎.png‎",
+      "run": "تشغيل",
+      "running": "جارٍ العمل…",
+      "summary": "تم تصغير {{changed}} من {{total}} · توفير {{saved}} ({{pct}}%)"
+    },
+    "cancel": "إلغاء"
   },
   "config": {
     "loading": "جارٍ تحميل المسارات…",
     "php": "PHP",
     "servers": "الخوادم",
-    "edit": "تحرير"
+    "edit": "تحرير",
+    "phpIni": "php.ini — PHP {{version}}",
+    "apacheHttpd": "Apache httpd.conf",
+    "apacheHint": "يُعاد إنشاؤه عند كل تشغيل لـ Apache — وتضيع التعديلات اليدوية. للتوجيهات الخاصة بمضيف معيّن استخدم تبويب Apache في ذلك المضيف.",
+    "nginxConf": "Nginx nginx.conf",
+    "nginxHint": "يُعاد إنشاؤه عند كل تشغيل لـ Nginx. للتوجيهات الخاصة بمضيف معيّن استخدم تبويب Nginx في ذلك المضيف.",
+    "mysqlCnf": "MySQL my.cnf",
+    "mysqlHint": "يعتمد المسار على إصدار MySQL النشط. حرّره بعد التشغيل ليكون الملف موجودًا.",
+    "footer": "تُفتح التعديلات في نافذة Monaco منفصلة. استخدم Ctrl+S للحفظ. لكي تسري تغييرات php.ini يجب إيقاف عمليات الخادم وتشغيلها من جديد — إذ يُقرأ الملف عند بدء العملية.",
+    "openError": "تعذّر فتح المحرر: {{message}}"
   },
   "logs": {
     "noContent": "(لا يوجد محتوى سجل بعد)",
     "pause": "إيقاف مؤقت",
-    "resume": "استئناف"
+    "resume": "استئناف",
+    "pauseTitle": "إيقاف التحديث مؤقتًا",
+    "resumeTitle": "استئناف التحديث"
   },
   "editor": {
     "open": "فتح",
     "saved": "تم الحفظ",
     "dirty": "حفظ *",
     "checkSyntax": "فحص الصياغة",
-    "empty": "أدخل مسار ملف بالأعلى واضغط Enter (أو انقر فتح)."
+    "empty": "أدخل مسار ملف بالأعلى واضغط Enter (أو انقر فتح).",
+    "pathPlaceholder": "C:/مسار/الملف.php (اضغط Enter للفتح)",
+    "savedMessage": "تم الحفظ.",
+    "noErrors": "لم يُعثر على أخطاء في بناء الجملة.",
+    "lintFailed": "فشل الفحص.",
+    "notUtf8": "هذا الملف ليس UTF-8 صالحًا، لذلك فُتح للقراءة فقط. الحفظ سيستبدل كل بايت لم يتعرف عليه فاكّ الترميز.",
+    "readOnly": "للقراءة فقط"
   },
   "versions": {
     "installed": "مُثبَّت",
@@ -150,6 +331,25 @@
     "remove": "إزالة",
     "removing": "جارٍ الإزالة…",
     "downloadMore": "تنزيل المزيد",
-    "hideMore": "إخفاء"
+    "hideMore": "إخفاء",
+    "intro": "ثبّت أو حدّث أو أزل بيئات التشغيل والأدوات المرفقة. إزالة MySQL النشط أو PHP الافتراضي توقف الخدمات المرتبطة حتى إعادة التثبيت.",
+    "confirmRemove": "إزالة {{name}}؟ سيوفّر ذلك مساحة على القرص، ولن يكون المكوّن قابلاً للاستخدام حتى إعادة تثبيته.",
+    "moreHint": "إصدارات إضافية متاحة للتنزيل. يُتحقق من كل منها مقابل بصمة SHA-256 مثبّتة.",
+    "groupRuntimes": "الخوادم وبيئات التشغيل",
+    "groupPhp": "إصدارات PHP",
+    "groupTools": "الأدوات والإضافات",
+    "phpSection": "امتدادات ومحمّلات PHP",
+    "phpPick": "إصدار PHP",
+    "extensions": "الامتدادات",
+    "extensionsHint": "تفعيل امتدادات PHP المرفقة أو تعطيلها. أوقف Apache/Nginx ثم شغّلهما من جديد ليسري التغيير.",
+    "ioncube": "ionCube Loader",
+    "ioncubeHint": "محمّل مملوك للنصوص المشفّرة بـ ionCube (مثل XenForo وWHMCS). يختار النسخة المطابقة لإصدار PHP هذا. أعد تشغيل الخدمات بعد التثبيت.",
+    "ioncubeInstall": "تثبيت ionCube",
+    "ioncubeInstalling": "جارٍ التثبيت…",
+    "ioncubeDone": "تم تثبيت ionCube لـ PHP {{version}}. أعد تشغيل Apache/Nginx.",
+    "noPhp": "لا يوجد إصدار PHP مثبّت بعد — ثبّت واحدًا من الأعلى أولاً."
+  },
+  "services": {
+    "exitedImmediately": "بدأ {{service}} ثم توقف فورًا. على الأرجح أن المنفذ مستخدم بالفعل — نسخة أخرى ما زالت تعمل، أو عملية متبقية من جلسة سابقة. السبب موجود في السجلات ← {{service}}."
   }
 }

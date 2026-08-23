@@ -5,7 +5,8 @@
     "getStarted": "Loslegen",
     "retry": "Wiederholen",
     "skip": "Vorerst überspringen",
-    "errorTitle": "Einige Downloads sind fehlgeschlagen"
+    "errorTitle": "Einige Downloads sind fehlgeschlagen",
+    "errorHint": "Lamp Bench funktioniert, aber Dienste mit fehlgeschlagenen Downloads starten erst nach einem erneuten Versuch."
   },
   "nav": {
     "home": "Start",
@@ -34,7 +35,8 @@
     "saved": "Gespeichert — Neustart erforderlich",
     "restartHint": "Dienst neu starten, um Portänderungen anzuwenden.",
     "stopFirst": "Dienst stoppen, bevor die Version geändert wird.",
-    "invalidPort": "Ports müssen zwischen 1 und 65535 liegen."
+    "invalidPort": "Ports müssen zwischen 1 und 65535 liegen.",
+    "running": "Läuft"
   },
   "settings": {
     "cat": {
@@ -56,7 +58,12 @@
       "checking": "Suche…",
       "installNow": "Installieren & Neustarten",
       "channel": "Release-Kanal",
-      "channelAlpha": "Alpha (rollend)"
+      "channelAlpha": "Alpha (rollend)",
+      "upToDate": "Sie haben die neueste Version ({{version}}).",
+      "available": "Version {{version}} ist verfügbar.",
+      "error": "Update-Prüfung fehlgeschlagen: {{message}}",
+      "autoHint": "Lamp Bench sucht bei jedem Start nach Updates. Mit dieser Schaltfläche erneut manuell prüfen.",
+      "channelOnlyAlpha": "Bisher existiert nur der Alpha-Kanal. Beta und Stable erscheinen hier, sobald es entsprechende Builds gibt."
     },
     "about": {
       "title": "Über",
@@ -65,11 +72,36 @@
       "github": "GitHub",
       "license": "Lizenz",
       "openRepo": "Repository öffnen"
+    },
+    "services": {
+      "title": "Dienste",
+      "phpVersion": "Standard-PHP-Version",
+      "phpHint": "Neue Hosts verwenden standardmäßig diese PHP-Version. Eine noch nicht installierte wird jetzt heruntergeladen.",
+      "phpInstalling": "PHP {{version}} wird heruntergeladen …",
+      "mysqlVersion": "MySQL-Version",
+      "mysqlHint": "Aktiver MySQL-Server. Beim Wechsel wird der laufende gestoppt und die gewählte Version gestartet. Die Datenverzeichnisse bleiben pro Version getrennt.",
+      "mysqlSwitching": "MySQL wird gewechselt …",
+      "download": " — herunterladen"
+    },
+    "dyndns": {
+      "title": "Dynamisches DNS",
+      "hint": "Einen dynamischen DNS-Hostnamen auf die aktuelle öffentliche IP dieses Rechners zeigen lassen. Die Zugangsdaten werden lokal im Browserprofil gespeichert.",
+      "provider": "Anbieter",
+      "hostname": "Hostname",
+      "hostnamePlaceholder": "meinhost.ddns.net",
+      "user": "Benutzername",
+      "password": "Passwort / Token",
+      "update": "Jetzt aktualisieren",
+      "updating": "Wird aktualisiert …",
+      "ok": "DNS aktualisiert: {{status}}",
+      "failed": "Aktualisierung fehlgeschlagen: {{status}}"
     }
   },
   "updateBanner": {
     "install": "Installieren & Neustarten",
-    "downloading": "Update wird heruntergeladen…"
+    "downloading": "Update wird heruntergeladen…",
+    "available": "Lamp Bench <strong>{{version}}</strong> ist verfügbar.",
+    "failed": "Update fehlgeschlagen: {{message}}"
   },
   "home": {
     "services": "Dienste",
@@ -84,7 +116,12 @@
     "quickPhpMyAdmin": "phpMyAdmin",
     "quickMobileQR": "Mobiler QR",
     "statusRunning": "läuft",
-    "statusStopped": "gestoppt"
+    "statusStopped": "gestoppt",
+    "htdocsHint": "Legen Sie Projektordner hier ab, oder nutzen Sie",
+    "htdocsHintLink": "Werkzeuge → CMS-Extras",
+    "htdocsHintTail": "für eine Installation per Klick.",
+    "noHosts": "Noch keine virtuellen Hosts. Das obige Standard-htdocs funktioniert bereits unter",
+    "moreHosts": "+ {{count}} weitere"
   },
   "hosts": {
     "columns": {
@@ -111,7 +148,70 @@
     "revert": "Zurücksetzen",
     "addForm": {
       "title": "Host hinzufügen",
-      "cancel": "Abbrechen"
+      "cancel": "Abbrechen",
+      "hostnamePlaceholder": "meinprojekt.local",
+      "docrootPlaceholder": "C:/pfad/zum/projekt",
+      "gitInit": "Nach dem Anlegen git init in diesem Ordner ausführen",
+      "phpDownloadOnSave": "PHP {{version}} wird beim Speichern heruntergeladen."
+    },
+    "tabDisabled": "Kommt in einer späteren Phase",
+    "deploy": {
+      "intro": "Das Document-Root dieses Hosts auf einen entfernten Server hochladen. Die Einstellungen werden pro Host gespeichert. Das Passwort liegt im Klartext in der lokalen App-Datenbank.",
+      "protocol": "Protokoll",
+      "host": "Host",
+      "hostPlaceholder": "ftp.example.com",
+      "port": "Port",
+      "user": "Benutzer",
+      "password": "Passwort",
+      "remoteDir": "Entfernter Ordner",
+      "remoteDirPlaceholder": "/public_html",
+      "save": "Profil speichern",
+      "saved": "Profil gespeichert.",
+      "deployNow": "Jetzt hochladen",
+      "deploying": "Wird hochgeladen …",
+      "result": "{{files}} Dateien · {{bytes}} übertragen",
+      "withErrors": "{{files}} Dateien hochgeladen, {{errors}} Fehler (siehe unten)",
+      "ftpsNote": "FTPS verschlüsselt die Verbindung. Einfaches FTP überträgt die Zugangsdaten im Klartext.",
+      "ftpsSoon": "FTPS (in Kürze)"
+    },
+    "general": {
+      "hostName": "Hostname",
+      "phpVersion": "PHP-Version",
+      "phpDownloadHint": "Mit „download“ markierte Versionen werden beim Speichern geholt.",
+      "docroot": "Document-Root",
+      "open": "Öffnen",
+      "ports": "Ports",
+      "portsValue": "Apache :{{apacheHttp}} (HTTP) · :{{apacheHttps}} (HTTPS) · Nginx :{{nginxHttp}} / :{{nginxHttps}}"
+    },
+    "extrasTab": {
+      "apacheLabel": "Zusätzliche Apache-Direktiven (werden in den <VirtualHost> dieses Hosts eingefügt)",
+      "apachePlaceholder": "# Beispiel:\nDirectoryIndex index.php\n<Directory \".../public\">\n    AllowOverride All\n</Directory>",
+      "nginxLabel": "Zusätzliche Nginx-Direktiven (werden in den server { }-Block dieses Hosts eingefügt)",
+      "nginxPlaceholder": "# Beispiel:\nclient_max_body_size 50m;\nrewrite ^/alte-seite$ /neue-seite permanent;",
+      "footer": "Wird als Teil dieses Hosts gespeichert. Die Zeilen werden unverändert eingefügt. Apache startet nach dem Speichern neu."
+    },
+    "ssl": {
+      "intro": "Jeder Host erhält ein automatisch erzeugtes Zertifikat, signiert von der lokalen Lamp-Bench-CA. Die CA wird beim ersten Apache-Start in den Benutzer-Zertifikatspeicher Ihres Systems eingetragen.",
+      "certFile": "Zertifikatsdatei",
+      "keyFile": "Schlüsseldatei",
+      "httpsUrl": "HTTPS-URL",
+      "firefoxNote": "Firefox pflegt einen eigenen NSS-Zertifikatspeicher. Setzen Sie entweder {{pref}} in {{about}}, oder importieren Sie die CA unter {{path}} von Hand."
+    },
+    "snapshots": {
+      "labelPlaceholder": "Bezeichnung (z. B. „vor dem Plugin-Update“)",
+      "take": "Snapshot erstellen",
+      "includeDb": "MySQL-Datenbank einschließen",
+      "dbPlaceholder": "DB-Name (z. B. wp_meinprojekt)",
+      "intro": "Snapshots sichern {{docroot}} als ein einzelnes .tar.zst-Archiv. Aktivieren Sie „MySQL-Datenbank einschließen“, um zusätzlich einen mysqldump --databases beizulegen.",
+      "noSnapshots": "Noch keine Snapshots.",
+      "restore": "Wiederherstellen",
+      "deleteSnap": "Snapshot löschen",
+      "withDb": "Enthält einen mysqldump",
+      "confirmRestoreFiles": "Diesen Snapshot wiederherstellen? Das Document-Root wird zuerst geleert — alles, was seit dem Snapshot hinzugekommen ist, wird gelöscht.",
+      "confirmRestoreDb": "Diesen Snapshot wiederherstellen? Das Document-Root wird geleert und durch den Snapshot ersetzt, UND die enthaltene MySQL-Datenbank wird verworfen und neu importiert. Alles seither Hinzugekommene geht verloren.",
+      "confirmDelete": "Diesen Snapshot löschen? Die .tar.zst-Datei wird entfernt.",
+      "restored": "Wiederhergestellt.",
+      "versionWarning": "\n\n⚠ Die Datenbank dieses Snapshots wurde unter MySQL {{snap}} gesichert, aktiv ist jetzt aber {{active}}. Eine Wiederherstellung über Hauptversionen hinweg kann fehlschlagen oder Kollationen unbemerkt beschädigen."
     }
   },
   "tools": {
@@ -123,25 +223,106 @@
       "php": "PHP",
       "cms": "CMS"
     },
-    "open": "Öffnen"
+    "open": "Öffnen",
+    "pma": {
+      "title": "phpMyAdmin",
+      "subtitle": "Datenbankverwaltung — Apache und MySQL müssen laufen"
+    },
+    "mailhog": {
+      "title": "MailHog-Posteingang",
+      "subtitle": "Fängt PHP-mail() ab und zeigt die Nachrichten in einer Weboberfläche. MailHog zuerst starten."
+    },
+    "composer": {
+      "title": "Composer"
+    },
+    "laravel": {
+      "title": "Laravel",
+      "subtitle": "Eine neue Laravel-App mit composer create-project anlegen",
+      "newProject": "Neues Projekt",
+      "dialogTitle": "Laravel-Projekt erstellen",
+      "created": "Projekt erstellt. Das public-Verzeichnis steht unten — fügen Sie es unter Hosts als Host hinzu.",
+      "projectName": "Projektname",
+      "parentDir": "Übergeordnetes Verzeichnis",
+      "create": "Erstellen",
+      "creating": "Wird erstellt …",
+      "running": "composer create-project läuft — der erste Download dauert 1–3 Minuten.",
+      "hint": "Composer lädt Laravel und seine Abhängigkeiten herunter."
+    },
+    "cms": {
+      "wordpressTitle": "WordPress",
+      "wordpressSubtitle": "Installation mit einem Klick. Datenbank, wp-config.php mit frischen Salts, Dateien nach htdocs kopiert.",
+      "joomlaTitle": "Joomla",
+      "joomlaSubtitle": "Installation mit einem Klick. Datenbank angelegt. Die Einrichtung im Web-Installer abschließen.",
+      "drupalTitle": "Drupal",
+      "drupalSubtitle": "Drupal 11. Datenbank angelegt. Im Web-Installer abschließen.",
+      "mediawikiTitle": "MediaWiki",
+      "mediawikiSubtitle": "Datenbank angelegt. Rufen Sie /mw-config/ auf, um die Einrichtung abzuschließen.",
+      "install": "Installieren",
+      "newSite": "Neue Website",
+      "installTitle": "{{name}} installieren",
+      "installed": "Installiert. Öffnen Sie die URL, um den Einrichtungsassistenten abzuschließen:",
+      "openSite": "Website öffnen",
+      "done": "Fertig",
+      "siteName": "Website-Name",
+      "installIn": "Installieren in",
+      "phpVersion": "PHP-Version",
+      "hostname": "Hostname",
+      "alsoHost": "Auch als virtuellen Host eintragen",
+      "alsoHostHint": "Ein eigener Hostname wie {{example}} — erfordert eine Administratorfreigabe zum Ändern der hosts-Datei. Ohne ihn erreichen Sie die Website als Pfad unter {{fallback}}.",
+      "stageDownloading": "CMS-Dateien werden heruntergeladen … (nur bei der ersten Installation, kann eine Minute dauern)",
+      "stageInstalling": "Dateien werden kopiert, Datenbank wird angelegt …",
+      "stageIdle": "MySQL muss laufen.",
+      "installing": "Wird installiert …"
+    },
+    "checking": "wird geprüft …",
+    "images": {
+      "title": "Bildoptimierer",
+      "subtitle": "JPGs mit einer Zielqualität neu kodieren und PNGs verlustfrei an Ort und Stelle verkleinern. Atomar — eine Datei wird nie größer.",
+      "folder": "Ordner",
+      "folderPlaceholder": "C:/pfad/zu/bildern",
+      "jpegQuality": "JPG-Qualität ({{quality}})",
+      "includeJpg": ".jpg/.jpeg neu kodieren",
+      "includePng": ".png optimieren",
+      "run": "Ausführen",
+      "running": "Läuft …",
+      "summary": "{{changed}}/{{total}} verkleinert · {{saved}} gespart ({{pct}} %)"
+    },
+    "cancel": "Abbrechen"
   },
   "config": {
     "loading": "Pfade werden geladen…",
     "php": "PHP",
     "servers": "Server",
-    "edit": "Bearbeiten"
+    "edit": "Bearbeiten",
+    "phpIni": "php.ini — PHP {{version}}",
+    "apacheHttpd": "Apache httpd.conf",
+    "apacheHint": "Wird bei jedem Apache-Start neu erzeugt — manuelle Änderungen gehen verloren. Für hostspezifische Direktiven den Apache-Tab des Hosts verwenden.",
+    "nginxConf": "Nginx nginx.conf",
+    "nginxHint": "Wird bei jedem Nginx-Start neu erzeugt. Für hostspezifische Direktiven den Nginx-Tab des Hosts verwenden.",
+    "mysqlCnf": "MySQL my.cnf",
+    "mysqlHint": "Der Pfad hängt von der aktiven MySQL-Version ab. Erst nach dem Start bearbeiten, damit die Datei existiert.",
+    "footer": "Änderungen öffnen sich in einem eigenen Monaco-Fenster. Mit Strg+S speichern. Damit Änderungen an der php.ini greifen, müssen die Serverprozesse gestoppt und neu gestartet werden — sie wird beim Start des Prozesses geladen.",
+    "openError": "Editor konnte nicht geöffnet werden: {{message}}"
   },
   "logs": {
     "noContent": "(noch kein Protokollinhalt)",
     "pause": "Pause",
-    "resume": "Fortsetzen"
+    "resume": "Fortsetzen",
+    "pauseTitle": "Aktualisierung anhalten",
+    "resumeTitle": "Aktualisierung fortsetzen"
   },
   "editor": {
     "open": "Öffnen",
     "saved": "Gespeichert",
     "dirty": "Speichern *",
     "checkSyntax": "Syntax prüfen",
-    "empty": "Dateipfad oben eingeben und Enter drücken (oder Öffnen klicken)."
+    "empty": "Dateipfad oben eingeben und Enter drücken (oder Öffnen klicken).",
+    "pathPlaceholder": "C:/pfad/zur/datei.php (Enter zum Öffnen)",
+    "savedMessage": "Gespeichert.",
+    "noErrors": "Keine Syntaxfehler gefunden.",
+    "lintFailed": "Prüfung fehlgeschlagen.",
+    "notUtf8": "Diese Datei ist kein gültiges UTF-8 und wird deshalb schreibgeschützt geöffnet. Beim Speichern würde jedes vom Decoder nicht erkannte Byte ersetzt.",
+    "readOnly": "Schreibgeschützt"
   },
   "versions": {
     "installed": "Installiert",
@@ -150,6 +331,25 @@
     "remove": "Entfernen",
     "removing": "Entfernen…",
     "downloadMore": "Mehr herunterladen",
-    "hideMore": "Ausblenden"
+    "hideMore": "Ausblenden",
+    "intro": "Gebündelte Laufzeiten und Werkzeuge installieren, aktualisieren oder entfernen. Wird das aktive MySQL oder das Standard-PHP entfernt, stehen die zugehörigen Dienste bis zur Neuinstallation still.",
+    "confirmRemove": "{{name}} entfernen? Gibt Speicherplatz frei; die Komponente ist bis zur Neuinstallation nicht nutzbar.",
+    "moreHint": "Weitere Versionen zum Herunterladen. Jede wird gegen einen festgelegten SHA-256 geprüft.",
+    "groupRuntimes": "Server & Laufzeiten",
+    "groupPhp": "PHP-Versionen",
+    "groupTools": "Werkzeuge & Extras",
+    "phpSection": "PHP-Erweiterungen & Loader",
+    "phpPick": "PHP-Version",
+    "extensions": "Erweiterungen",
+    "extensionsHint": "Gebündelte PHP-Erweiterungen ein- und ausschalten. Apache/Nginx stoppen und wieder starten, damit die Änderung greift.",
+    "ioncube": "ionCube Loader",
+    "ioncubeHint": "Proprietärer Loader für ionCube-verschlüsselte Skripte (XenForo, WHMCS …). Wählt den zu dieser PHP-Version passenden Build. Dienste nach der Installation neu starten.",
+    "ioncubeInstall": "ionCube installieren",
+    "ioncubeInstalling": "Wird installiert …",
+    "ioncubeDone": "ionCube für PHP {{version}} installiert. Apache/Nginx neu starten.",
+    "noPhp": "Noch keine PHP-Version installiert — installieren Sie oben zuerst eine."
+  },
+  "services": {
+    "exitedImmediately": "{{service}} ist gestartet und sofort wieder stehen geblieben. Wahrscheinlich ist der Port bereits belegt — eine zweite laufende Instanz oder ein Prozess aus einer früheren Sitzung. Der Grund steht in Logs → {{service}}."
   }
 }

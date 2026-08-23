@@ -20,6 +20,20 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const localesDir = join(repoRoot, "src", "i18n", "locales");
 const srcDir = join(repoRoot, "src");
 
+function flatValues(o, p = "", out = {}) {
+  for (const [k, v] of Object.entries(o)) {
+    const key = p ? `${p}.${k}` : k;
+    if (v && typeof v === "object") flatValues(v, key, out);
+    else out[key] = v;
+  }
+  return out;
+}
+
+const placeholders = (s) =>
+  [...String(s).matchAll(/\{\{(\w+)\}\}/g)].map((m) => m[1]).sort().join(",");
+
+const strongTags = (s) => (String(s).match(/<\/?strong>/g) || []).length;
+
 function flat(o, p = "") {
   let r = [];
   for (const [k, v] of Object.entries(o)) {
@@ -69,20 +83,49 @@ console.log("referenced but MISSING:", missing.length, missing.join(", "));
 console.log("defined but UNUSED:    ", unused.length);
 if (unused.length) console.log("  " + unused.join("\n  "));
 
+// Values, not just keys. A translation that drops an interpolation
+// placeholder renders it literally on screen ("Version {{version}} is
+// available"), and updateBanner.available is fed through <Trans> with a
+// <strong> slot that has to survive too.
+const enValues = flatValues(
+  JSON.parse(readFileSync(join(localesDir, "en.json"), "utf8")),
+);
+const brokenValues = [];
+
 console.log("\ncoverage per locale:");
 for (const f of readdirSync(localesDir).sort()) {
   if (f === "en.json") continue;
-  const k = new Set(flat(JSON.parse(readFileSync(join(localesDir, f), "utf8"))));
-  const have = en.filter((x) => k.has(x)).length;
+  const values = flatValues(JSON.parse(readFileSync(join(localesDir, f), "utf8")));
+  const have = en.filter((x) => x in values).length;
   console.log(
     "  " + f.padEnd(9),
     String(have).padStart(3) + "/" + en.length,
     Math.round((have / en.length) * 100) + "%",
   );
+
+  for (const [k, source] of Object.entries(enValues)) {
+    const got = values[k];
+    if (got === undefined) continue;
+    const want = placeholders(source);
+    if (want !== placeholders(got)) {
+      brokenValues.push(`${f} ${k}: placeholders differ (expected ${want || "none"})`);
+    }
+    if (strongTags(source) !== strongTags(got)) {
+      brokenValues.push(`${f} ${k}: <strong> markup differs`);
+    }
+  }
 }
 
-if (missing.length > 0 || unused.length > 0) {
+if (brokenValues.length) {
+  console.error("\nbroken translations:");
+  for (const b of brokenValues) console.error("  " + b);
+}
+
+if (missing.length > 0 || unused.length > 0 || brokenValues.length > 0) {
   console.error("\ni18n check failed.");
   process.exit(1);
 }
-console.log("\ni18n consistent: every key used is defined, and vice versa.");
+console.log(
+  "\ni18n consistent: every key used is defined, every locale complete, " +
+    "and every placeholder preserved.",
+);

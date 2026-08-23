@@ -70,9 +70,9 @@ each launch.
   per version, and install the ionCube loader.
 - Every service's ports are editable from the sidebar, with collisions
   rejected before they're saved.
-- 13 languages, detected from the OS locale on first launch. English,
-  Spanish and French are complete; the other ten cover the common UI and
-  fall back to English for the longer technical strings.
+- 13 languages, complete, detected from the OS locale on first launch:
+  English, Spanish, French, German, Italian, Portuguese, Russian,
+  Turkish, Chinese, Japanese, Korean, Arabic (RTL) and Hindi.
 
 ## Platform support
 
