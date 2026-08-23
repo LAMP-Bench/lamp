@@ -246,7 +246,9 @@
     "savedMessage": "Saved.",
     "noErrors": "No syntax errors detected.",
     "lintFailed": "Lint failed.",
-    "empty": "Type a file path above and press Enter (or click Open)."
+    "empty": "Type a file path above and press Enter (or click Open).",
+    "notUtf8": "This file isn't valid UTF-8, so it's open read-only. Saving would replace every byte the decoder didn't recognise.",
+    "readOnly": "Read-only"
   },
   "hosts": {
     "columns": {
@@ -323,8 +325,8 @@
       "restore": "Restore",
       "deleteSnap": "Delete snapshot",
       "withDb": "Bundles a mysqldump",
-      "confirmRestoreFiles": "Restore this snapshot? Files in the docroot will be overwritten with the snapshot's contents (existing files NOT in the snapshot are left alone).",
-      "confirmRestoreDb": "Restore this snapshot? Docroot files will be overwritten AND the bundled MySQL database will be dropped and re-imported.",
+      "confirmRestoreFiles": "Restore this snapshot? The document root is emptied first, so anything added since the snapshot was taken is deleted.",
+      "confirmRestoreDb": "Restore this snapshot? The document root is emptied and replaced with the snapshot, AND the bundled MySQL database is dropped and re-imported. Anything added since is lost.",
       "confirmDelete": "Delete this snapshot? The .tar.zst file is removed.",
       "restored": "Restored.",
       "versionWarning": "\n\n⚠ This snapshot's database was dumped under MySQL {{snap}}, but {{active}} is active now. Restoring across major versions can fail or subtly corrupt collations."

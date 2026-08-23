@@ -246,7 +246,9 @@
     "savedMessage": "Enregistré.",
     "noErrors": "Aucune erreur de syntaxe détectée.",
     "lintFailed": "Lint a échoué.",
-    "empty": "Saisissez un chemin de fichier ci-dessus et appuyez sur Entrée (ou cliquez sur Ouvrir)."
+    "empty": "Saisissez un chemin de fichier ci-dessus et appuyez sur Entrée (ou cliquez sur Ouvrir).",
+    "notUtf8": "Ce fichier n'est pas de l'UTF-8 valide, il est donc ouvert en lecture seule. L'enregistrer remplacerait chaque octet non reconnu par le décodeur.",
+    "readOnly": "Lecture seule"
   },
   "hosts": {
     "columns": {
@@ -323,8 +325,8 @@
       "restore": "Restaurer",
       "deleteSnap": "Supprimer le snapshot",
       "withDb": "Inclut un mysqldump",
-      "confirmRestoreFiles": "Restaurer ce snapshot ? Les fichiers du docroot seront écrasés par le contenu du snapshot (les fichiers ABSENTS du snapshot sont conservés).",
-      "confirmRestoreDb": "Restaurer ce snapshot ? Les fichiers du docroot seront écrasés ET la base MySQL incluse sera supprimée puis réimportée.",
+      "confirmRestoreFiles": "Restaurer cet instantané ? La racine du site est d'abord vidée : tout ce qui a été ajouté depuis sera supprimé.",
+      "confirmRestoreDb": "Restaurer cet instantané ? La racine du site est vidée puis remplacée, ET la base MySQL est supprimée puis réimportée. Tout ce qui a été ajouté depuis sera perdu.",
       "confirmDelete": "Supprimer ce snapshot ? Le fichier .tar.zst est effacé.",
       "restored": "Restauré.",
       "versionWarning": "\n\n⚠ La base de données de ce snapshot a été exportée sous MySQL {{snap}}, mais {{active}} est actif maintenant. Restaurer entre versions majeures peut échouer ou corrompre subtilement les collations."

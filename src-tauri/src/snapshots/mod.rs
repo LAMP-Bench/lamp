@@ -65,13 +65,25 @@ pub fn list_for_host(conn: &Connection, host_id: i64) -> Result<Vec<Snapshot>, S
         .map_err(|e| e.to_string())
 }
 
-pub fn create(
-    conn: &Connection,
+/// What `capture` produced, ready to be written to the database.
+pub struct Captured {
+    pub path: PathBuf,
+    pub size: u64,
+    pub has_db: bool,
+    pub mysql_version: String,
+}
+
+/// Do the slow part — mysqldump plus tar.zst of the whole docroot — without
+/// touching the database.
+///
+/// Split out from `record` so the caller can release the SQLite mutex first.
+/// Holding it across a dump of a large database froze every other command in
+/// the app, since a single connection behind one lock is the only way in.
+pub fn capture(
     host: &Host,
-    label: &str,
     runtime_dir: &Path,
     db: Option<DbCapture>,
-) -> Result<Snapshot, String> {
+) -> Result<Captured, String> {
     let docroot = PathBuf::from(&host.docroot);
     if !docroot.exists() {
         return Err(format!("docroot does not exist: {}", docroot.display()));
@@ -95,30 +107,40 @@ pub fn create(
 
     let size = write_tar_zst(&docroot, &target, db_dump.as_deref())?;
 
+    Ok(Captured {
+        path: target,
+        size,
+        has_db,
+        mysql_version,
+    })
+}
+
+/// Record a completed capture. Cheap, so the DB lock is held only here.
+pub fn record(conn: &Connection, host_id: i64, label: &str, cap: Captured) -> Result<Snapshot, String> {
+    let label = label.trim();
     conn.execute(
         "INSERT INTO snapshots (host_id, label, path, size_bytes, has_db, mysql_version) \
          VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
         params![
-            host.id,
-            label.trim(),
-            target.to_string_lossy(),
-            size as i64,
-            if has_db { 1 } else { 0 },
-            mysql_version,
+            host_id,
+            label,
+            cap.path.to_string_lossy(),
+            cap.size as i64,
+            if cap.has_db { 1 } else { 0 },
+            cap.mysql_version,
         ],
     )
     .map_err(|e| e.to_string())?;
 
-    let id = conn.last_insert_rowid();
     Ok(Snapshot {
-        id,
-        host_id: host.id,
-        label: label.trim().to_string(),
-        path: target.to_string_lossy().into_owned(),
-        size_bytes: size as i64,
+        id: conn.last_insert_rowid(),
+        host_id,
+        label: label.to_string(),
+        path: cap.path.to_string_lossy().into_owned(),
+        size_bytes: cap.size as i64,
         created_at: now_iso(),
-        has_db,
-        mysql_version,
+        has_db: cap.has_db,
+        mysql_version: cap.mysql_version,
     })
 }
 
@@ -189,7 +211,49 @@ pub fn restore(
     let docroot = PathBuf::from(&host.docroot);
     fs::create_dir_all(&docroot).map_err(|e| e.to_string())?;
 
+    // Restore replaces, it does not merge. Unpacking over whatever is there
+    // meant anything added since the snapshot survived — so "roll back to
+    // before the plugin update" left the broken plugin in place, which is
+    // precisely the case the feature exists for.
+    clear_dir_contents(&docroot)?;
+
     extract_tar_zst(&archive_path, &docroot, mysql_dir, mysql_port)
+}
+
+/// A filesystem root, or a direct child of one — `/`, `/var`, `C:\` or
+/// `C:\LAMP`. Nothing that shallow is plausibly a document root, and getting
+/// it wrong here deletes something that matters.
+fn is_too_shallow_to_clear(dir: &Path) -> bool {
+    match dir.parent() {
+        None => true,
+        Some(parent) => parent.parent().is_none(),
+    }
+}
+
+/// Empty a directory without removing the directory itself.
+///
+/// Guarded, because a docroot is a free-text field: a stray `C:/` or `/` in
+/// there would otherwise be catastrophic. Anything without a parent, or
+/// sitting directly at a filesystem root, is refused.
+fn clear_dir_contents(dir: &Path) -> Result<(), String> {
+    if is_too_shallow_to_clear(dir) {
+        return Err(format!(
+            "refusing to clear {} — that looks like a filesystem root, not a document root",
+            dir.display()
+        ));
+    }
+    for entry in fs::read_dir(dir).map_err(|e| format!("read docroot: {e}"))? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let path = entry.path();
+        let ft = entry.file_type().map_err(|e| e.to_string())?;
+        let result = if ft.is_dir() {
+            fs::remove_dir_all(&path)
+        } else {
+            fs::remove_file(&path)
+        };
+        result.map_err(|e| format!("clear {}: {e}", path.display()))?;
+    }
+    Ok(())
 }
 
 pub fn delete(conn: &Connection, snapshot_id: i64) -> Result<(), String> {
@@ -324,18 +388,32 @@ fn restore_mysql_dump(sql: &[u8], mysql_dir: &Path, port: u16) -> Result<(), Str
         .stderr(Stdio::piped())
         .spawn()
         .map_err(|e| format!("spawn mysql client: {e}"))?;
-    {
-        let mut stdin = child
-            .stdin
-            .take()
-            .ok_or_else(|| "mysql stdin unavailable".to_string())?;
-        stdin
-            .write_all(sql)
-            .map_err(|e| format!("pipe sql to mysql: {e}"))?;
-    }
+
+    // Feed stdin from another thread. Writing the whole dump inline before
+    // reading anything back deadlocks as soon as the client emits enough
+    // warnings to fill the stderr pipe buffer — it blocks writing, we block
+    // writing, neither side moves. Large dumps hit this reliably.
+    let mut stdin = child
+        .stdin
+        .take()
+        .ok_or_else(|| "mysql stdin unavailable".to_string())?;
+    let payload = sql.to_vec();
+    let writer = std::thread::spawn(move || {
+        let result = stdin.write_all(&payload);
+        // Dropping stdin closes the pipe, which is what tells mysql the input
+        // is finished.
+        drop(stdin);
+        result
+    });
+
     let output = child
         .wait_with_output()
         .map_err(|e| format!("wait mysql: {e}"))?;
+    match writer.join() {
+        Ok(Ok(())) => {}
+        Ok(Err(e)) => return Err(format!("pipe sql to mysql: {e}")),
+        Err(_) => return Err("sql writer thread panicked".into()),
+    }
     if !output.status.success() {
         return Err(format!(
             "mysql restore failed: {}",
@@ -369,4 +447,43 @@ fn now_iso() -> String {
         now.minute(),
         now.second(),
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn refuses_to_clear_a_root_or_its_direct_children() {
+        // A docroot is a free-text field, so these are reachable by typo.
+        #[cfg(windows)]
+        {
+            assert!(is_too_shallow_to_clear(Path::new("C:\\")));
+            assert!(is_too_shallow_to_clear(Path::new("C:/LAMP")));
+            assert!(!is_too_shallow_to_clear(Path::new("C:/LAMP/htdocs")));
+            assert!(!is_too_shallow_to_clear(Path::new("C:/LAMP/htdocs/site")));
+        }
+        #[cfg(unix)]
+        {
+            assert!(is_too_shallow_to_clear(Path::new("/")));
+            assert!(is_too_shallow_to_clear(Path::new("/var")));
+            assert!(!is_too_shallow_to_clear(Path::new("/var/www")));
+        }
+    }
+
+    #[test]
+    fn clearing_empties_a_directory_without_removing_it() {
+        let dir = std::env::temp_dir()
+            .join("lamp-clear-test")
+            .join(format!("run-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(dir.join("nested/deep")).unwrap();
+        fs::write(dir.join("a.txt"), "a").unwrap();
+        fs::write(dir.join("nested/deep/b.txt"), "b").unwrap();
+
+        clear_dir_contents(&dir).unwrap();
+        assert!(dir.is_dir(), "the directory itself must survive");
+        assert_eq!(fs::read_dir(&dir).unwrap().count(), 0);
+        let _ = fs::remove_dir_all(&dir);
+    }
 }

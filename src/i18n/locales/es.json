@@ -246,7 +246,9 @@
     "savedMessage": "Guardado.",
     "noErrors": "Sin errores de sintaxis.",
     "lintFailed": "Lint falló.",
-    "empty": "Escribe una ruta arriba y pulsa Enter (o haz clic en Abrir)."
+    "empty": "Escribe una ruta arriba y pulsa Enter (o haz clic en Abrir).",
+    "notUtf8": "Este archivo no es UTF-8 válido, así que se abre en solo lectura. Guardarlo sustituiría cada byte que el decodificador no reconoció.",
+    "readOnly": "Solo lectura"
   },
   "hosts": {
     "columns": {
@@ -323,8 +325,8 @@
       "restore": "Restaurar",
       "deleteSnap": "Eliminar snapshot",
       "withDb": "Incluye un mysqldump",
-      "confirmRestoreFiles": "¿Restaurar este snapshot? Los archivos del docroot serán sobrescritos con el contenido del snapshot (los archivos que NO estén en el snapshot se conservan).",
-      "confirmRestoreDb": "¿Restaurar este snapshot? Los archivos del docroot serán sobrescritos Y la base de datos MySQL incluida será borrada y reimportada.",
+      "confirmRestoreFiles": "¿Restaurar este snapshot? El document root se vacía primero, así que se borra todo lo añadido desde que se tomó.",
+      "confirmRestoreDb": "¿Restaurar este snapshot? El document root se vacía y se reemplaza por el snapshot, Y la base de datos MySQL se elimina y se reimporta. Se pierde todo lo añadido desde entonces.",
       "confirmDelete": "¿Eliminar este snapshot? Se borra el archivo .tar.zst.",
       "restored": "Restaurado.",
       "versionWarning": "\n\n⚠ La base de datos de este snapshot se exportó con MySQL {{snap}}, pero ahora está activo {{active}}. Restaurar entre versiones mayores puede fallar o corromper sutilmente las colaciones."

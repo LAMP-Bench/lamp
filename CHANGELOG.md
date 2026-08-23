@@ -7,6 +7,31 @@ exact build number while in alpha.
 
 ## Unreleased (alpha)
 
+### Not losing your data
+- Restoring a snapshot now replaces the document root instead of
+  unpacking on top of it. Files added since the snapshot survived the
+  "restore", so rolling back to before a bad plugin update left the bad
+  plugin exactly where it was. The confirmation says plainly what gets
+  deleted, and clearing refuses to touch anything as shallow as `C:\` or
+  `/var`.
+- The editor opens files that aren't valid UTF-8 read-only. It shows a
+  lossy decode — which is right, since Apache logs and older PHP sources
+  mix encodings — but saving that buffer wrote the decoder's replacement
+  character over every byte it hadn't recognised. Silent, permanent
+  corruption in a tool people point at their source.
+- Per-host certificates are reissued as they approach expiry. They are
+  valid for a year and were never revisited, so on day 366 browsers
+  started rejecting a certificate the app believed was fine. Leaves also
+  carry a KeyUsage extension now, for clients stricter than Chrome.
+- Restoring a large database no longer deadlocks. The whole dump was
+  written to the client's stdin before anything was read back, so once
+  enough warnings filled the stderr pipe both sides stopped moving.
+- Taking a snapshot no longer freezes the rest of the app: the mysqldump
+  and the compression happen without the database lock held.
+- Downloading or removing a component whose service is still running is
+  refused. Replacing files a live process has open loses them on Windows
+  — it is how MySQL's `bin/` got emptied during an earlier smoke test.
+
 ### Linux and macOS groundwork
 - The downloader understands `.tar.gz`, `.tar.xz` and `.tar` as well as
   `.zip`, applies the Unix permission bits stored in an archive, and

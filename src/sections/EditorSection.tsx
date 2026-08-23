@@ -14,6 +14,14 @@ type LintResult = {
   stderr: string;
 };
 
+type FileContents = {
+  content: string;
+  /// False when the file wasn't valid UTF-8. Saving would write the decoder's
+  /// replacement characters over every byte it didn't understand, so the
+  /// buffer is opened read-only instead.
+  utf8: boolean;
+};
+
 function languageForPath(path: string): string {
   const ext = path.split(".").pop()?.toLowerCase() ?? "";
   const map: Record<string, string> = {
@@ -62,6 +70,7 @@ export function EditorSection({
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [readOnly, setReadOnly] = useState(false);
   const [lint, setLint] = useState<LintResult | null>(null);
   const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
 
@@ -73,7 +82,7 @@ export function EditorSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialPath]);
 
-  const dirty = content !== originalContent;
+  const dirty = content !== originalContent && !readOnly;
   const isPhp = path.toLowerCase().endsWith(".php");
 
   async function open(p: string) {
@@ -82,10 +91,12 @@ export function EditorSection({
     setInfo(null);
     setLint(null);
     try {
-      const c = await invoke<string>("file_read", { path: p });
-      setContent(c);
-      setOriginalContent(c);
+      const file = await invoke<FileContents>("file_read", { path: p });
+      setContent(file.content);
+      setOriginalContent(file.content);
+      setReadOnly(!file.utf8);
       setPath(p);
+      if (!file.utf8) setError(t("editor.notUtf8"));
     } catch (e) {
       setError(String(e));
     } finally {
@@ -94,7 +105,7 @@ export function EditorSection({
   }
 
   async function save() {
-    if (!path) return;
+    if (!path || readOnly) return;
     setBusy(true);
     setError(null);
     setInfo(null);
@@ -174,12 +185,12 @@ export function EditorSection({
         </button>
         <button
           onClick={save}
-          disabled={!path || !dirty || busy}
+          disabled={!path || !dirty || busy || readOnly}
           className="px-3 py-1 rounded bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
-          title="Ctrl+S"
+          title={readOnly ? t("editor.notUtf8") : "Ctrl+S"}
         >
           <FiSave />
-          {dirty ? t("editor.dirty") : t("editor.saved")}
+          {readOnly ? t("editor.readOnly") : dirty ? t("editor.dirty") : t("editor.saved")}
         </button>
         {isPhp && (
           <button
@@ -239,6 +250,9 @@ export function EditorSection({
               scrollBeyondLastLine: false,
               wordWrap: "on",
               tabSize: 4,
+              // Non-UTF8 files are shown but not editable: what's on screen
+              // is a lossy decode, and writing it back would corrupt them.
+              readOnly,
             }}
           />
         ) : (

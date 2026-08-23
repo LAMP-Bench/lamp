@@ -352,8 +352,7 @@ fn service_stop(name: &str, state: tauri::State<AppState>) -> Result<(), String>
     }
 }
 
-#[tauri::command]
-fn service_status(name: &str, state: tauri::State<AppState>) -> Result<ServiceStatus, String> {
+fn status_of(name: &str, state: &AppState) -> Result<ServiceStatus, String> {
     match name {
         "apache" => Ok(state.apache.lock().unwrap().status()),
         "nginx" => Ok(state.nginx.lock().unwrap().status()),
@@ -362,6 +361,41 @@ fn service_status(name: &str, state: tauri::State<AppState>) -> Result<ServiceSt
         "mailhog" => Ok(state.mailhog.lock().unwrap().status()),
         other => Err(format!("unknown service: {other}")),
     }
+}
+
+#[tauri::command]
+fn service_status(name: &str, state: tauri::State<AppState>) -> Result<ServiceStatus, String> {
+    status_of(name, &state)
+}
+
+/// Services that hold files inside a manifest entry's install directory.
+///
+/// Replacing or deleting those files while the process has them open silently
+/// loses data on Windows — that is how MySQL 8.0's `bin/` was emptied during
+/// an earlier smoke test, with a leaked mysqld still holding the DLLs.
+fn services_using_binary(name: &str) -> &'static [&'static str] {
+    match name {
+        "apache" | "mod_fcgid" => &["apache"],
+        "nginx" => &["nginx"],
+        "redis" => &["redis"],
+        "mailhog" => &["mailhog"],
+        n if n.starts_with("mysql-") => &["mysql"],
+        // PHP is loaded by Apache's mod_fcgid children and by the php-cgi
+        // pools Nginx drives, so either one pins the files.
+        n if n.starts_with("php-") || n.starts_with("xdebug-") => &["apache", "nginx"],
+        _ => &[],
+    }
+}
+
+fn ensure_not_in_use(name: &str, state: &AppState) -> Result<(), String> {
+    for svc in services_using_binary(name) {
+        if matches!(status_of(svc, state)?, ServiceStatus::Running { .. }) {
+            return Err(format!(
+                "Stop {svc} first — replacing files it currently has open loses them."
+            ));
+        }
+    }
+    Ok(())
 }
 
 #[tauri::command]
@@ -447,11 +481,19 @@ fn snapshot_create(
     state: tauri::State<AppState>,
 ) -> Result<snapshots::Snapshot, String> {
     let (mysql_dir, mysql_port, mysql_version) = mysql_active_full(&state);
-    let conn = state.db.lock().unwrap();
-    let host = hosts::list(&conn)?
-        .into_iter()
-        .find(|h| h.id == host_id)
-        .ok_or_else(|| format!("host {host_id} not found"))?;
+
+    // Look the host up, then let go. The capture below runs mysqldump and
+    // compresses the whole docroot, and the single SQLite connection sits
+    // behind one mutex — holding it for the duration froze every other
+    // command in the app until the snapshot finished.
+    let host = {
+        let conn = state.db.lock().unwrap();
+        hosts::list(&conn)?
+            .into_iter()
+            .find(|h| h.id == host_id)
+            .ok_or_else(|| format!("host {host_id} not found"))?
+    };
+
     let trimmed = db_name.as_deref().map(str::trim).filter(|s| !s.is_empty());
     let db_capture = trimmed.map(|name| snapshots::DbCapture {
         mysql_dir: &mysql_dir,
@@ -459,7 +501,10 @@ fn snapshot_create(
         db_name: name,
         version: &mysql_version,
     });
-    snapshots::create(&conn, &host, &label, &state.runtime_dir, db_capture)
+    let captured = snapshots::capture(&host, &state.runtime_dir, db_capture)?;
+
+    let conn = state.db.lock().unwrap();
+    snapshots::record(&conn, host.id, &label, captured)
 }
 
 #[tauri::command]
@@ -580,10 +625,35 @@ fn laravel_create(
     Ok(public_dir.to_string_lossy().replace('\\', "/"))
 }
 
+#[derive(Serialize)]
+struct FileContents {
+    content: String,
+    /// False when the bytes on disk were not valid UTF-8. The editor opens
+    /// those read-only.
+    utf8: bool,
+}
+
+/// Read a file for the editor, reporting whether it decoded cleanly.
+///
+/// The lossy decode is deliberate — Apache logs and older PHP sources mix
+/// UTF-8 with the local codepage, and refusing to show them is worse than
+/// showing them. But the replacement characters it produces are real
+/// characters, so *saving* one of those buffers used to write `EF BF BD` over
+/// every byte the decoder didn't recognise: silent, permanent corruption in a
+/// tool people point at their source files.
 #[tauri::command]
-fn file_read(path: String) -> Result<String, String> {
+fn file_read(path: String) -> Result<FileContents, String> {
     let raw = std::fs::read(&path).map_err(|e| format!("read {path}: {e}"))?;
-    Ok(String::from_utf8_lossy(&raw).into_owned())
+    match String::from_utf8(raw) {
+        Ok(content) => Ok(FileContents {
+            content,
+            utf8: true,
+        }),
+        Err(e) => Ok(FileContents {
+            content: String::from_utf8_lossy(e.as_bytes()).into_owned(),
+            utf8: false,
+        }),
+    }
 }
 
 #[tauri::command]
@@ -767,6 +837,7 @@ fn binary_download(
     app: tauri::AppHandle,
     state: tauri::State<AppState>,
 ) -> Result<(), String> {
+    ensure_not_in_use(&name, &state)?;
     // Streaming progress is forwarded as Tauri events. Frontend subscribes
     // to `binary-download-progress` and filters on the `name` field.
     let resources = state.resources_dir.clone();
@@ -786,6 +857,7 @@ fn binary_download(
 
 #[tauri::command]
 fn binary_remove(name: &str, state: tauri::State<AppState>) -> Result<(), String> {
+    ensure_not_in_use(name, &state)?;
     downloads::remove(name, &state.resources_dir)
 }
 

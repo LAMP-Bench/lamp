@@ -16,6 +16,27 @@ use std::path::{Path, PathBuf};
 
 pub const SSL_PORT: u16 = 8443;
 
+/// Reissue a leaf once it has this little life left. Leaves are valid for a
+/// year and were previously never revisited: `issue_leaf` returned early
+/// whenever the file existed, so on day 366 the browser started rejecting a
+/// certificate the app had no idea was stale.
+const RENEW_WITHIN_DAYS: i64 = 30;
+
+/// Whether a leaf on disk is still worth reusing. Anything unreadable or
+/// unparseable counts as stale — reissuing costs milliseconds, and a corrupt
+/// file is otherwise invisible until a browser refuses the connection.
+fn leaf_is_current(cert_path: &Path) -> bool {
+    let Ok(pem) = fs::read_to_string(cert_path) else {
+        return false;
+    };
+    // `from_ca_cert_pem` is named for its usual job but parses any
+    // certificate's parameters, validity included.
+    let Ok(parsed) = CertificateParams::from_ca_cert_pem(&pem) else {
+        return false;
+    };
+    (parsed.not_after - time::OffsetDateTime::now_utc()).whole_days() > RENEW_WITHIN_DAYS
+}
+
 pub struct LocalCa {
     pub dir: PathBuf,
 }
@@ -73,12 +94,13 @@ impl LocalCa {
     }
 
     /// Issue (or reuse) a leaf cert for `hostname` under `out_dir`. Stable —
-    /// same hostname keeps the same cert across restarts unless deleted.
+    /// the same hostname keeps the same certificate across restarts until it
+    /// approaches expiry, at which point it is quietly reissued.
     pub fn issue_leaf(&self, hostname: &str, out_dir: &Path) -> Result<LeafCert, String> {
         fs::create_dir_all(out_dir).map_err(|e| e.to_string())?;
         let cert_path = out_dir.join(format!("{hostname}.crt"));
         let key_path = out_dir.join(format!("{hostname}.key"));
-        if cert_path.exists() && key_path.exists() {
+        if cert_path.exists() && key_path.exists() && leaf_is_current(&cert_path) {
             return Ok(LeafCert {
                 cert_path,
                 key_path,
@@ -106,6 +128,12 @@ impl LocalCa {
         params.not_before = time::OffsetDateTime::now_utc();
         params.not_after = time::OffsetDateTime::now_utc() + time::Duration::days(365);
         params.extended_key_usages = vec![ExtendedKeyUsagePurpose::ServerAuth];
+        // Chrome doesn't insist on KeyUsage for a server certificate, but
+        // stricter clients do, and it costs nothing to be correct.
+        params.key_usages = vec![
+            KeyUsagePurpose::DigitalSignature,
+            KeyUsagePurpose::KeyEncipherment,
+        ];
 
         let leaf = params
             .signed_by(&leaf_kp, &ca_cert, &ca_kp)
@@ -118,5 +146,47 @@ impl LocalCa {
             cert_path,
             key_path,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn leaf_expiry_is_readable_from_the_pem() {
+        let dir = std::env::temp_dir().join(format!("lamp-ssl-test-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        let ca = LocalCa::new(dir.join("ca"));
+        ca.ensure().unwrap();
+        let leaf = ca.issue_leaf("probe.local", &dir.join("ssl")).unwrap();
+
+        let pem = fs::read_to_string(&leaf.cert_path).unwrap();
+        let parsed = CertificateParams::from_ca_cert_pem(&pem)
+            .expect("rcgen should parse a leaf's params, not just a CA's");
+        let days_left = (parsed.not_after - time::OffsetDateTime::now_utc()).whole_days();
+        assert!(
+            (360..=366).contains(&days_left),
+            "unexpected validity window: {days_left} days"
+        );
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_fresh_leaf_is_current_and_junk_is_not() {
+        let dir = std::env::temp_dir().join(format!("lamp-ssl-cur-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        let ca = LocalCa::new(dir.join("ca"));
+        ca.ensure().unwrap();
+        let leaf = ca.issue_leaf("fresh.local", &dir.join("ssl")).unwrap();
+        assert!(leaf_is_current(&leaf.cert_path));
+
+        // An unreadable or corrupt certificate counts as stale so it gets
+        // replaced rather than served.
+        let junk = dir.join("ssl").join("junk.crt");
+        fs::write(&junk, "not a certificate").unwrap();
+        assert!(!leaf_is_current(&junk));
+        assert!(!leaf_is_current(&dir.join("ssl").join("missing.crt")));
+        let _ = fs::remove_dir_all(&dir);
     }
 }
