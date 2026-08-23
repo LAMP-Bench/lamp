@@ -2,12 +2,14 @@ import { FiEdit2, FiGlobe, FiPower } from "react-icons/fi";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useTranslation } from "react-i18next";
 import { useService } from "../useService";
+import { usePorts } from "../PortsContext";
 import { useToast } from "./Toast";
 import { serviceErrorText } from "../serviceError";
 
 export function TopBar({ title }: { title: string }) {
   const { t } = useTranslation();
   const toast = useToast();
+  const { siteUrl } = usePorts();
   const apache = useService("apache");
   const nginx = useService("nginx");
   const mysql = useService("mysql");
@@ -39,7 +41,7 @@ export function TopBar({ title }: { title: string }) {
     if (apache.status?.kind !== "running") await flip(apache, "Apache");
   }
 
-  const webStart = () => openUrl("http://localhost:8080/");
+  const webStart = () => openUrl(siteUrl());
 
   return (
     <header className="border-b border-neutral-200 bg-white px-5 py-2.5 flex items-center justify-between">

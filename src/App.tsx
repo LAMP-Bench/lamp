@@ -11,6 +11,7 @@ import { ConfigSection } from "./sections/ConfigSection";
 import { LogsSection } from "./sections/LogsSection";
 import { SettingsSection } from "./sections/SettingsSection";
 import { SetupWizard, setupNeeded } from "./components/SetupWizard";
+import { PortsProvider } from "./PortsContext";
 import type { SectionId } from "./types";
 
 /// Monaco is only ever mounted in a standalone editor window, and it drags
@@ -89,21 +90,26 @@ function MainShell() {
   }, []);
 
   return (
-    <div className="h-screen bg-white text-neutral-900 grid grid-cols-[240px_1fr] overflow-hidden">
-      <Sidebar active={section} onSelect={setSection} version={version} />
-      <div className="flex flex-col min-w-0 min-h-0">
-        <UpdateBanner />
-        <TopBar title={t(`nav.${section}`)} />
-        <main className="flex-1 min-h-0 overflow-hidden">
-          {section === "home" && <HomeSection onNavigate={setSection} />}
-          {section === "hosts" && <HostsSection />}
-          {section === "tools" && <ToolsSection />}
-          {section === "config" && <ConfigSection />}
-          {section === "logs" && <LogsSection />}
-          {section === "settings" && <SettingsSection />}
-        </main>
+    // Ports are fetched once here rather than per component: every link in
+    // the shell is built from them, and the sidebar's port editor refreshes
+    // this so the rest of the UI follows immediately.
+    <PortsProvider>
+      <div className="h-screen bg-white text-neutral-900 grid grid-cols-[240px_1fr] overflow-hidden">
+        <Sidebar active={section} onSelect={setSection} version={version} />
+        <div className="flex flex-col min-w-0 min-h-0">
+          <UpdateBanner />
+          <TopBar title={t(`nav.${section}`)} />
+          <main className="flex-1 min-h-0 overflow-hidden">
+            {section === "home" && <HomeSection onNavigate={setSection} />}
+            {section === "hosts" && <HostsSection />}
+            {section === "tools" && <ToolsSection />}
+            {section === "config" && <ConfigSection />}
+            {section === "logs" && <LogsSection />}
+            {section === "settings" && <SettingsSection />}
+          </main>
+        </div>
       </div>
-    </div>
+    </PortsProvider>
   );
 }
 

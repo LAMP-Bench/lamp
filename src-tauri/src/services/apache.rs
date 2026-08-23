@@ -113,66 +113,12 @@ impl ApacheService {
             .expect("at least one PHP install configured")
     }
 
+    /// Keep every installed PHP version's `php.ini` current. Delegated to
+    /// `php::ensure_managed_ini` so this and the Versions panel can't disagree
+    /// about who owns the file — see that function for the history.
     fn ensure_all_php_inis(&self) -> Result<(), String> {
         for p in &self.php_installs {
-            let ini = p.dir.join("php.ini");
-            if ini.exists() {
-                continue;
-            }
-            let template = p.dir.join("php.ini-development");
-            if !template.exists() {
-                // PHP version is listed but the files aren't on disk yet
-                // (e.g. on-demand version that hasn't been downloaded).
-                // Skip it — failing the whole Apache start over a missing
-                // optional version is the bug that bricked the v0.1.0
-                // installer's service toggles.
-                continue;
-            }
-            let mut content = fs::read_to_string(&template)
-                .map_err(|e| format!("read {}: {e}", template.display()))?;
-            content.push_str(&format!(
-                "\n\
-                 ; --- Lamp Bench overrides ---\n\
-                 extension_dir = \"{ext}\"\n\
-                 extension=mysqli\n\
-                 extension=pdo_mysql\n\
-                 extension=curl\n\
-                 extension=mbstring\n\
-                 extension=openssl\n\
-                 extension=gd\n\
-                 extension=intl\n\
-                 extension=zip\n\
-                 extension=fileinfo\n\
-                 extension=exif\n\
-                 \n\
-                 ; OPcache (Zend extension on Windows)\n\
-                 zend_extension=opcache\n\
-                 opcache.enable=1\n\
-                 opcache.enable_cli=0\n\
-                 \n\
-                 ; Xdebug 3 — develop mode is always on (pretty errors),\n\
-                 ; debugger only attaches when the request carries an\n\
-                 ; XDEBUG_TRIGGER cookie/GET/POST. Use the IDE's \"Listen for\n\
-                 ; Xdebug\" button + a browser extension to step through code.\n\
-                 zend_extension=xdebug\n\
-                 xdebug.mode=develop,debug\n\
-                 xdebug.start_with_request=trigger\n\
-                 xdebug.client_host=127.0.0.1\n\
-                 xdebug.client_port=9003\n\
-                 xdebug.discover_client_host=0\n\
-                 \n\
-                 ; Mail capture via MailHog — listening on 127.0.0.1:1025\n\
-                 ; when the Mailhog service is running. PHP's mail() routes\n\
-                 ; here so the user can inspect emails in the MailHog web UI\n\
-                 ; at http://localhost:8025 instead of trying to deliver.\n\
-                 [mail function]\n\
-                 SMTP = 127.0.0.1\n\
-                 smtp_port = {smtp}\n\
-                 sendmail_from = noreply@localhost\n",
-                ext = posix(&p.dir.join("ext")),
-                smtp = self.mailhog_smtp_port
-            ));
-            fs::write(&ini, content).map_err(|e| format!("write {}: {e}", ini.display()))?;
+            crate::php::ensure_managed_ini(&p.dir, self.mailhog_smtp_port)?;
         }
         Ok(())
     }

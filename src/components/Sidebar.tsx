@@ -21,6 +21,7 @@ import { Toggle } from "./Toggle";
 import { useToast } from "./Toast";
 import { useService } from "../useService";
 import { serviceErrorText } from "../serviceError";
+import { usePorts } from "../PortsContext";
 import type { SectionId, ServiceName } from "../types";
 
 type NavItem = { id: SectionId; icon: ReactNode };
@@ -188,6 +189,7 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
   const { t } = useTranslation();
   const { status, busy, error, toggle } = useService(spec.name);
   const toast = useToast();
+  const { refresh: refreshPorts } = usePorts();
   const running = status?.kind === "running";
   const Icon = spec.icon;
 
@@ -263,6 +265,9 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
         port: cfg.port,
         port2: cfg.has_secondary ? cfg.port2 : 0,
       });
+      // Links all over the app are built from these, so pull the new value
+      // through instead of leaving them on the stale one until a restart.
+      await refreshPorts();
       setSavedFlash(true);
     } catch (e) {
       toast("error", String(e));

@@ -318,7 +318,7 @@ fn service_start(name: &str, state: tauri::State<AppState>) -> Result<(), String
             let mut nginx = state.nginx.lock().unwrap();
             nginx.set_php_installs(installs);
             nginx.set_hosts(hosts);
-            nginx.set_ports(nginx_p, nginx_p2);
+            nginx.set_ports(nginx_p, nginx_p2, mailhog_smtp);
             nginx.start()
         }
         "mysql" => {
@@ -598,12 +598,24 @@ fn mysql_active(state: &AppState) -> (PathBuf, u16) {
 
 /// Like `mysql_active` but also returns the active version label so snapshot
 /// capture can record which MySQL produced the dump.
+///
+/// The port is read from `service_config`, not assumed. Everything that talks
+/// to MySQL over TCP goes through here — `mysqldump` for snapshots, the
+/// `mysql` client for restores, and `CREATE DATABASE` for the CMS installers
+/// — so hardcoding 3306 meant all of them failed with "can't connect" the
+/// moment someone moved MySQL off its default port.
 fn mysql_active_full(state: &AppState) -> (PathBuf, u16, String) {
-    let mysql = state.mysql.lock().unwrap();
-    let active = mysql.active_version();
+    // Deliberately two separate scopes: never hold the service lock while
+    // taking the DB lock, so this can't invert the order `service_start`
+    // uses (DB first, then service) and deadlock.
+    let active = state.mysql.lock().unwrap().active_version();
+    let port = {
+        let conn = state.db.lock().unwrap();
+        ports_for(&conn, "mysql").0
+    };
     (
         state.resources_dir.join(format!("mysql-{active}")),
-        3306u16,
+        port,
         active,
     )
 }
@@ -858,12 +870,26 @@ fn ioncube_install(version: String, state: tauri::State<AppState>) -> Result<(),
     ioncube::install(&version, &php_dir, downloads::current_platform())
 }
 
+/// Locate a PHP install and make sure its `php.ini` is fully formed before
+/// the extensions panel reads or edits it. Opening that panel is one of two
+/// ways a `php.ini` can come into existence, and it used to produce a bare
+/// copy of the template that never received the settings block.
+fn php_dir_with_ini(version: &str, state: &AppState) -> Result<PathBuf, String> {
+    let dir = state.resources_dir.join(format!("php-{version}"));
+    let smtp = {
+        let conn = state.db.lock().unwrap();
+        ports_for(&conn, "mailhog").1
+    };
+    php::ensure_managed_ini(&dir, smtp)?;
+    Ok(dir)
+}
+
 #[tauri::command]
 fn php_extensions(
     version: String,
     state: tauri::State<AppState>,
 ) -> Result<Vec<php::PhpExtension>, String> {
-    php::list_extensions(&state.resources_dir.join(format!("php-{version}")))
+    php::list_extensions(&php_dir_with_ini(&version, &state)?)
 }
 
 #[tauri::command]
@@ -873,11 +899,7 @@ fn php_extension_toggle(
     enable: bool,
     state: tauri::State<AppState>,
 ) -> Result<(), String> {
-    php::toggle_extension(
-        &state.resources_dir.join(format!("php-{version}")),
-        &name,
-        enable,
-    )
+    php::toggle_extension(&php_dir_with_ini(&version, &state)?, &name, enable)
 }
 
 #[tauri::command]

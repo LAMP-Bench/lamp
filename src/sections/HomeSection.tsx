@@ -13,6 +13,7 @@ import {
 } from "react-icons/fi";
 import { SiApache, SiNginx, SiMysql, SiPhp } from "react-icons/si";
 import { useService } from "../useService";
+import { usePorts } from "../PortsContext";
 import { MobileQRModal } from "../components/MobileQRModal";
 import type { Host, SectionId } from "../types";
 
@@ -22,6 +23,7 @@ export function HomeSection({
   onNavigate: (id: SectionId) => void;
 }) {
   const { t } = useTranslation();
+  const { ports, siteUrl } = usePorts();
   const apache = useService("apache");
   const nginx = useService("nginx");
   const mysql = useService("mysql");
@@ -45,25 +47,25 @@ export function HomeSection({
           <div className="grid grid-cols-2 gap-3">
             <StatusBox
               label="Apache"
-              port="8080 · 8443"
+              port={`${ports.apache.port} · ${ports.apache.port2}`}
               icon={<SiApache className="text-red-500" />}
               status={apache.status}
             />
             <StatusBox
               label="MySQL"
-              port="3306"
+              port={String(ports.mysql.port)}
               icon={<SiMysql className="text-sky-500" />}
               status={mysql.status}
             />
             <StatusBox
               label="Nginx"
-              port="8081 · 8444"
+              port={`${ports.nginx.port} · ${ports.nginx.port2}`}
               icon={<SiNginx className="text-emerald-500" />}
               status={nginx.status}
             />
             <StatusBox
               label="Redis"
-              port="6379"
+              port={String(ports.redis.port)}
               icon={<span className="text-rose-500 font-bold text-lg">●</span>}
               status={redis.status}
             />
@@ -80,11 +82,11 @@ export function HomeSection({
               {htdocs || "…"}
             </code>
             <button
-              onClick={() => openUrl("http://localhost:8080/")}
+              onClick={() => openUrl(siteUrl())}
               className="px-2 py-1 rounded text-xs border border-neutral-300 hover:bg-white flex items-center gap-1.5 text-neutral-700"
             >
               <FiExternalLink />
-              localhost:8080
+              localhost:{ports.apache.port}
             </button>
           </div>
           <p className="text-xs text-neutral-500 mt-2">
@@ -114,7 +116,10 @@ export function HomeSection({
           {hosts.length === 0 ? (
             <div className="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-4 text-center text-sm text-neutral-500">
               {t("home.noHosts")}
-              <code className="ml-1 text-neutral-700">localhost:8080</code>.
+              <code className="ml-1 text-neutral-700">
+                localhost:{ports.apache.port}
+              </code>
+              .
             </div>
           ) : (
             <div className="rounded-lg border border-neutral-200 bg-white overflow-hidden">
@@ -130,7 +135,7 @@ export function HomeSection({
                     {h.php_version}
                   </span>
                   <button
-                    onClick={() => openUrl(`http://${h.name}:8080/`)}
+                    onClick={() => openUrl(siteUrl(h.name))}
                     className="text-neutral-400 hover:text-neutral-700"
                     title="Open"
                   >
@@ -178,7 +183,7 @@ export function HomeSection({
             <QuickAction
               icon={<FiExternalLink />}
               label={t("home.quickPhpMyAdmin")}
-              onClick={() => openUrl("http://localhost:8080/phpmyadmin/")}
+              onClick={() => openUrl(siteUrl("localhost", "/phpmyadmin/"))}
             />
             <QuickAction
               icon={<FiSmartphone />}

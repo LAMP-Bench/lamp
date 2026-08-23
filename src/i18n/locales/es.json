@@ -297,7 +297,7 @@
       "docroot": "Document root",
       "open": "Abrir",
       "ports": "Puertos",
-      "portsValue": "Apache :8080 (HTTP) · :8443 (HTTPS) · Nginx :8081 / :8444"
+      "portsValue": "Apache :{{apacheHttp}} (HTTP) · :{{apacheHttps}} (HTTPS) · Nginx :{{nginxHttp}} / :{{nginxHttps}}"
     },
     "extrasTab": {
       "apacheLabel": "Directivas extra de Apache (inyectadas dentro de este <VirtualHost>)",

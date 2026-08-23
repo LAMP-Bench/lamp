@@ -21,6 +21,7 @@ pub struct NginxService {
     default_php: String,
     http_port: u16,
     ssl_port: u16,
+    mailhog_smtp_port: u16,
     hosts: Vec<Host>,
     nginx_child: Option<Child>,
     php_pools: Vec<Child>,
@@ -44,6 +45,7 @@ impl NginxService {
             default_php,
             http_port: HTTP_PORT,
             ssl_port: SSL_PORT,
+            mailhog_smtp_port: crate::services::mailhog::SMTP_PORT,
             hosts: Vec::new(),
             nginx_child: None,
             php_pools: Vec::new(),
@@ -54,9 +56,13 @@ impl NginxService {
         self.hosts = hosts;
     }
 
-    pub fn set_ports(&mut self, http: u16, https: u16) {
+    /// `mailhog_smtp` is here because Nginx seeds `php.ini` too: an
+    /// Nginx-only user never starts Apache, and before this their PHP had no
+    /// `extension_dir` and no mail routing at all.
+    pub fn set_ports(&mut self, http: u16, https: u16, mailhog_smtp: u16) {
         self.http_port = http;
         self.ssl_port = https;
+        self.mailhog_smtp_port = mailhog_smtp;
     }
 
     pub fn set_php_installs(&mut self, installs: Vec<PhpInstall>) {
@@ -130,6 +136,10 @@ impl NginxService {
 
     fn spawn_php_pools(&mut self) -> Result<(), String> {
         for (i, p) in self.php_installs.iter().enumerate() {
+            // Same single seeder Apache uses. Without this an Nginx-only
+            // install runs PHP with no extension_dir, so mysqli and friends
+            // never load.
+            crate::php::ensure_managed_ini(&p.dir, self.mailhog_smtp_port)?;
             let port = PHP_BASE_PORT + (i as u16);
             let php_cgi = p.dir.join("php-cgi.exe");
             if !php_cgi.exists() {

@@ -7,6 +7,38 @@ exact build number while in alpha.
 
 ## Unreleased (alpha)
 
+### Configurable ports, actually wired
+- Moving a service off its default port now works everywhere. MySQL's port
+  was read from config in exactly one place and hardcoded as 3306 in
+  another, so `mysqldump`, snapshot restore and the CMS installers' `CREATE
+  DATABASE` all failed with "can't connect" against a server that was
+  running fine.
+- The nineteen `:8080`/`:3306`/`:8025` literals scattered through the UI are
+  gone. WebStart, the phpMyAdmin and MailHog shortcuts, the per-host
+  HTTP/HTTPS buttons, the CMS "open your new site" link and the phone QR
+  code all read the live configuration, and editing a port in the sidebar
+  updates them immediately instead of at next launch.
+
+### php.ini has one owner again
+- The settings Lamp Bench manages live in a delimited block that is
+  rewritten on every service start. Previously it was written once at file
+  creation and never revisited: changing MailHog's SMTP port left `php.ini`
+  pointing at the old one, and no existing install could ever receive a new
+  default.
+- Fixed a race with lasting consequences: opening Versions → extensions
+  before a service had started created a bare `php.ini`, after which the
+  block was never added at all — that PHP version permanently lost
+  `extension_dir`, mysqli and Xdebug. Both paths now go through the same
+  seeder.
+- Default extensions are enabled by uncommenting the template's own lines
+  instead of appending duplicates, so the Versions panel shows one entry per
+  extension and toggling one keeps working. User toggles live outside the
+  managed block and survive its rewrites. Upgrading installs have the old
+  block removed rather than stacked on top of, which would have loaded
+  Xdebug and OPcache twice.
+- Nginx seeds `php.ini` too. An Nginx-only user never starts Apache, and
+  until now their PHP ran with no `extension_dir` at all.
+
 ### Packaging & release
 - The code editor is bundled instead of fetched. `@monaco-editor/react`
   was loading Monaco from `cdn.jsdelivr.net` at runtime, so the editor

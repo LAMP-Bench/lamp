@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { IconType } from "react-icons";
 import { FiExternalLink, FiPackage, FiX, FiMail, FiImage, FiUploadCloud } from "react-icons/fi";
+import { usePorts } from "../PortsContext";
 import {
   SiPhpmyadmin,
   SiLaravel,
@@ -105,6 +106,7 @@ function Section({
 
 function PhpMyAdminCard() {
   const { t } = useTranslation();
+  const { siteUrl } = usePorts();
   return (
     <ToolCard
       icon={SiPhpmyadmin}
@@ -113,7 +115,7 @@ function PhpMyAdminCard() {
       subtitle={t("tools.pma.subtitle")}
       action={
         <button
-          onClick={() => openUrl("http://localhost:8080/phpmyadmin/")}
+          onClick={() => openUrl(siteUrl("localhost", "/phpmyadmin/"))}
           className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5"
         >
           <FiExternalLink />
@@ -126,6 +128,7 @@ function PhpMyAdminCard() {
 
 function MailHogCard() {
   const { t } = useTranslation();
+  const { mailhogUrl } = usePorts();
   return (
     <ToolCard
       icon={FiMail}
@@ -134,7 +137,7 @@ function MailHogCard() {
       subtitle={t("tools.mailhog.subtitle")}
       action={
         <button
-          onClick={() => openUrl("http://localhost:8025/")}
+          onClick={() => openUrl(mailhogUrl())}
           className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 text-sm flex items-center gap-1.5"
         >
           <FiExternalLink />
@@ -272,6 +275,7 @@ function CmsInstallDialog({
   );
   const [error, setError] = useState<string | null>(null);
   const [createdUrl, setCreatedUrl] = useState<string | null>(null);
+  const { ports, siteUrl } = usePorts();
 
   useEffect(() => {
     invoke<string[]>("php_versions").then((v) => {
@@ -318,8 +322,8 @@ function CmsInstallDialog({
       });
       const url =
         addHost && hostname.trim()
-          ? `http://${hostname.trim()}:8080/`
-          : `http://localhost:8080/${siteName.trim()}/`;
+          ? siteUrl(hostname.trim())
+          : siteUrl("localhost", `/${siteName.trim()}/`);
       setCreatedUrl(url);
     } catch (e) {
       setError(String(e));
@@ -423,7 +427,7 @@ function CmsInstallDialog({
                     Custom hostname like{" "}
                     <code>my-site.local</code> — triggers a UAC prompt to
                     update the hosts file. Skip to access it as a path under
-                    <code> localhost:8080</code>.
+                    <code> localhost:{ports.apache.port}</code>.
                   </span>
                 </span>
               </label>

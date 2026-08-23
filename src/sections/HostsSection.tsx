@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useConfirm, useToast } from "../components/Toast";
+import { usePorts } from "../PortsContext";
 import {
   FiPlus,
   FiMinus,
@@ -362,6 +363,7 @@ function GeneralTab({
   catalog: PhpCatalogEntry[];
 }) {
   const { t } = useTranslation();
+  const { ports, siteUrl, secureSiteUrl } = usePorts();
   return (
     <div className="max-w-2xl space-y-4 text-sm">
       <Field label={t("hosts.general.hostName")}>
@@ -371,7 +373,7 @@ function GeneralTab({
           className="w-72 px-3 py-1.5 rounded border border-neutral-300 font-mono focus:outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
         />
         <button
-          onClick={() => openUrl(`http://${draft.name}:8080/`)}
+          onClick={() => openUrl(siteUrl(draft.name))}
           disabled={!draft.name}
           className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 flex items-center gap-1.5 text-xs disabled:opacity-50"
         >
@@ -379,7 +381,7 @@ function GeneralTab({
           HTTP
         </button>
         <button
-          onClick={() => openUrl(`https://${draft.name}:8443/`)}
+          onClick={() => openUrl(secureSiteUrl(draft.name))}
           disabled={!draft.name}
           className="px-3 py-1.5 rounded border border-neutral-300 text-neutral-700 hover:bg-neutral-50 flex items-center gap-1.5 text-xs disabled:opacity-50"
         >
@@ -424,7 +426,12 @@ function GeneralTab({
 
       <Field label={t("hosts.general.ports")}>
         <span className="text-neutral-600 font-mono text-xs">
-          {t("hosts.general.portsValue")}
+          {t("hosts.general.portsValue", {
+            apacheHttp: ports.apache.port,
+            apacheHttps: ports.apache.port2,
+            nginxHttp: ports.nginx.port,
+            nginxHttps: ports.nginx.port2,
+          })}
         </span>
       </Field>
     </div>
@@ -462,6 +469,7 @@ function ExtrasTab({
 
 function SslTab({ host }: { host: Host }) {
   const { t } = useTranslation();
+  const { ports, secureSiteUrl } = usePorts();
   return (
     <div className="max-w-2xl space-y-3 text-sm">
       <p className="text-neutral-600">{t("hosts.ssl.intro")}</p>
@@ -480,11 +488,11 @@ function SslTab({ host }: { host: Host }) {
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            openUrl(`https://${host.name}:8443/`);
+            openUrl(secureSiteUrl(host.name));
           }}
           className="text-sky-600 hover:underline font-mono text-xs"
         >
-          https://{host.name}:8443/
+          https://{host.name}:{ports.apache.port2}/
         </a>
       </Field>
       <div className="rounded border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import QRCode from "qrcode";
+import { usePorts } from "../PortsContext";
 import { FiX, FiSmartphone, FiCopy, FiCheck } from "react-icons/fi";
 
 /// Shows a QR code for opening the local site on a phone over Wi-Fi. The QR
-/// encodes `http://<LAN-IP>:8080/` so a phone on the same network can scan
+/// encodes `http://<LAN-IP>:<apache port>/` so a phone on the same network can scan
 /// and reach Apache without having to type the IP. Hostnames like
 /// `myhost.local` are skipped on purpose — phones don't resolve them, so
 /// the URL targets the dev machine's IP directly.
@@ -20,13 +21,14 @@ export function MobileQRModal({
   const [ip, setIp] = useState<string | null>(null);
   const [qrSvg, setQrSvg] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const { siteUrl } = usePorts();
 
   useEffect(() => {
     if (!open) return;
     invoke<string | null>("lan_ip").then(setIp).catch(() => setIp(null));
   }, [open]);
 
-  const url = ip ? `http://${ip}:8080${pathSuffix}` : null;
+  const url = ip ? siteUrl(ip, pathSuffix) : null;
 
   useEffect(() => {
     if (!url) {
