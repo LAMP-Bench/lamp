@@ -9,16 +9,19 @@ export function ConfigSection() {
   const { t } = useTranslation();
   const toast = useToast();
   const [versions, setVersions] = useState<string[]>([]);
-  const [htdocs, setHtdocs] = useState<string>("");
+  // Both come from Rust. Deriving them from htdocs_path() by string surgery
+  // looked right in dev and pointed at C:/LAMP and C:/resources in a real
+  // install, so every Edit button opened a file that didn't exist.
+  const [runtime, setRuntime] = useState<string>("");
+  const [resources, setResources] = useState<string>("");
+  const [mysqlVersion, setMysqlVersion] = useState<string>("8.0");
 
   useEffect(() => {
     invoke<string[]>("php_versions").then(setVersions).catch(() => {});
-    invoke<string>("htdocs_path").then(setHtdocs).catch(() => {});
+    invoke<string>("runtime_path").then(setRuntime).catch(() => {});
+    invoke<string>("resources_path").then(setResources).catch(() => {});
+    invoke<string>("mysql_active_version").then(setMysqlVersion).catch(() => {});
   }, []);
-
-  // htdocs gives us the runtime path one level up; resources is sibling.
-  const runtime = htdocs.replace(/\/htdocs\/?$/, "");
-  const resources = runtime.replace(/\/[^/]+$/, "") + "/resources";
 
   async function open(path: string) {
     try {
@@ -28,7 +31,7 @@ export function ConfigSection() {
     }
   }
 
-  if (!htdocs) {
+  if (!runtime || !resources) {
     return (
       <div className="p-6 text-sm text-neutral-500">{t("config.loading")}</div>
     );
@@ -76,14 +79,11 @@ export function ConfigSection() {
             <ConfigRow
               icon={<SiMysql className="text-sky-500" />}
               title={t("config.mysqlCnf")}
-              subtitle={`${runtime}/mysql-<version>/my.cnf`}
+              // Each MySQL version keeps its own data dir and my.cnf, so the
+              // one worth editing is whichever version is currently active.
+              subtitle={`${runtime}/mysql-${mysqlVersion}/my.cnf`}
               hint={t("config.mysqlHint")}
-              onEdit={() => {
-                // Best effort — try 8.0, fall back to 5.7.
-                open(`${runtime}/mysql-8.0/my.cnf`).catch(() =>
-                  open(`${runtime}/mysql-5.7/my.cnf`)
-                );
-              }}
+              onEdit={() => open(`${runtime}/mysql-${mysqlVersion}/my.cnf`)}
             />
           </div>
         </section>

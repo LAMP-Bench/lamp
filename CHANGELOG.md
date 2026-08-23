@@ -7,6 +7,34 @@ exact build number while in alpha.
 
 ## Unreleased (alpha)
 
+### Packaging & release
+- The code editor is bundled instead of fetched. `@monaco-editor/react`
+  was loading Monaco from `cdn.jsdelivr.net` at runtime, so the editor
+  never opened without an internet connection. It now ships with the app
+  and loads lazily, which also keeps ~4 MB out of the main window's
+  startup path.
+- Windows builds an `.exe` only. The `C:\LAMP` default and the
+  post-install permission grant both live in the NSIS installer, and WiX
+  got neither — the `.msi` we were publishing installed somewhere it
+  couldn't write and failed on first launch.
+- Config section paths are supplied by the backend (`runtime_path`,
+  `resources_path`) instead of derived from `htdocs_path` by string
+  surgery. The derivation was right in a dev checkout and wrong in every
+  real install, so every "Edit" button opened a file that didn't exist.
+  The `my.cnf` row now follows the active MySQL version.
+- Releases are staged before they go live. The workflow used to delete
+  the published release as its first step, leaving the updater with
+  nothing for the whole build — permanently, if any platform failed.
+  Builds now upload to a private staging tag and only the last few
+  seconds of a fully green run touch the public release.
+- Dropped the ~350 MB binary fetch from the build. The installer has
+  been slim since the first-launch wizard landed; nothing was bundling
+  those files.
+- New weekly job probes every URL in `binaries.json` and opens an issue
+  when one goes dark, so a purged upstream is caught before a user
+  clicks Install. Also runnable locally with
+  `pnpm scripts:check-binaries`.
+
 ### Reliability
 - Quitting no longer orphans the services. Apache, MySQL, Nginx, the
   php-cgi pools, Redis and MailHog are now stopped on the way out, so the

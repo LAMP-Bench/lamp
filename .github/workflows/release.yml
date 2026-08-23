@@ -1,52 +1,59 @@
 name: alpha-testing build
 
-# Builds Lamp Bench on Windows, macOS (Apple Silicon) and Ubuntu, signs the
-# updater artifacts, and uploads everything to a DRAFT release tagged
-# `alpha-testing`. If every platform finishes cleanly the `publish` job
-# flips that draft to a public prerelease. If any platform fails the draft
-# stays hidden — so the in-app updater never sees a half-broken `latest.json`
-# and existing installs don't auto-update onto a partial build.
+# Builds Lamp Bench on Windows, macOS (universal) and Ubuntu, signs the
+# updater artifacts, and uploads everything to a DRAFT release on a private
+# STAGING tag. Only once every platform finishes cleanly does `publish`
+# promote that draft onto the public `alpha-testing` tag.
+#
+# The staging indirection matters. This workflow used to delete the live
+# `alpha-testing` release as its very first step: for the ~30 minutes of the
+# build there was no release at all (the in-app updater 404'd for every
+# install, and the download page was empty), and a failing lint or a single
+# red matrix job left users with nothing — the old release was already gone
+# and no new one arrived. Now the live release is only touched in the last
+# few seconds of a fully successful run.
 
 on:
   workflow_dispatch:
+
+# The tag the build uploads to. Never public, never referenced by the
+# updater — safe to wipe and recreate on every run.
+env:
+  STAGING_TAG: alpha-staging
+  CHANNEL_TAG: alpha-testing
 
 permissions:
   contents: write
 
 jobs:
   prepare:
-    # Wipe any existing `alpha-testing` release before the matrix runs so
-    # tauri-action's "find by tag" doesn't latch onto a stale public
-    # release (which would defeat the draft-only semantics below).
+    # Clear the staging slot so tauri-action's "find by tag" starts from a
+    # clean draft instead of appending to last run's leftovers. Destructive
+    # only towards a tag nothing points at.
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
-      - name: Delete any existing alpha-testing release + tag
+      - name: Clear the staging release + tag
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { owner, repo } = context.repo;
+            const tag = process.env.STAGING_TAG;
             const releases = await github.paginate(
               github.rest.repos.listReleases,
               { owner, repo, per_page: 100 }
             );
-            for (const r of releases.filter((r) => r.tag_name === 'alpha-testing')) {
-              await github.rest.repos.deleteRelease({
-                owner, repo, release_id: r.id,
-              });
-              core.notice(
-                `Deleted release ${r.id} (draft=${r.draft}, prerelease=${r.prerelease}).`
-              );
+            for (const r of releases.filter((r) => r.tag_name === tag)) {
+              await github.rest.repos.deleteRelease({ owner, repo, release_id: r.id });
+              core.notice(`Deleted stale staging release ${r.id}.`);
             }
             try {
-              await github.rest.git.deleteRef({
-                owner, repo, ref: 'tags/alpha-testing',
-              });
-              core.notice('Deleted tag alpha-testing.');
-            } catch (e) {
-              core.notice('Tag alpha-testing did not exist or could not be deleted.');
+              await github.rest.git.deleteRef({ owner, repo, ref: `tags/${tag}` });
+              core.notice(`Deleted stale tag ${tag}.`);
+            } catch {
+              core.notice(`No ${tag} tag to delete.`);
             }
 
   lint:
@@ -171,20 +178,11 @@ jobs:
       - name: Install JS dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Cache bundled service binaries
-        uses: actions/cache@v4
-        with:
-          path: resources/.cache
-          key: ${{ runner.os }}-resources-${{ hashFiles('scripts/binaries.json') }}
-
-      # `--bundled-only` pulls just the essentials marked `bundled: true`
-      # in scripts/binaries.json. Currently only Windows has binaries
-      # pinned — the script no-ops on macOS/Linux and the platform-specific
-      # tauri.windows.conf.json only adds the resources mapping on Win,
-      # so the macOS/Linux installers ship as a shell without bundled
-      # services until those binaries are added to the manifest.
-      - name: Fetch bundled service binaries
-        run: pnpm scripts:fetch-binaries -- --bundled-only
+      # NOTE: no `fetch-binaries` step. The installer has been slim since
+      # 36593bf — `tauri.conf.json` maps no `resources/` into the bundle, and
+      # the first-launch wizard downloads Apache/MySQL/PHP into the install
+      # dir instead. Pulling ~350 MB here just to throw it away cost several
+      # minutes of every Windows build.
 
       # Derive a strictly-increasing version from the run number so the
       # in-app updater actually fires. Installed builds sit at some
@@ -202,7 +200,7 @@ jobs:
           node -e "const f='src-tauri/tauri.conf.json',j=require('./'+f);j.version='$VER';require('fs').writeFileSync(f,JSON.stringify(j,null,2)+'\n')"
           node -e "const fs=require('fs');const f='src-tauri/Cargo.toml';let s=fs.readFileSync(f,'utf8');s=s.replace(/^version = \".*\"/m,'version = \"$VER\"');fs.writeFileSync(f,s)"
 
-      - name: Build Tauri app + upload to alpha-testing draft
+      - name: Build Tauri app + upload to the staging draft
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -214,69 +212,87 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          # Single rolling channel tag — every run replaces the artifacts on
-          # this one release. The version stamped above (0.1.<run_number>) is
-          # what makes the updater fire; we intentionally do NOT create a tag
-          # per build (that would pile up build-N tags forever).
-          tagName: alpha-testing
+          # Uploads land on the staging tag. `publish` moves the finished
+          # draft onto the public channel tag; the version stamped above
+          # (0.1.<run_number>) is what actually makes the updater fire, so we
+          # deliberately do NOT create a tag per build.
+          tagName: ${{ env.STAGING_TAG }}
           releaseName: 'Lamp Bench — alpha testing'
-          # IMPORTANT: this body is set ONLY on the first build of each
-          # alpha-testing release (the prepare job wipes the old release +
-          # tag, then the first build matrix entry creates the draft with
-          # this body). Subsequent matrix entries reuse the same draft and
-          # tauri-action skips the body update if a release already exists.
-          # That means anything we type in here is the canonical body for
-          # the whole release; manual edits on GitHub stick until the next
-          # workflow run.
+          # This body is written by whichever matrix entry creates the draft;
+          # the others reuse it. Since `prepare` clears staging on every run,
+          # it is rewritten from here each time.
           releaseBody: |
             **Rolling alpha build** for Lamp Bench.
 
             Pick the installer that matches your machine:
-            - **Windows x64** — `.exe` (NSIS) or `.msi`
+            - **Windows x64** — `.exe` (NSIS)
             - **macOS (Intel + Apple Silicon)** — `.dmg` or `.app.tar.gz` (universal)
             - **Linux Debian/Ubuntu/Mint** — `.deb`
             - **Linux Fedora/RHEL/openSUSE** — `.rpm`
             - **Any other Linux (Arch, etc.)** — `.AppImage`
 
             Built from commit `${{ github.sha }}`.
-          # Drafts let all platforms upload without the release going
-          # public; the `publish` job below flips this to a published
-          # prerelease only when every platform succeeded.
+          # Drafts are invisible to humans and to the in-app updater, so a
+          # partial upload can never be seen.
           releaseDraft: true
           prerelease: true
           args: ${{ matrix.args }}
 
   publish:
     needs: build
-    # success() is true only when EVERY matrix job in `needs` succeeded.
-    # If any platform failed the draft stays hidden until a human looks.
+    # success() is true only when EVERY matrix job in `needs` succeeded, so a
+    # single red platform leaves the live release untouched and the staging
+    # draft sitting there for a human to inspect.
     if: success()
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
-      - name: Publish the draft release
+      - name: Promote the staging draft onto the channel tag
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { owner, repo } = context.repo;
+            const staging = process.env.STAGING_TAG;
+            const channel = process.env.CHANNEL_TAG;
+
             const releases = await github.paginate(
               github.rest.repos.listReleases,
               { owner, repo, per_page: 100 }
             );
             const draft = releases.find(
-              (r) => r.tag_name === 'alpha-testing' && r.draft === true
+              (r) => r.tag_name === staging && r.draft === true
             );
             if (!draft) {
-              core.setFailed("no alpha-testing draft release to publish");
+              core.setFailed(`no ${staging} draft release to promote`);
               return;
             }
-            await github.rest.repos.updateRelease({
+
+            // Only now — with every artifact uploaded and verified — do we
+            // touch the live release. The gap where users have no download
+            // is the couple of seconds between these two calls.
+            for (const r of releases.filter((r) => r.tag_name === channel)) {
+              await github.rest.repos.deleteRelease({ owner, repo, release_id: r.id });
+              core.notice(`Removed previous ${channel} release ${r.id}.`);
+            }
+            try {
+              await github.rest.git.deleteRef({ owner, repo, ref: `tags/${channel}` });
+            } catch {
+              core.notice(`No ${channel} tag to delete.`);
+            }
+
+            // Retagging a *draft* is allowed (its tag doesn't exist yet), and
+            // publishing creates the tag at target_commitish. Asset URLs
+            // follow the release, so
+            // /releases/download/alpha-testing/latest.json keeps resolving.
+            const { data: published } = await github.rest.repos.updateRelease({
               owner,
               repo,
               release_id: draft.id,
+              tag_name: channel,
+              target_commitish: context.sha,
               draft: false,
               prerelease: true,
             });
-            core.notice(`Published release ${draft.id} (${draft.html_url}).`);
+            core.notice(`Published ${channel} (${published.html_url}).`);

@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import Editor, { OnMount } from "@monaco-editor/react";
+// Side-effect import: binds @monaco-editor/react to the bundled Monaco
+// instead of letting it reach for a CDN. Lives here rather than in main.tsx
+// so the ~5 MB of editor only enters the bundle chunk that actually needs it.
+import "../monacoSetup";
 import { FiFolder, FiSave, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 
 type LintResult = {

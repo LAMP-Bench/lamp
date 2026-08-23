@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { Sidebar } from "./components/Sidebar";
@@ -8,11 +8,17 @@ import { HomeSection } from "./sections/HomeSection";
 import { HostsSection } from "./sections/HostsSection";
 import { ToolsSection } from "./sections/ToolsSection";
 import { ConfigSection } from "./sections/ConfigSection";
-import { EditorSection } from "./sections/EditorSection";
 import { LogsSection } from "./sections/LogsSection";
 import { SettingsSection } from "./sections/SettingsSection";
 import { SetupWizard, setupNeeded } from "./components/SetupWizard";
 import type { SectionId } from "./types";
+
+/// Monaco is only ever mounted in a standalone editor window, and it drags
+/// several megabytes of language services in with it. Loading it lazily keeps
+/// the main window's startup free of that cost entirely.
+const EditorSection = lazy(() =>
+  import("./sections/EditorSection").then((m) => ({ default: m.EditorSection })),
+);
 
 /// Detect editor-window mode from the URL hash. New editor windows are
 /// spawned by the Rust `editor_open` command with `#editor=<path>`.
@@ -34,7 +40,9 @@ function App() {
   if (editorPath !== null) {
     return (
       <div className="h-screen bg-white text-neutral-900 flex flex-col">
-        <EditorSection initialPath={editorPath} fullscreen />
+        <Suspense fallback={<div className="flex-1 bg-white" />}>
+          <EditorSection initialPath={editorPath} fullscreen />
+        </Suspense>
       </div>
     );
   }

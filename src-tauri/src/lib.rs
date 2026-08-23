@@ -797,6 +797,23 @@ fn htdocs_path(state: tauri::State<AppState>) -> String {
     state.htdocs_dir.to_string_lossy().replace('\\', "/")
 }
 
+/// Writable state root: generated configs, MySQL data dirs, certs, logs.
+///
+/// The UI used to reconstruct this by string-surgery on `htdocs_path()`,
+/// which happened to work in dev (`<repo>/.lamp-bench/htdocs` → strip
+/// `/htdocs`) and was wrong in every real install, where htdocs and runtime
+/// are siblings rather than nested (`C:/LAMP/htdocs` vs `C:/LAMP/runtime`).
+#[tauri::command]
+fn runtime_path(state: tauri::State<AppState>) -> String {
+    state.runtime_dir.to_string_lossy().replace('\\', "/")
+}
+
+/// Where the downloaded service binaries live (`php-8.4/`, `apache/`, …).
+#[tauri::command]
+fn resources_path(state: tauri::State<AppState>) -> String {
+    state.resources_dir.to_string_lossy().replace('\\', "/")
+}
+
 /// LAN-routable IPv4 of this machine, for the "open on my phone" QR code.
 /// Uses the classic UDP-connect trick: bind ephemeral, connect to a public
 /// address (no packet actually sent), read the OS-selected local IP. That
@@ -1237,6 +1254,8 @@ pub fn run() {
             snapshot_delete,
             read_log,
             htdocs_path,
+            runtime_path,
+            resources_path,
             lan_ip,
             compress_images,
             current_platform,

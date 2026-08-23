@@ -21,9 +21,8 @@ Grab the installer for your machine from the rolling
 
 | Platform | File |
 |---|---|
-| Windows x64 | `.exe` (NSIS) or `.msi` |
-| macOS Apple Silicon | `.dmg` or `.app.tar.gz` (aarch64) |
-| macOS Intel | `.dmg` or `.app.tar.gz` (x86_64) |
+| Windows x64 | `.exe` (NSIS) |
+| macOS (Intel + Apple Silicon) | `.dmg` or `.app.tar.gz` (universal) |
 | Linux Debian/Ubuntu/Mint | `.deb` |
 | Linux Fedora/RHEL/openSUSE | `.rpm` |
 | Any other Linux (Arch, …) | `.AppImage` |
@@ -32,6 +31,14 @@ On Windows the installer defaults to `C:\LAMP\`. First launch runs a
 short setup wizard that downloads the bundled services into
 `<install>/resources/`. The in-app updater offers new alpha builds on
 each launch.
+
+> **Why no `.msi`?** Lamp Bench keeps its runtime state, downloaded
+> binaries and `htdocs/` next to the executable, so the install directory
+> has to be user-writable. Both of the things that make that work — the
+> `C:\LAMP` default and the post-install ACL grant — live in the NSIS
+> installer. WiX gets neither, so an `.msi` would land in
+> `C:\Program Files` and fail on first launch. Shipping one would just be
+> a broken download, so the Windows bundle is NSIS-only.
 
 > ⚠ **Alpha software.** Things change shape between builds; expect rough
 > edges. Don't point it at data you can't afford to lose.
@@ -104,12 +111,15 @@ Produces an installer for the current OS in
 ## Quality gates
 
 ```sh
-./node_modules/.bin/tsc --noEmit                     # TypeScript
+pnpm exec tsc --noEmit                               # TypeScript
 cargo clippy --manifest-path src-tauri/Cargo.toml --no-deps -- -D warnings
 cargo test --manifest-path src-tauri/Cargo.toml --lib
+pnpm scripts:check-binaries                          # pinned URLs still live
 ```
 
-CI runs all three before the build matrix.
+CI runs the first three before the build matrix. The URL probe runs on
+its own weekly schedule and opens an issue when an upstream purges a
+file we pin.
 
 ## Repository layout
 
