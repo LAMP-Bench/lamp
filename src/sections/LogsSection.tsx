@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
-import { FiPause, FiPlay, FiMail } from "react-icons/fi";
+import { FiPause, FiPlay, FiMail, FiCopy, FiCheck } from "react-icons/fi";
 import { SiApache, SiNginx, SiMysql, SiRedis } from "react-icons/si";
 import type { IconType } from "react-icons";
 import type { LogName } from "../types";
@@ -24,7 +24,20 @@ export function LogsSection() {
   const [service, setService] = useState<LogName>("apache");
   const [log, setLog] = useState("");
   const [paused, setPaused] = useState(false);
+  const [copied, setCopied] = useState(false);
   const preRef = useRef<HTMLPreElement>(null);
+
+  /// Copying the tail is the first thing anyone does with a log they're
+  /// about to ask for help with.
+  async function copyLog() {
+    try {
+      await navigator.clipboard.writeText(log);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard unavailable — nothing useful to say about it */
+    }
+  }
 
   useEffect(() => {
     if (paused) return;
@@ -74,14 +87,25 @@ export function LogsSection() {
             );
           })}
         </div>
-        <button
-          onClick={() => setPaused((p) => !p)}
-          className="px-3 py-1 rounded text-sm flex items-center gap-1.5 border border-neutral-300 hover:bg-neutral-50 text-neutral-700"
-          title={paused ? t("logs.resumeTitle") : t("logs.pauseTitle")}
-        >
-          {paused ? <FiPlay /> : <FiPause />}
-          {paused ? t("logs.resume") : t("logs.pause")}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={copyLog}
+            disabled={!log}
+            className="px-3 py-1 rounded text-sm flex items-center gap-1.5 border border-neutral-300 hover:bg-neutral-50 text-neutral-700 disabled:opacity-40"
+            title={t("logs.copyTitle")}
+          >
+            {copied ? <FiCheck className="text-emerald-600" /> : <FiCopy />}
+            {copied ? t("logs.copied") : t("logs.copy")}
+          </button>
+          <button
+            onClick={() => setPaused((p) => !p)}
+            className="px-3 py-1 rounded text-sm flex items-center gap-1.5 border border-neutral-300 hover:bg-neutral-50 text-neutral-700"
+            title={paused ? t("logs.resumeTitle") : t("logs.pauseTitle")}
+          >
+            {paused ? <FiPlay /> : <FiPause />}
+            {paused ? t("logs.resume") : t("logs.pause")}
+          </button>
+        </div>
       </div>
 
       <pre

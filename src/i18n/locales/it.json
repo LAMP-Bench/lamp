@@ -311,7 +311,10 @@
     "pause": "Pausa",
     "resume": "Riprendi",
     "pauseTitle": "Sospendi l'aggiornamento",
-    "resumeTitle": "Riprendi l'aggiornamento"
+    "resumeTitle": "Riprendi l'aggiornamento",
+    "copy": "Copia",
+    "copied": "Copiato",
+    "copyTitle": "Copia il log visibile negli appunti"
   },
   "editor": {
     "open": "Apri",

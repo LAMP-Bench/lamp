@@ -47,7 +47,12 @@ pub fn update(
         return Err("username is required".into());
     }
     let host = update_host(provider)?;
-    let url = format!("https://{host}/nic/update?hostname={hostname}");
+    // Percent-encode: an unencoded `&` in the hostname would let a typo
+    // append query parameters of its own to the update request.
+    let url = format!(
+        "https://{host}/nic/update?hostname={}",
+        percent_encode(hostname)
+    );
 
     // dyndns2 mandates a descriptive User-Agent; providers reject the default
     // ureq one. Basic auth carries the credentials.
@@ -64,6 +69,23 @@ pub fn update(
     let status = body.trim().to_string();
     let ok = status.starts_with("good") || status.starts_with("nochg");
     Ok(DynDnsResult { status, ok })
+}
+
+/// Percent-encode everything outside the unreserved set from RFC 3986. A
+/// hostname should only ever contain those anyway; this is here so that a
+/// mistyped one fails as a bad request instead of quietly meaning something
+/// else.
+fn percent_encode(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    for b in s.bytes() {
+        match b {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'.' | b'_' | b'~' => {
+                out.push(b as char)
+            }
+            _ => out.push_str(&format!("%{b:02X}")),
+        }
+    }
+    out
 }
 
 /// Minimal base64 for the Basic auth header. Avoids pulling a base64 crate
@@ -105,6 +127,15 @@ mod tests {
         assert_eq!(base64_basic("user", "pass"), "dXNlcjpwYXNz");
         // "a:b" -> YTpi
         assert_eq!(base64_basic("a", "b"), "YTpi");
+    }
+
+    #[test]
+    fn hostname_is_percent_encoded() {
+        assert_eq!(percent_encode("myhost.ddns.net"), "myhost.ddns.net");
+        assert_eq!(percent_encode("a-b_c~d"), "a-b_c~d");
+        // The case that matters: extra query parameters can't be smuggled in.
+        assert_eq!(percent_encode("x&myip=1.2.3.4"), "x%26myip%3D1.2.3.4");
+        assert_eq!(percent_encode("a b"), "a%20b");
     }
 
     #[test]

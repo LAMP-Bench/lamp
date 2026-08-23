@@ -311,7 +311,10 @@
     "pause": "일시정지",
     "resume": "재개",
     "pauseTitle": "새로고침 일시중지",
-    "resumeTitle": "새로고침 재개"
+    "resumeTitle": "새로고침 재개",
+    "copy": "복사",
+    "copied": "복사됨",
+    "copyTitle": "보이는 로그를 클립보드에 복사"
   },
   "editor": {
     "open": "열기",

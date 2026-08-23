@@ -84,7 +84,8 @@ pub fn install_files_and_db(
     }
     if !source_dir.exists() {
         return Err(format!(
-            "CMS source not found at {}. Run `pnpm scripts:fetch-binaries`.",
+            "CMS files aren't downloaded yet ({} is missing). \
+             Install them from Settings → Components.",
             source_dir.display()
         ));
     }

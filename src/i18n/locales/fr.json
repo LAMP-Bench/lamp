@@ -225,7 +225,10 @@
     "pause": "Pause",
     "resume": "Reprendre",
     "pauseTitle": "Mettre en pause le polling",
-    "resumeTitle": "Reprendre le polling"
+    "resumeTitle": "Reprendre le polling",
+    "copy": "Copier",
+    "copied": "Copié",
+    "copyTitle": "Copier le journal affiché dans le presse-papiers"
   },
   "editor": {
     "open": "Ouvrir",

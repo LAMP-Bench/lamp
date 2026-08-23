@@ -7,6 +7,37 @@ exact build number while in alpha.
 
 ## Unreleased (alpha)
 
+### Sweeping up
+- Apache loads the modules a stock `.htaccess` expects — headers, expires,
+  deflate, env, setenvif, autoindex, auth_basic. An unguarded `Header set`
+  used to be a hard 500, and `Options Indexes` did nothing at all without
+  autoindex, so a directory with no index gave 403 instead of a listing.
+  Each is wrapped in `<IfFile>` so a build that lacks one still starts.
+- Nginx's default site serves `htdocs`, the same as Apache's. It served
+  nginx's own welcome page before, which meant a project dropped into
+  `htdocs` was reachable on one port and not the other. Its access log
+  goes to the runtime directory instead of into `resources/`.
+- A failed certificate issuance is now an error rather than something
+  swallowed. The generated config references those files by path, so the
+  service failed to start anyway — just with the reason buried in
+  `error.log`.
+- Declining the elevation prompt when adding a host no longer leaves the
+  host behind. The row was already committed by then, so the UI listed a
+  host that resolved nowhere.
+- `mysqldump` runs with `--single-transaction` and `--default-character-set=utf8mb4`:
+  snapshots of a site in use are consistent, and 4-byte characters survive.
+- phpMyAdmin's cookie secret is generated per install instead of being a
+  constant compiled into every copy.
+- The dynamic-DNS hostname is percent-encoded, so a stray `&` can't append
+  query parameters to the update request.
+- The toolbar's Editor button works — it had been disabled since the
+  standalone editor window landed. Logs gained a copy button.
+- Editor windows are numbered rather than named after the millisecond they
+  opened in, which collided when two opened in the same tick.
+- New tests assert the generated Apache config is well-formed — balanced
+  blocks, no unsubstituted placeholders, no escape sequences leaking
+  through as literal text.
+
 ### Downloads can be stopped
 - Every download is cancellable — from the first-launch wizard, the
   sidebar and the Versions panel. The read timeout added earlier only

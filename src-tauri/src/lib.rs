@@ -497,7 +497,14 @@ fn host_create(
         let conn = state.db.lock().unwrap();
         hosts::create(&conn, &name, &docroot, &php_version)?
     };
-    apply_host_changes(&state)?;
+    // Applying needs an elevation prompt to edit the system hosts file. If
+    // the user declines it, the row is already committed — leaving a host
+    // listed in the UI that resolves nowhere. Undo it.
+    if let Err(e) = apply_host_changes(&state) {
+        let conn = state.db.lock().unwrap();
+        let _ = hosts::delete(&conn, host.id, &state.runtime_dir);
+        return Err(e);
+    }
     Ok(host)
 }
 
@@ -1148,12 +1155,12 @@ fn lan_ip() -> Option<String> {
 #[tauri::command]
 fn editor_open(path: String, app: tauri::AppHandle) -> Result<(), String> {
     use tauri::{WebviewUrl, WebviewWindowBuilder};
+    // A millisecond timestamp alone collides when two windows open in the
+    // same tick, and `WebviewWindowBuilder::build` fails on a duplicate label.
+    static NEXT_EDITOR_ID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
     let label = format!(
         "editor-{}",
-        std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| d.as_millis())
-            .unwrap_or(0)
+        NEXT_EDITOR_ID.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
     );
     // We hand the path off through the URL hash. App.tsx checks it on mount
     // and renders a full-screen EditorSection when present.
@@ -1353,6 +1360,7 @@ pub fn run() {
                     resources.join("nginx"),
                     runtime.clone(),
                     ssl_dir,
+                    htdocs.clone(),
                     LocalCa::new(ca_dir),
                     php_installs.clone(),
                     default_php.clone(),

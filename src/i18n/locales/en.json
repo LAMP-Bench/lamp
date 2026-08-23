@@ -225,7 +225,10 @@
     "pause": "Pause",
     "resume": "Resume",
     "pauseTitle": "Pause polling",
-    "resumeTitle": "Resume polling"
+    "resumeTitle": "Resume polling",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyTitle": "Copy the visible log to the clipboard"
   },
   "editor": {
     "open": "Open",

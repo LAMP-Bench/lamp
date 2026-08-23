@@ -311,7 +311,10 @@
     "pause": "Duraklat",
     "resume": "Sürdür",
     "pauseTitle": "Yenilemeyi duraklat",
-    "resumeTitle": "Yenilemeyi sürdür"
+    "resumeTitle": "Yenilemeyi sürdür",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "copyTitle": "Görünen günlüğü panoya kopyala"
   },
   "editor": {
     "open": "Aç",

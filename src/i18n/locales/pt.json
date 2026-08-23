@@ -311,7 +311,10 @@
     "pause": "Pausar",
     "resume": "Retomar",
     "pauseTitle": "Pausar a atualização",
-    "resumeTitle": "Retomar a atualização"
+    "resumeTitle": "Retomar a atualização",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "copyTitle": "Copiar o registo visível para a área de transferência"
   },
   "editor": {
     "open": "Abrir",

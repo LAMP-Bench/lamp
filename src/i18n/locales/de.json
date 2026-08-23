@@ -311,7 +311,10 @@
     "pause": "Pause",
     "resume": "Fortsetzen",
     "pauseTitle": "Aktualisierung anhalten",
-    "resumeTitle": "Aktualisierung fortsetzen"
+    "resumeTitle": "Aktualisierung fortsetzen",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "copyTitle": "Sichtbares Log in die Zwischenablage kopieren"
   },
   "editor": {
     "open": "Öffnen",

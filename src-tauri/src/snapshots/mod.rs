@@ -152,6 +152,12 @@ fn run_mysqldump(d: &DbCapture) -> Result<Vec<u8>, String> {
     // `--databases` makes the dump self-contained: it emits CREATE DATABASE
     // + USE statements, so restoring is a single pipe into `mysql` without
     // having to remember which DB the dump came from.
+    //
+    // `--single-transaction` takes the dump from one consistent InnoDB
+    // snapshot instead of locking tables — a snapshot of a site being used
+    // could otherwise capture two tables from either side of a write.
+    // `--default-character-set` stops 4-byte characters (emoji, and plenty
+    // of ordinary CJK text) coming back mangled.
     let output = hidden_command(&dumper)
         .args([
             "--protocol=TCP",
@@ -160,7 +166,14 @@ fn run_mysqldump(d: &DbCapture) -> Result<Vec<u8>, String> {
             "-P",
         ])
         .arg(d.port.to_string())
-        .args(["-u", "root", "--databases", d.db_name])
+        .args([
+            "-u",
+            "root",
+            "--single-transaction",
+            "--default-character-set=utf8mb4",
+            "--databases",
+            d.db_name,
+        ])
         .output()
         .map_err(|e| format!("spawn mysqldump: {e}"))?;
     if !output.status.success() {

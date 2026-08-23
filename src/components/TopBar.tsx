@@ -1,4 +1,5 @@
 import { FiEdit2, FiGlobe, FiPower } from "react-icons/fi";
+import { invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useTranslation } from "react-i18next";
 import { useService } from "../useService";
@@ -43,13 +44,24 @@ export function TopBar({ title }: { title: string }) {
 
   const webStart = () => openUrl(siteUrl());
 
+  /// Opens an editor window with no file loaded — it prompts for a path.
+  /// This button had been `disabled` since the standalone editor landed,
+  /// which is just a dead control sitting in the main toolbar.
+  const openEditor = async () => {
+    try {
+      await invoke("editor_open", { path: "" });
+    } catch (e) {
+      toast("error", String(e));
+    }
+  };
+
   return (
     <header className="border-b border-neutral-200 bg-white px-5 py-2.5 flex items-center justify-between">
       <h1 className="text-base font-semibold tracking-tight text-neutral-800">
         {title}
       </h1>
       <div className="flex items-center gap-1">
-        <ActionButton icon={<FiEdit2 />} label={t("topbar.editor")} disabled />
+        <ActionButton icon={<FiEdit2 />} label={t("topbar.editor")} onClick={openEditor} />
         <ActionButton icon={<FiGlobe />} label={t("topbar.webstart")} onClick={webStart} />
         <ActionButton
           icon={<FiPower />}

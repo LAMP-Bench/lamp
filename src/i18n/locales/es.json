@@ -225,7 +225,10 @@
     "pause": "Pausar",
     "resume": "Reanudar",
     "pauseTitle": "Pausar el sondeo",
-    "resumeTitle": "Reanudar el sondeo"
+    "resumeTitle": "Reanudar el sondeo",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "copyTitle": "Copiar el log visible al portapapeles"
   },
   "editor": {
     "open": "Abrir",
