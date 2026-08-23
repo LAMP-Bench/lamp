@@ -133,6 +133,13 @@ jobs:
             label: darwin-universal
             args: '--target universal-apple-darwin'
     runs-on: ${{ matrix.platform }}
+    env:
+      # Bundling Monaco (dd95413) produces a ~4 MB chunk, and minifying it
+      # runs Node out of heap on the macOS runners, which have noticeably
+      # less memory than the Linux and Windows ones — those two built the
+      # same commit fine. Node sizes its default heap from available RAM, so
+      # this only ever failed on one of the three.
+      NODE_OPTIONS: --max-old-space-size=4096
 
     steps:
       - uses: actions/checkout@v4
