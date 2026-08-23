@@ -491,7 +491,9 @@ fn extract_zip(archive: &Path, target: &Path, strip: Option<&str>) -> Result<(),
         // library at load time.
         #[cfg(unix)]
         {
-            use std::os::unix::fs::PermissionsExt;
+            // No `PermissionsExt` here — `unix_mode()` is the zip crate's own
+            // method. The trait is only needed further down, for
+            // `Permissions::from_mode`.
             if file.unix_mode().is_some_and(|m| m & 0o170000 == 0o120000) {
                 let mut link_target = String::new();
                 file.read_to_string(&mut link_target)
