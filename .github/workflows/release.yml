@@ -111,6 +111,12 @@ jobs:
 
   build:
     needs: [prepare, lint]
+    # Named after the target, not the runner image: the Actions UI would
+    # otherwise show "build (ubuntu-22.04, ...)", which says where it was
+    # compiled rather than what it produces. Every conditional below keys off
+    # this label too, so bumping a runner image doesn't silently stop
+    # matching.
+    name: ${{ matrix.label }}
     strategy:
       # We want everyone's artifacts before publishing, so a failing
       # platform shouldn't cancel its siblings — they still upload to the
@@ -119,10 +125,10 @@ jobs:
       matrix:
         include:
           - platform: windows-latest
-            label: windows-x86_64
+            label: windows
             args: ''
           - platform: ubuntu-22.04
-            label: linux-x86_64
+            label: linux
             args: ''
           # One universal macOS build (Intel + Apple Silicon in a single
           # .dmg/.app) cross-compiled on the fast, always-available
@@ -130,7 +136,7 @@ jobs:
           # job, but those Intel runners sit in a multi-hour queue and were
           # blocking the publish gate (which needs every matrix job green).
           - platform: macos-latest
-            label: darwin-universal
+            label: macos
             args: '--target universal-apple-darwin'
     runs-on: ${{ matrix.platform }}
     env:
@@ -150,7 +156,7 @@ jobs:
         # Debian/Ubuntu/Mint/Pop!/Elementary, .rpm covers Fedora/RHEL/
         # openSUSE, and .AppImage runs on ANYTHING with glibc (Arch, void,
         # etc.). `rpm` is what teaches the Tauri bundler to emit the .rpm.
-        if: matrix.platform == 'ubuntu-22.04'
+        if: matrix.label == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -181,7 +187,7 @@ jobs:
         with:
           # universal-apple-darwin lipo's both arch slices, so the runner
           # needs both targets installed.
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          targets: ${{ matrix.label == 'macos' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - uses: swatinem/rust-cache@v2
         with:

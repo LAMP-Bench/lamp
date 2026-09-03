@@ -24,7 +24,13 @@ Grab the installer for your machine from the rolling
 | macOS (Intel + Apple Silicon) | `.dmg` or `.app.tar.gz` (universal) |
 | Linux Debian/Ubuntu/Mint | `.deb` |
 | Linux Fedora/RHEL/openSUSE | `.rpm` |
-| Any other Linux (Arch, …) | `.AppImage` |
+| Arch and derivatives | AUR: `lamp-bench-bin` |
+| Any other Linux | `.AppImage` |
+
+There is no native Arch package in the release: `tauri build` accepts only
+deb, rpm and appimage as Linux bundle targets. The AUR package repacks the
+`.deb`, whose layout already matches what Arch expects, and declares the same
+libraries under Arch's names. Its `PKGBUILD` lives in `packaging/aur/`.
 
 On Windows the installer defaults to `C:\LAMP\`. First launch runs a
 short setup wizard that downloads the bundled services into

@@ -1,0 +1,42 @@
+# Maintainer: caixax <westlargo@proton.me>
+#
+# Arch has no native package from the Tauri bundler: `tauri build --bundles`
+# accepts only deb, rpm and appimage. The idiomatic answer on Arch is the AUR,
+# and a -bin package that repacks the .deb is the standard shape for it. The
+# .deb already lays its files out exactly where Arch wants them, so there is
+# nothing to rewrite.
+#
+# To publish: clone ssh://aur@aur.archlinux.org/lamp-bench-bin.git, drop this
+# in, run `makepkg --printsrcinfo > .SRCINFO`, commit both. Needs an AUR
+# account with your SSH key registered.
+
+pkgname=lamp-bench-bin
+_asset='Lamp.Bench'
+pkgver=0.1.15
+pkgrel=1
+pkgdesc='Local web development environment: Apache, Nginx, MySQL and multiple PHP versions behind a native GUI'
+arch=('x86_64')
+url='https://github.com/LAMP-Bench/lamp'
+license=('MIT')
+# What the generated .deb and .rpm declare, under Arch's names for the same
+# libraries. libayatana-appindicator is dlopened by the tray at runtime, so
+# nothing would catch its absence until the app panics on launch.
+depends=('webkit2gtk-4.1' 'gtk3' 'libayatana-appindicator')
+provides=('lamp-bench')
+conflicts=('lamp-bench')
+# Already stripped by the release build, and there is no source to attach
+# debug symbols to.
+options=('!strip' '!debug')
+source=("${pkgname}-${pkgver}.deb::${url}/releases/download/alpha-testing/${_asset}_${pkgver}_amd64.deb")
+# The alpha channel publishes to a rolling tag, so the bytes behind this URL
+# change without the URL changing and a pinned checksum would go stale on
+# every build. Pin it properly once releases move to immutable version tags.
+sha256sums=('SKIP')
+# Unpacked by hand in package() rather than by makepkg, so the payload lands
+# in $pkgdir instead of being expanded into $srcdir first.
+noextract=("${pkgname}-${pkgver}.deb")
+
+package() {
+    bsdtar -xOf "${srcdir}/${pkgname}-${pkgver}.deb" data.tar.gz \
+        | bsdtar -xf - -C "${pkgdir}"
+}
