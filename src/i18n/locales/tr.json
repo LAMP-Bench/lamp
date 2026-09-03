@@ -355,7 +355,9 @@
     "noPhp": "Henüz kurulu PHP sürümü yok — önce yukarıdan bir tane kurun.",
     "cancelDownload": "Bu indirmeyi durdur",
     "unavailable": "kullanılamıyor",
-    "unavailableHint": "Bu platform için henüz paketlenmedi. Bu bileşen için yalnızca kaynak kodu yayımlanıyor, dolayısıyla indirilecek bir şey yok."
+    "unavailableHint": "Bu platform için henüz paketlenmedi. Bu bileşen için yalnızca kaynak kodu yayımlanıyor, dolayısıyla indirilecek bir şey yok.",
+    "usingSystem": "sistemden",
+    "usingSystemHint": "Paketle gelmiyor, ancak sistemde kurulu bir kopya var ve o kullanılacak: {{path}}"
   },
   "services": {
     "exitedImmediately": "{{service}} başladı ve hemen durdu. Büyük olasılıkla bağlantı noktası zaten kullanımda — çalışan başka bir kopya ya da önceki oturumdan kalan bir süreç. Nedeni Günlükler → {{service}} bölümünde."

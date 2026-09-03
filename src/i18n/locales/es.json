@@ -46,7 +46,9 @@
     "noPhp": "Aún no hay versiones de PHP instaladas — instala una arriba primero.",
     "cancelDownload": "Detener esta descarga",
     "unavailable": "no disponible",
-    "unavailableHint": "Todavía no empaquetado para esta plataforma. El proyecto original solo publica el código fuente de este componente, así que no hay nada que descargar."
+    "unavailableHint": "Todavía no empaquetado para esta plataforma. El proyecto original solo publica el código fuente de este componente, así que no hay nada que descargar.",
+    "usingSystem": "del sistema",
+    "usingSystemHint": "No viene incluido, pero hay una copia del sistema instalada y se usará esa: {{path}}"
   },
   "topbar": {
     "editor": "Editor",

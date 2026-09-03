@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Lamp Bench. The project is in rolling **alpha** —
+All notable changes to Lamp Bench. The project is in rolling **alpha**,
 builds are published to the `alpha-testing` GitHub release and versioned
 `0.1.<CI run number>`. This file groups changes by theme rather than by
 exact build number while in alpha.
@@ -8,7 +8,7 @@ exact build number while in alpha.
 ## Unreleased (alpha)
 
 ### Sweeping up
-- Apache loads the modules a stock `.htaccess` expects — headers, expires,
+- Apache loads the modules a stock `.htaccess` expects, headers, expires,
   deflate, env, setenvif, autoindex, auth_basic. An unguarded `Header set`
   used to be a hard 500, and `Options Indexes` did nothing at all without
   autoindex, so a directory with no index gave 403 instead of a listing.
@@ -19,7 +19,7 @@ exact build number while in alpha.
   goes to the runtime directory instead of into `resources/`.
 - A failed certificate issuance is now an error rather than something
   swallowed. The generated config references those files by path, so the
-  service failed to start anyway — just with the reason buried in
+  service failed to start anyway, just with the reason buried in
   `error.log`.
 - Declining the elevation prompt when adding a host no longer leaves the
   host behind. The row was already committed by then, so the UI listed a
@@ -30,16 +30,16 @@ exact build number while in alpha.
   constant compiled into every copy.
 - The dynamic-DNS hostname is percent-encoded, so a stray `&` can't append
   query parameters to the update request.
-- The toolbar's Editor button works — it had been disabled since the
+- The toolbar's Editor button works. It had been disabled since the
   standalone editor window landed. Logs gained a copy button.
 - Editor windows are numbered rather than named after the millisecond they
   opened in, which collided when two opened in the same tick.
-- New tests assert the generated Apache config is well-formed — balanced
+- New tests assert the generated Apache config is well-formed, balanced
   blocks, no unsubstituted placeholders, no escape sequences leaking
   through as literal text.
 
 ### Downloads can be stopped
-- Every download is cancellable — from the first-launch wizard, the
+- Every download is cancellable, from the first-launch wizard, the
   sidebar and the Versions panel. The read timeout added earlier only
   rescues a genuinely dead socket; a transfer that is merely enormous, or
   one you changed your mind about, previously meant killing the app. In
@@ -58,7 +58,7 @@ exact build number while in alpha.
 - All 13 languages are complete. German, Russian, Portuguese, Italian,
   Chinese, Japanese, Korean, Arabic, Hindi and Turkish were sitting at
   39%, covering the sidebar and settings while every longer string fell
-  back to English — so most of the app read as untranslated in ten of
+  back to English, so most of the app read as untranslated in ten of
   the thirteen.
 - `pnpm scripts:check-i18n` now validates translated *values*, not just
   which keys exist: a translation that drops an interpolation
@@ -68,7 +68,7 @@ exact build number while in alpha.
 
 ### The UI stops promising things it can't do
 - The default PHP version is a real, persisted setting. The Settings
-  picker only ever changed a local variable — the value actually used was
+  picker only ever changed a local variable, the value actually used was
   fixed when the app booted and could not be changed at all.
 - Changing an existing host's PHP version downloads it if needed, which
   the Add-host form already did. Before, switching a host to an
@@ -87,8 +87,8 @@ exact build number while in alpha.
   listening.
 - Removed the FTP card from Tools. Per-host deploy profiles superseded
   it, and its help text still said stored profiles were a future plan.
-- Translated the Tools dialogs — installing a CMS, creating a Laravel
-  project, the image optimiser — which had stayed English even where
+- Translated the Tools dialogs, installing a CMS, creating a Laravel
+  project, the image optimiser, which had stayed English even where
   translations had already been written for them. Also dropped a
   Windows-only "triggers a UAC prompt" line that non-Windows users were
   being shown.
@@ -105,8 +105,8 @@ exact build number while in alpha.
   deleted, and clearing refuses to touch anything as shallow as `C:\` or
   `/var`.
 - The editor opens files that aren't valid UTF-8 read-only. It shows a
-  lossy decode — which is right, since Apache logs and older PHP sources
-  mix encodings — but saving that buffer wrote the decoder's replacement
+  lossy decode, which is right, since Apache logs and older PHP sources
+  mix encodings, but saving that buffer wrote the decoder's replacement
   character over every byte it hadn't recognised. Silent, permanent
   corruption in a tool people point at their source.
 - Per-host certificates are reissued as they approach expiry. They are
@@ -120,7 +120,7 @@ exact build number while in alpha.
   and the compression happen without the database lock held.
 - Downloading or removing a component whose service is still running is
   refused. Replacing files a live process has open loses them on Windows
-  — it is how MySQL's `bin/` got emptied during an earlier smoke test.
+. It is how MySQL's `bin/` got emptied during an earlier smoke test.
 
 ### Linux and macOS groundwork
 - The downloader understands `.tar.gz`, `.tar.xz` and `.tar` as well as
@@ -129,8 +129,8 @@ exact build number while in alpha.
   support: a zip-only extractor that also discarded the executable bit
   could not have produced a runnable binary from any Unix package, no
   matter which URLs the manifest pinned.
-- Downloads stream to disk instead of being buffered whole in memory —
-  MySQL's Linux build is ~900 MB — and a stalled connection now times
+- Downloads stream to disk instead of being buffered whole in memory,
+  MySQL's Linux build is ~900 MB, and a stalled connection now times
   out rather than freezing the first-launch wizard with no way past it.
 - `php-cgi` and `nginx` are located with the platform's executable
   suffix rather than a hardcoded `.exe`, so the generated Apache and
@@ -142,7 +142,7 @@ exact build number while in alpha.
   config with absolute paths, so a packaged build behaves identically.
 - Pinned the Unix binaries that actually exist: MailHog for Linux and
   macOS, MySQL 8.0 for both macOS architectures. **Apache, nginx, PHP
-  and Redis publish source tarballs only** — there is nothing to pin, so
+  and Redis publish source tarballs only**. There is nothing to pin, so
   those come from the package manager on Linux. macOS remains the gap.
 - The elevated hosts-file write no longer stages through a fixed name in
   world-writable `/tmp` on Unix, where another local user could swap the
@@ -170,7 +170,7 @@ exact build number while in alpha.
   default.
 - Fixed a race with lasting consequences: opening Versions → extensions
   before a service had started created a bare `php.ini`, after which the
-  block was never added at all — that PHP version permanently lost
+  block was never added at all. That PHP version permanently lost
   `extension_dir`, mysqli and Xdebug. Both paths now go through the same
   seeder.
 - Default extensions are enabled by uncommenting the template's own lines
@@ -190,7 +190,7 @@ exact build number while in alpha.
   startup path.
 - Windows builds an `.exe` only. The `C:\LAMP` default and the
   post-install permission grant both live in the NSIS installer, and WiX
-  got neither — the `.msi` we were publishing installed somewhere it
+  got neither, the `.msi` we were publishing installed somewhere it
   couldn't write and failed on first launch.
 - Config section paths are supplied by the backend (`runtime_path`,
   `resources_path`) instead of derived from `htdocs_path` by string
@@ -199,7 +199,7 @@ exact build number while in alpha.
   The `my.cnf` row now follows the active MySQL version.
 - Releases are staged before they go live. The workflow used to delete
   the published release as its first step, leaving the updater with
-  nothing for the whole build — permanently, if any platform failed.
+  nothing for the whole build, permanently, if any platform failed.
   Builds now upload to a private staging tag and only the last few
   seconds of a fully green run touch the public release.
 - Dropped the ~350 MB binary fetch from the build. The installer has
@@ -231,7 +231,7 @@ exact build number while in alpha.
   PHP 8.2, 8.3 and 8.5 were returning 404: upstream purges superseded
   patch releases out of `/releases/`. Checksums are unchanged.
 - `PRAGMA foreign_keys = ON`. SQLite defaults it off, so the
-  `ON DELETE CASCADE` clauses had never done anything — deleting a host
+  `ON DELETE CASCADE` clauses had never done anything, deleting a host
   left its snapshot rows and deploy profile behind. Deleting a host now
   also removes its snapshot archives and leaf certificate from disk.
 - Host names are validated and normalised (trimmed, lowercased, DNS
@@ -294,8 +294,26 @@ exact build number while in alpha.
   actually fires; an immutable `build-<run_number>` git tag preserves
   history alongside the rolling `alpha-testing` tag.
 
+### Building from source
+- Components with no prebuilt binary for the platform can now be compiled on
+  the user's machine: Apache (with mod_fcgid), PHP, Xdebug, nginx and Redis.
+  Upstream ships source tarballs only for all of them, and this is also what
+  makes version switching work on Unix: any PHP version gets built on demand
+  rather than being limited to what was pre-built for a release.
+- Distro handling is keyed on the family, never the release, so nothing is
+  pinned to something like "ubuntu-22.04". `/etc/os-release`'s `ID_LIKE`
+  resolves CachyOS to Arch, Mint to Debian and Rocky to Fedora without any of
+  them being named. Package tables cover Debian, Fedora, Arch, openSUSE and
+  Alpine.
+- Installing build tools is behind an explicit consent step showing the
+  detected distro, what is missing and the exact command, with a copy button
+  for running it by hand. It installs build tooling only, never a service.
+  The build log streams to the UI.
+- Redis and MailHog are reported as already usable when a system copy is
+  installed, instead of offering a compile for something that works now.
+
 ### Deferred
 - Real FTPS transport and SFTP (needs an async runtime).
-- Cloud storage sync — Google Drive / OneDrive / Dropbox (needs OAuth app
+- Cloud storage sync, Google Drive / OneDrive / Dropbox (needs OAuth app
   credentials + redirect server).
 - Linux/macOS native service binaries (Apache/MySQL/PHP/nginx/Redis/MailHog).

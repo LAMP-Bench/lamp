@@ -46,7 +46,9 @@
     "noPhp": "No PHP versions installed yet — install one above first.",
     "cancelDownload": "Stop this download",
     "unavailable": "unavailable",
-    "unavailableHint": "Not packaged for this platform yet. Upstream publishes source only for this component, so there is nothing to download here."
+    "unavailableHint": "Not packaged for this platform yet. Upstream publishes source only for this component, so there is nothing to download here.",
+    "usingSystem": "from your system",
+    "usingSystemHint": "Not bundled, but a system copy is installed and will be used: {{path}}"
   },
   "topbar": {
     "editor": "Editor",

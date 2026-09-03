@@ -46,7 +46,9 @@
     "noPhp": "Aucune version PHP installée — installez-en une ci-dessus d'abord.",
     "cancelDownload": "Arrêter ce téléchargement",
     "unavailable": "indisponible",
-    "unavailableHint": "Pas encore empaqueté pour cette plateforme. L'amont ne publie que les sources de ce composant, il n'y a donc rien à télécharger."
+    "unavailableHint": "Pas encore empaqueté pour cette plateforme. L'amont ne publie que les sources de ce composant, il n'y a donc rien à télécharger.",
+    "usingSystem": "du système",
+    "usingSystemHint": "Non fourni, mais une copie système est installée et sera utilisée : {{path}}"
   },
   "topbar": {
     "editor": "Éditeur",

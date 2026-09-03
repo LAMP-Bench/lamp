@@ -961,6 +961,15 @@ fn binary_remove(name: &str, state: tauri::State<AppState>) -> Result<(), String
 /// Whether this component has a download for the current OS at all. Lets the
 /// UI grey out what simply isn't packaged for the platform rather than
 /// showing an Install button that errors.
+/// Path to a system copy that would satisfy this component, if one exists.
+/// Only Redis and MailHog can be satisfied that way, see
+/// `services::system_names`. Lets the UI say "already usable" instead of
+/// offering a download or a compile for something that works right now.
+#[tauri::command]
+fn component_system_binary(name: String) -> Option<String> {
+    services::system_binary(&name).map(|p| p.to_string_lossy().into_owned())
+}
+
 /// What building this component from source would need: the distro we
 /// detected, which probes failed, and the exact package-manager command.
 /// Read-only. Nothing is installed or compiled by asking.
@@ -1574,6 +1583,7 @@ pub fn run() {
             binary_remove,
             binary_list,
             binary_available,
+            component_system_binary,
             source_build_report,
             source_build_install_deps,
             source_build,

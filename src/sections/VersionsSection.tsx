@@ -20,7 +20,11 @@ import {
   useDownloadProgress,
 } from "../useDownloadProgress";
 import type { PhpExtension } from "../types";
-import { SourceBuildModal, useDepReport } from "../components/SourceBuild";
+import {
+  SourceBuildModal,
+  useDepReport,
+  useSystemBinary,
+} from "../components/SourceBuild";
 
 /// Categorise a manifest entry name into a UI group. Anything PHP-ish goes
 /// to its own group; the core daemons are "runtimes"; everything else is a
@@ -142,10 +146,18 @@ export function VersionsSection() {
 
   function UnavailableRow({ name }: { name: string }) {
     const report = useDepReport(name);
+    const systemPath = useSystemBinary(name);
     const [open, setOpen] = useState(false);
-    const buildable = report?.buildable === true;
+    // A component the supervisor can already start from a system copy is not
+    // missing anything. Offering a five-minute compile for it would be
+    // actively misleading.
+    const buildable = report?.buildable === true && systemPath === null;
     return (
-      <div className={`px-4 py-2 flex items-center gap-3 text-sm ${buildable ? "" : "opacity-60"}`}>
+      <div
+        className={`px-4 py-2 flex items-center gap-3 text-sm ${
+          buildable || systemPath ? "" : "opacity-60"
+        }`}
+      >
         <FiPackage className="text-neutral-400 shrink-0" />
         <code className="flex-1 text-neutral-500 font-mono text-xs truncate">
           {name}
@@ -159,6 +171,13 @@ export function VersionsSection() {
             <FiTool />
             {t("sourceBuild.compile")}
           </button>
+        ) : systemPath ? (
+          <span
+            className="text-[11px] text-emerald-700 border border-emerald-200 bg-emerald-50 rounded px-2 py-1"
+            title={t("versions.usingSystemHint", { path: systemPath })}
+          >
+            {t("versions.usingSystem")}
+          </span>
         ) : (
           <span
             className="text-[11px] text-neutral-400 border border-neutral-200 rounded px-2 py-1"

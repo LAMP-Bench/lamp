@@ -16,6 +16,22 @@ export type DepReport = {
   buildable: boolean;
 };
 
+/// Path to a system copy that would satisfy this component, or null. Only
+/// Redis and MailHog can be, see `services::system_names`.
+export function useSystemBinary(name: string) {
+  const [path, setPath] = useState<string | null>(null);
+  useEffect(() => {
+    let live = true;
+    invoke<string | null>("component_system_binary", { name })
+      .then((p) => live && setPath(p))
+      .catch(() => live && setPath(null));
+    return () => {
+      live = false;
+    };
+  }, [name]);
+  return path;
+}
+
 export function useDepReport(name: string) {
   const [report, setReport] = useState<DepReport | null>(null);
   useEffect(() => {

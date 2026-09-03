@@ -355,7 +355,9 @@
     "noPhp": "Noch keine PHP-Version installiert — installieren Sie oben zuerst eine.",
     "cancelDownload": "Diesen Download abbrechen",
     "unavailable": "nicht verfügbar",
-    "unavailableHint": "Für diese Plattform noch nicht paketiert. Das Upstream-Projekt veröffentlicht für diese Komponente nur den Quellcode, es gibt hier also nichts herunterzuladen."
+    "unavailableHint": "Für diese Plattform noch nicht paketiert. Das Upstream-Projekt veröffentlicht für diese Komponente nur den Quellcode, es gibt hier also nichts herunterzuladen.",
+    "usingSystem": "vom System",
+    "usingSystemHint": "Nicht mitgeliefert, aber eine Systemkopie ist installiert und wird verwendet: {{path}}"
   },
   "services": {
     "exitedImmediately": "{{service}} ist gestartet und sofort wieder stehen geblieben. Wahrscheinlich ist der Port bereits belegt — eine zweite laufende Instanz oder ein Prozess aus einer früheren Sitzung. Der Grund steht in Logs → {{service}}."

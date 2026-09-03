@@ -94,6 +94,41 @@ fn which(name: &str) -> Option<PathBuf> {
     find_in_dirs(&dirs, name)
 }
 
+/// Executable names a component can be satisfied by from the system, when
+/// nothing is bundled. Empty means the component is bundled-only.
+///
+/// Only Redis and MailHog are listed, and that is a deliberate line rather
+/// than an unfinished one: both are driven entirely by command-line arguments
+/// and a generated config full of absolute paths, so a distro copy behaves
+/// identically to a bundled one. Apache, nginx, PHP and MySQL are not,
+/// a distro Apache expects its own ServerRoot and module layout, and the
+/// config generator would have to become layout-aware before its binary
+/// could be swapped in.
+///
+/// The table lives here rather than inline in each service so the UI can ask
+/// the same question the supervisor will answer at start time.
+pub fn system_names(component: &str) -> &'static [&'static str] {
+    match component {
+        "redis" => &["redis-server"],
+        "mailhog" => &["MailHog", "mailhog"],
+        _ => &[],
+    }
+}
+
+/// The system copy that would satisfy this component, if any. Used by the UI
+/// to avoid offering a download or a compile for something already usable.
+pub fn system_binary(component: &str) -> Option<PathBuf> {
+    #[cfg(windows)]
+    {
+        let _ = component;
+        None
+    }
+    #[cfg(not(windows))]
+    {
+        system_names(component).iter().find_map(|n| which(n))
+    }
+}
+
 /// Locate a service executable: the bundled copy first, then whatever the
 /// system provides.
 ///

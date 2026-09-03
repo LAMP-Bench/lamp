@@ -42,7 +42,7 @@ impl Service for MailhogService {
         let bundled = self
             .mailhog_dir
             .join(format!("MailHog{}", std::env::consts::EXE_SUFFIX));
-        let bin = resolve_binary(bundled.clone(), &["MailHog", "mailhog"]).ok_or_else(|| {
+        let bin = resolve_binary(bundled.clone(), super::system_names("mailhog")).ok_or_else(|| {
             format!(
                 "MailHog binary not found at {}. Install it from the sidebar first.",
                 bundled.display()

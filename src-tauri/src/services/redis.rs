@@ -65,7 +65,7 @@ impl Service for RedisService {
         let bundled = self
             .redis_dir
             .join(format!("redis-server{}", std::env::consts::EXE_SUFFIX));
-        let server = resolve_binary(bundled.clone(), &["redis-server"]).ok_or_else(|| {
+        let server = resolve_binary(bundled.clone(), super::system_names("redis")).ok_or_else(|| {
             format!(
                 "redis-server not found at {} and none on PATH — install Redis from the sidebar, \
                  or via your package manager",

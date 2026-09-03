@@ -355,7 +355,9 @@
     "noPhp": "Ainda não há nenhuma versão do PHP instalada — instale uma acima primeiro.",
     "cancelDownload": "Parar esta transferência",
     "unavailable": "indisponível",
-    "unavailableHint": "Ainda não empacotado para esta plataforma. O projeto original publica apenas o código-fonte deste componente, portanto não há nada para baixar."
+    "unavailableHint": "Ainda não empacotado para esta plataforma. O projeto original publica apenas o código-fonte deste componente, portanto não há nada para baixar.",
+    "usingSystem": "do sistema",
+    "usingSystemHint": "Não incluído, mas existe uma cópia do sistema instalada que será usada: {{path}}"
   },
   "services": {
     "exitedImmediately": "O {{service}} arrancou e parou logo a seguir. Provavelmente a porta já está ocupada — outra cópia ainda em execução, ou um processo que ficou de uma sessão anterior. O motivo está em Registos → {{service}}."
