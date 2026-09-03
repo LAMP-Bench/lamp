@@ -359,5 +359,23 @@
   },
   "services": {
     "exitedImmediately": "{{service}} 启动后立即停止了。端口很可能已被占用 — 可能有另一个副本仍在运行，或上次会话遗留了进程。原因请查看 日志 → {{service}}。"
+  },
+  "sourceBuild": {
+    "compile": "编译",
+    "rowHint": "此平台没有预编译二进制文件, 在此编译",
+    "title": "从源码编译 {{name}}",
+    "intro": "{{distro}} 没有预编译的二进制文件。Lamp Bench 可以在本机编译 {{version}} 版本，需要几分钟。",
+    "toolsNeeded": "需要编译工具",
+    "toolsMissing": "缺少：{{list}}",
+    "toolsCommand": "经你授权，Lamp Bench 将执行：",
+    "toolsManual": "未能识别包管理器。请自行安装以下内容后重试：",
+    "toolsNote": "这是唯一会用到你的包管理器的步骤，且只安装编译工具，绝不安装服务。",
+    "copy": "复制",
+    "start": "安装工具并编译",
+    "startNoDeps": "开始编译",
+    "running": "编译中…",
+    "ok": "编译成功",
+    "failed": "编译失败",
+    "close": "关闭"
   }
 }

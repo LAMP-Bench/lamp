@@ -401,3 +401,170 @@ fn wait_for_free(port: u16, timeout: Duration) -> bool {
     }
     false
 }
+
+/// The source-build path, end to end: fetch the upstream tarball, verify its
+/// SHA256, unpack, compile, and install into `resources/` in the layout the
+/// service supervisor expects. Redis is the subject because it is the fastest
+/// of the five (plain `make`, no configure), the machinery it exercises is
+/// shared by all of them.
+#[test]
+#[ignore]
+fn integration_source_build_redis() {
+    let report = crate::build::dep_report("redis");
+    assert!(report.buildable, "redis should have a source recipe");
+    assert!(
+        !report.packages.is_empty(),
+        "no build_deps for family {}, the package table is missing an entry",
+        report.family
+    );
+    if !report.missing.is_empty() {
+        panic!(
+            "build tools missing on this machine: {}. Install with: {}",
+            report.missing.join(", "),
+            report.install_command.unwrap_or_else(|| "(unknown)".into())
+        );
+    }
+
+    let resources = scratch("srcbuild-resources");
+    let work = scratch("srcbuild-work");
+    let _ = std::fs::remove_dir_all(resources.join("redis"));
+
+    let mut lines: Vec<String> = Vec::new();
+    {
+        let mut log = |l: &str| lines.push(l.to_string());
+        let mut ctx = crate::build::Ctx {
+            resources_dir: resources.clone(),
+            work_dir: work.join("redis"),
+            jobs: std::thread::available_parallelism()
+                .map(|n| n.get())
+                .unwrap_or(2),
+            log: &mut log,
+        };
+        crate::build::build("redis", &mut ctx).unwrap_or_else(|e| {
+            let tail: Vec<&str> = lines.iter().rev().take(25).map(|s| s.as_str()).collect();
+            panic!(
+                "redis source build failed: {e}\nlog tail:\n{}",
+                tail.into_iter().rev().collect::<Vec<_>>().join("\n")
+            )
+        });
+    }
+
+    // The layout contract: services/redis.rs looks for redis-server at the
+    // root of the component dir, matching the Windows zip.
+    let server = resources.join("redis").join("redis-server");
+    assert!(server.is_file(), "expected {}", server.display());
+    assert!(
+        is_executable(&server),
+        "{} is not executable",
+        server.display()
+    );
+
+    // And it has to actually run, a build that produces an unusable binary
+    // is not a build.
+    let out = std::process::Command::new(&server)
+        .arg("--version")
+        .output()
+        .expect("run redis-server --version");
+    let version = String::from_utf8_lossy(&out.stdout);
+    assert!(
+        version.contains("Redis server"),
+        "unexpected --version output: {version}"
+    );
+    assert!(
+        !lines.is_empty(),
+        "the build produced no log output; the UI would show a blank pane"
+    );
+}
+
+/// Diagnostic, not an assertion: prints what the toolchain check sees on this
+/// machine for every buildable component. The point is to make a "missing
+/// dependency" report readable when someone pastes it into a bug.
+///
+///   cargo test --lib -- --ignored --nocapture integration_dep_report
+#[test]
+#[ignore]
+fn integration_dep_report() {
+    for name in ["apache", "php-8.4", "nginx", "redis"] {
+        let r = crate::build::dep_report(name);
+        println!(
+            "\n{name}: buildable={} version={:?}\n  distro: {} (id={}, family={})\n  missing: {}\n  install: {}",
+            r.buildable,
+            r.source_version,
+            r.distro,
+            r.distro_id,
+            r.family,
+            if r.missing.is_empty() { "nothing".into() } else { r.missing.join(", ") },
+            r.install_command.unwrap_or_else(|| "(unknown package manager)".into())
+        );
+    }
+}
+
+/// The flagship case for source builds: install a PHP version that has no
+/// prebuilt binary for this platform, which is the only way version switching
+/// works on Unix. Slow (minutes), hence ignored.
+#[test]
+#[ignore]
+fn integration_source_build_php_83() {
+    let report = crate::build::dep_report("php-8.3");
+    if !report.missing.is_empty() {
+        panic!(
+            "build tools missing: {}. Install with: {}",
+            report.missing.join(", "),
+            report.install_command.unwrap_or_else(|| "(unknown)".into())
+        );
+    }
+
+    let resources = scratch("srcbuild-php-resources");
+    let work = scratch("srcbuild-php-work");
+    let _ = std::fs::remove_dir_all(resources.join("php-8.3"));
+
+    let mut lines: Vec<String> = Vec::new();
+    {
+        let mut log = |l: &str| lines.push(l.to_string());
+        let mut ctx = crate::build::Ctx {
+            resources_dir: resources.clone(),
+            work_dir: work.join("php-8.3"),
+            jobs: std::thread::available_parallelism().map(|n| n.get()).unwrap_or(2),
+            log: &mut log,
+        };
+        crate::build::build("php-8.3", &mut ctx).unwrap_or_else(|e| {
+            let tail: Vec<&str> = lines.iter().rev().take(30).map(|s| s.as_str()).collect();
+            panic!(
+                "php 8.3 source build failed: {e}\nlog tail:\n{}",
+                tail.into_iter().rev().collect::<Vec<_>>().join("\n")
+            )
+        });
+    }
+
+    let dir = resources.join("php-8.3");
+    // The layout contract, identical to the Windows zip: binaries flat at the
+    // root, extensions in ext/, the ini template alongside.
+    for f in ["php", &php_cgi_file(), "php.ini-development"] {
+        assert!(dir.join(f).is_file(), "expected {}", dir.join(f).display());
+    }
+    assert!(is_executable(&dir.join(php_cgi_file())));
+
+    // discover_php_installs is what makes a new version show up in the app,
+    // and it keys on php-cgi being present.
+    let found = downloads::discover_php_installs(&resources);
+    assert!(
+        found.iter().any(|p| p.version == "8.3"),
+        "the app would not see the version it just built: {found:?}"
+    );
+
+    let out = std::process::Command::new(dir.join("php"))
+        .arg("-v")
+        .output()
+        .expect("run php -v");
+    let v = String::from_utf8_lossy(&out.stdout);
+    assert!(v.contains("PHP 8.3."), "unexpected php -v: {v}");
+
+    // The shared extensions the managed php.ini names have to exist as .so,
+    // or PHP logs "Unable to load dynamic library" on every request.
+    for ext in ["mysqli.so", "curl.so", "gd.so", "opcache.so"] {
+        assert!(
+            dir.join("ext").join(ext).is_file(),
+            "missing {ext}. It was built static instead of shared"
+        );
+    }
+}

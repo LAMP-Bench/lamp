@@ -358,5 +358,23 @@
   },
   "services": {
     "exitedImmediately": "{{service}} a démarré puis s’est arrêté aussitôt. Le port est probablement déjà utilisé — une autre copie en cours, ou un processus resté d’une session précédente. Consultez Logs → {{service}} pour la raison."
+  },
+  "sourceBuild": {
+    "compile": "Compiler",
+    "rowHint": "Aucun binaire précompilé pour cette plateforme, compilez-le ici",
+    "title": "Compiler {{name}} depuis les sources",
+    "intro": "Aucun binaire précompilé n'existe pour {{distro}}. Lamp Bench peut compiler la version {{version}} sur cette machine. Comptez plusieurs minutes.",
+    "toolsNeeded": "Outils de compilation requis",
+    "toolsMissing": "Manquants : {{list}}",
+    "toolsCommand": "Lamp Bench exécutera ceci, avec votre autorisation :",
+    "toolsManual": "Gestionnaire de paquets non reconnu. Installez ceci vous-même, puis réessayez :",
+    "toolsNote": "C'est la seule étape qui utilise votre gestionnaire de paquets, et elle installe des outils de compilation, jamais un service.",
+    "copy": "Copier",
+    "start": "Installer les outils et compiler",
+    "startNoDeps": "Lancer la compilation",
+    "running": "Compilation…",
+    "ok": "Compilé avec succès",
+    "failed": "Échec de la compilation",
+    "close": "Fermer"
   }
 }

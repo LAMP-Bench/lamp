@@ -359,5 +359,23 @@
   },
   "services": {
     "exitedImmediately": "{{service}} ist gestartet und sofort wieder stehen geblieben. Wahrscheinlich ist der Port bereits belegt — eine zweite laufende Instanz oder ein Prozess aus einer früheren Sitzung. Der Grund steht in Logs → {{service}}."
+  },
+  "sourceBuild": {
+    "compile": "Kompilieren",
+    "rowHint": "Kein vorgefertigtes Binary für diese Plattform, hier kompilieren",
+    "title": "{{name}} aus dem Quellcode kompilieren",
+    "intro": "Für {{distro}} existiert kein vorgefertigtes Binary. Lamp Bench kann Version {{version}} auf diesem Rechner bauen. Rechne mit mehreren Minuten.",
+    "toolsNeeded": "Build-Werkzeuge erforderlich",
+    "toolsMissing": "Fehlt: {{list}}",
+    "toolsCommand": "Lamp Bench führt dies mit deiner Zustimmung aus:",
+    "toolsManual": "Paketmanager nicht erkannt. Installiere dies selbst und versuche es erneut:",
+    "toolsNote": "Der einzige Schritt, der deinen Paketmanager nutzt, er installiert Build-Werkzeuge, niemals einen Dienst.",
+    "copy": "Kopieren",
+    "start": "Werkzeuge installieren und kompilieren",
+    "startNoDeps": "Kompilieren starten",
+    "running": "Kompiliere…",
+    "ok": "Erfolgreich gebaut",
+    "failed": "Build fehlgeschlagen",
+    "close": "Schließen"
   }
 }

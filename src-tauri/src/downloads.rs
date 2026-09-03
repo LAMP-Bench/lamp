@@ -32,6 +32,9 @@ pub struct Entry {
     #[allow(dead_code)]
     pub bundled: bool,
     pub platforms: HashMap<String, PlatformEntry>,
+    /// How to build this component from source when no prebuilt binary
+    /// exists for the current platform. See `crate::build`.
+    pub source: Option<crate::build::SourceRecipe>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -253,14 +256,14 @@ pub const CANCELLED: &str = "Download cancelled.";
 /// never unpack a single non-Windows service no matter what URLs the manifest
 /// pinned.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum ArchiveFormat {
+pub(crate) enum ArchiveFormat {
     Zip,
     Tar,
     TarGz,
     TarXz,
 }
 
-fn detect_format(filename: &str) -> Result<ArchiveFormat, String> {
+pub(crate) fn detect_format(filename: &str) -> Result<ArchiveFormat, String> {
     let f = filename.to_ascii_lowercase();
     if f.ends_with(".zip") {
         Ok(ArchiveFormat::Zip)
@@ -481,7 +484,7 @@ fn is_safe_relative(rel: &str) -> bool {
             .any(|c| matches!(c, std::path::Component::ParentDir))
 }
 
-fn extract_zip(archive: &Path, target: &Path, strip: Option<&str>) -> Result<(), String> {
+pub(crate) fn extract_zip(archive: &Path, target: &Path, strip: Option<&str>) -> Result<(), String> {
     let file = fs::File::open(archive).map_err(|e| format!("open archive: {e}"))?;
     let mut zip = zip::ZipArchive::new(std::io::BufReader::new(file))
         .map_err(|e| format!("open zip: {e}"))?;
@@ -548,7 +551,7 @@ fn extract_zip(archive: &Path, target: &Path, strip: Option<&str>) -> Result<(),
     Ok(())
 }
 
-fn extract_tar(
+pub(crate) fn extract_tar(
     archive: &Path,
     target: &Path,
     format: ArchiveFormat,

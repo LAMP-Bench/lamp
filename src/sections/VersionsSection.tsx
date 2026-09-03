@@ -10,6 +10,7 @@ import {
   FiChevronUp,
   FiShield,
   FiX,
+  FiTool,
 } from "react-icons/fi";
 import { SiPhp } from "react-icons/si";
 import { useConfirm, useToast } from "../components/Toast";
@@ -19,6 +20,7 @@ import {
   useDownloadProgress,
 } from "../useDownloadProgress";
 import type { PhpExtension } from "../types";
+import { SourceBuildModal, useDepReport } from "../components/SourceBuild";
 
 /// Categorise a manifest entry name into a UI group. Anything PHP-ish goes
 /// to its own group; the core daemons are "runtimes"; everything else is a
@@ -139,18 +141,42 @@ export function VersionsSection() {
   }
 
   function UnavailableRow({ name }: { name: string }) {
+    const report = useDepReport(name);
+    const [open, setOpen] = useState(false);
+    const buildable = report?.buildable === true;
     return (
-      <div className="px-4 py-2 flex items-center gap-3 text-sm opacity-60">
+      <div className={`px-4 py-2 flex items-center gap-3 text-sm ${buildable ? "" : "opacity-60"}`}>
         <FiPackage className="text-neutral-400 shrink-0" />
         <code className="flex-1 text-neutral-500 font-mono text-xs truncate">
           {name}
         </code>
-        <span
-          className="text-[11px] text-neutral-400 border border-neutral-200 rounded px-2 py-1"
-          title={t("versions.unavailableHint")}
-        >
-          {t("versions.unavailable")}
-        </span>
+        {buildable ? (
+          <button
+            onClick={() => setOpen(true)}
+            className="px-2 py-1 rounded border border-violet-300 text-violet-700 hover:bg-violet-50 text-xs flex items-center gap-1"
+            title={t("sourceBuild.rowHint")}
+          >
+            <FiTool />
+            {t("sourceBuild.compile")}
+          </button>
+        ) : (
+          <span
+            className="text-[11px] text-neutral-400 border border-neutral-200 rounded px-2 py-1"
+            title={t("versions.unavailableHint")}
+          >
+            {t("versions.unavailable")}
+          </span>
+        )}
+        {open && report && (
+          <SourceBuildModal
+            name={name}
+            report={report}
+            onClose={() => setOpen(false)}
+            onBuilt={() => {
+              refresh();
+            }}
+          />
+        )}
       </div>
     );
   }

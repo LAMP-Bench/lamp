@@ -359,5 +359,23 @@
   },
   "services": {
     "exitedImmediately": "{{service}} başladı ve hemen durdu. Büyük olasılıkla bağlantı noktası zaten kullanımda — çalışan başka bir kopya ya da önceki oturumdan kalan bir süreç. Nedeni Günlükler → {{service}} bölümünde."
+  },
+  "sourceBuild": {
+    "compile": "Derle",
+    "rowHint": "Bu platform için hazır ikili dosya yok, burada derleyin",
+    "title": "{{name}} bileşenini kaynaktan derle",
+    "intro": "{{distro}} için hazır bir ikili dosya yok. Lamp Bench {{version}} sürümünü bu makinede derleyebilir. Birkaç dakika sürer.",
+    "toolsNeeded": "Derleme araçları gerekli",
+    "toolsMissing": "Eksik: {{list}}",
+    "toolsCommand": "Lamp Bench izninizle şunu çalıştıracak:",
+    "toolsManual": "Paket yöneticisi tanınmadı. Bunları kendiniz kurup yeniden deneyin:",
+    "toolsNote": "Paket yöneticinizi kullanan tek adım budur ve yalnızca derleme araçları kurar, asla bir servis değil.",
+    "copy": "Kopyala",
+    "start": "Araçları kur ve derle",
+    "startNoDeps": "Derlemeyi başlat",
+    "running": "Derleniyor…",
+    "ok": "Başarıyla derlendi",
+    "failed": "Derleme başarısız",
+    "close": "Kapat"
   }
 }

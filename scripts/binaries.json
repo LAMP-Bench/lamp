@@ -10,6 +10,75 @@
         "sha256": "2CD1F349B6705E43E784E876A233EEB1A859FA6B8ABC693A91F87B35A368F7F9",
         "strip_root_dir": "Apache24"
       }
+    },
+    "source": {
+      "version": "2.4.66",
+      "url": "https://archive.apache.org/dist/httpd/httpd-2.4.66.tar.gz",
+      "sha256": "442184763B60936471B88A91275F79D2407733B7AAC27E345F270E8BC31C3D49",
+      "strip_root_dir": "httpd-2.4.66",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make",
+          "apr-1-config",
+          "apu-1-config",
+          "pcre2-config"
+        ],
+        "pkgconfig": [
+          "openssl"
+        ]
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config",
+          "libapr1-dev",
+          "libaprutil1-dev",
+          "libpcre2-dev",
+          "libssl-dev",
+          "libexpat1-dev"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config",
+          "apr-devel",
+          "apr-util-devel",
+          "pcre2-devel",
+          "openssl-devel",
+          "expat-devel"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf",
+          "apr",
+          "apr-util",
+          "pcre2",
+          "openssl",
+          "expat"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config",
+          "libapr1-devel",
+          "libapr-util1-devel",
+          "pcre2-devel",
+          "libopenssl-devel",
+          "libexpat-devel"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf",
+          "apr-dev",
+          "apr-util-dev",
+          "pcre2-dev",
+          "openssl-dev",
+          "expat-dev"
+        ]
+      }
     }
   },
   "mod_fcgid": {
@@ -21,6 +90,70 @@
         "filename": "mod_fcgid-2.3.10-win64-VS17.zip",
         "url": "https://www.apachelounge.com/download/VS17/modules/mod_fcgid-2.3.10-win64-VS17.zip",
         "sha256": "CF3DED8953863C68FC522EE48F516565E67E18B180B9E5B147668C04FA5DC46D"
+      }
+    },
+    "source": {
+      "version": "2.3.9",
+      "url": "https://archive.apache.org/dist/httpd/mod_fcgid/mod_fcgid-2.3.9.tar.gz",
+      "sha256": "1CBAD345E3376B5D7C8F9A62B471EDD7FA892695B90B79502F326B4692A679CF",
+      "strip_root_dir": "mod_fcgid-2.3.9",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make"
+        ],
+        "pkgconfig": []
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config",
+          "libapr1-dev",
+          "libaprutil1-dev",
+          "libpcre2-dev",
+          "libssl-dev",
+          "libexpat1-dev"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config",
+          "apr-devel",
+          "apr-util-devel",
+          "pcre2-devel",
+          "openssl-devel",
+          "expat-devel"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf",
+          "apr",
+          "apr-util",
+          "pcre2",
+          "openssl",
+          "expat"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config",
+          "libapr1-devel",
+          "libapr-util1-devel",
+          "pcre2-devel",
+          "libopenssl-devel",
+          "libexpat-devel"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf",
+          "apr-dev",
+          "apr-util-dev",
+          "pcre2-dev",
+          "openssl-dev",
+          "expat-dev"
+        ]
       }
     }
   },
@@ -34,6 +167,64 @@
         "url": "https://nginx.org/download/nginx-1.30.0.zip",
         "sha256": "70F52D646E86D88FDBD03CD968AFDD08F9DE819ECBEFC06E6135CFBB7EABE2F9",
         "strip_root_dir": "nginx-1.30.0"
+      }
+    },
+    "source": {
+      "version": "1.30.0",
+      "url": "https://nginx.org/download/nginx-1.30.0.tar.gz",
+      "sha256": "058188C64BF22BAECAA72B809A6318A4F9BA623889C554FEAB03F7CB853AB31B",
+      "strip_root_dir": "nginx-1.30.0",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make"
+        ],
+        "pkgconfig": [
+          "libpcre2-8",
+          "openssl",
+          "zlib"
+        ]
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config",
+          "libpcre2-dev",
+          "libssl-dev",
+          "zlib1g-dev"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config",
+          "pcre2-devel",
+          "openssl-devel",
+          "zlib-devel"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf",
+          "pcre2",
+          "openssl",
+          "zlib"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config",
+          "pcre2-devel",
+          "libopenssl-devel",
+          "zlib-devel"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf",
+          "pcre2-dev",
+          "openssl-dev",
+          "zlib-dev"
+        ]
       }
     }
   },
@@ -121,6 +312,45 @@
         "url": "https://github.com/tporadowski/redis/releases/download/v5.0.14.1/Redis-x64-5.0.14.1.zip",
         "sha256": "018EA18A35876383CBB5F4CD0258ADFC87747CF9D619BCE1CF73A2E36F720CCF"
       }
+    },
+    "source": {
+      "version": "7.2.5",
+      "url": "https://download.redis.io/releases/redis-7.2.5.tar.gz",
+      "sha256": "5981179706F8391F03BE91D951ACAFAEDA91AF7FAC56BEFFB2701963103E423D",
+      "strip_root_dir": "redis-7.2.5",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make"
+        ],
+        "pkgconfig": []
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf"
+        ]
+      }
     }
   },
   "php-8.1": {
@@ -132,6 +362,129 @@
         "filename": "php-8.1.34-nts-Win32-vs16-x64.zip",
         "url": "https://windows.php.net/downloads/releases/archives/php-8.1.34-nts-Win32-vs16-x64.zip",
         "sha256": "9CFE246CB144076C16F5913A3EF88A474C3DD7E60F0F0C8BB95FAF68674016CC"
+      }
+    },
+    "source": {
+      "version": "8.1.34",
+      "url": "https://www.php.net/distributions/php-8.1.34.tar.xz",
+      "sha256": "FFA9E0982E82EEAEA848F57687B425ED173AA278FE563001310AE2638DB5C251",
+      "strip_root_dir": "php-8.1.34",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make",
+          "pkg-config",
+          "re2c",
+          "bison"
+        ],
+        "pkgconfig": [
+          "libxml-2.0",
+          "sqlite3",
+          "libcurl",
+          "oniguruma",
+          "libzip",
+          "icu-uc",
+          "libpng",
+          "freetype2",
+          "openssl",
+          "zlib"
+        ]
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config",
+          "libxml2-dev",
+          "libsqlite3-dev",
+          "libcurl4-openssl-dev",
+          "libonig-dev",
+          "libzip-dev",
+          "libicu-dev",
+          "libpng-dev",
+          "libjpeg-dev",
+          "libfreetype-dev",
+          "libssl-dev",
+          "zlib1g-dev",
+          "libbz2-dev",
+          "re2c",
+          "bison"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config",
+          "libxml2-devel",
+          "sqlite-devel",
+          "libcurl-devel",
+          "oniguruma-devel",
+          "libzip-devel",
+          "libicu-devel",
+          "libpng-devel",
+          "libjpeg-turbo-devel",
+          "freetype-devel",
+          "openssl-devel",
+          "zlib-devel",
+          "bzip2-devel",
+          "re2c",
+          "bison"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf",
+          "libxml2",
+          "sqlite",
+          "curl",
+          "oniguruma",
+          "libzip",
+          "icu",
+          "libpng",
+          "libjpeg-turbo",
+          "freetype2",
+          "openssl",
+          "zlib",
+          "bzip2",
+          "re2c",
+          "bison"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config",
+          "libxml2-devel",
+          "sqlite3-devel",
+          "libcurl-devel",
+          "oniguruma-devel",
+          "libzip-devel",
+          "libicu-devel",
+          "libpng16-devel",
+          "libjpeg8-devel",
+          "freetype2-devel",
+          "libopenssl-devel",
+          "zlib-devel",
+          "libbz2-devel",
+          "re2c",
+          "bison"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf",
+          "libxml2-dev",
+          "sqlite-dev",
+          "curl-dev",
+          "oniguruma-dev",
+          "libzip-dev",
+          "icu-dev",
+          "libpng-dev",
+          "libjpeg-turbo-dev",
+          "freetype-dev",
+          "openssl-dev",
+          "zlib-dev",
+          "bzip2-dev",
+          "re2c",
+          "bison"
+        ]
       }
     }
   },
@@ -145,6 +498,129 @@
         "url": "https://windows.php.net/downloads/releases/archives/php-8.2.31-nts-Win32-vs16-x64.zip",
         "sha256": "941BD3B87683EB16D5FFA7F5997DE9A5E07EF08BA875048E5C4D95B4FC778162"
       }
+    },
+    "source": {
+      "version": "8.2.31",
+      "url": "https://www.php.net/distributions/php-8.2.31.tar.xz",
+      "sha256": "95EAE411D594FE6F6E5678B76645DC13AE47D3C0A5325C1D969B58DEA56EE45A",
+      "strip_root_dir": "php-8.2.31",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make",
+          "pkg-config",
+          "re2c",
+          "bison"
+        ],
+        "pkgconfig": [
+          "libxml-2.0",
+          "sqlite3",
+          "libcurl",
+          "oniguruma",
+          "libzip",
+          "icu-uc",
+          "libpng",
+          "freetype2",
+          "openssl",
+          "zlib"
+        ]
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config",
+          "libxml2-dev",
+          "libsqlite3-dev",
+          "libcurl4-openssl-dev",
+          "libonig-dev",
+          "libzip-dev",
+          "libicu-dev",
+          "libpng-dev",
+          "libjpeg-dev",
+          "libfreetype-dev",
+          "libssl-dev",
+          "zlib1g-dev",
+          "libbz2-dev",
+          "re2c",
+          "bison"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config",
+          "libxml2-devel",
+          "sqlite-devel",
+          "libcurl-devel",
+          "oniguruma-devel",
+          "libzip-devel",
+          "libicu-devel",
+          "libpng-devel",
+          "libjpeg-turbo-devel",
+          "freetype-devel",
+          "openssl-devel",
+          "zlib-devel",
+          "bzip2-devel",
+          "re2c",
+          "bison"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf",
+          "libxml2",
+          "sqlite",
+          "curl",
+          "oniguruma",
+          "libzip",
+          "icu",
+          "libpng",
+          "libjpeg-turbo",
+          "freetype2",
+          "openssl",
+          "zlib",
+          "bzip2",
+          "re2c",
+          "bison"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config",
+          "libxml2-devel",
+          "sqlite3-devel",
+          "libcurl-devel",
+          "oniguruma-devel",
+          "libzip-devel",
+          "libicu-devel",
+          "libpng16-devel",
+          "libjpeg8-devel",
+          "freetype2-devel",
+          "libopenssl-devel",
+          "zlib-devel",
+          "libbz2-devel",
+          "re2c",
+          "bison"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf",
+          "libxml2-dev",
+          "sqlite-dev",
+          "curl-dev",
+          "oniguruma-dev",
+          "libzip-dev",
+          "icu-dev",
+          "libpng-dev",
+          "libjpeg-turbo-dev",
+          "freetype-dev",
+          "openssl-dev",
+          "zlib-dev",
+          "bzip2-dev",
+          "re2c",
+          "bison"
+        ]
+      }
     }
   },
   "php-8.3": {
@@ -156,6 +632,129 @@
         "filename": "php-8.3.31-nts-Win32-vs16-x64.zip",
         "url": "https://windows.php.net/downloads/releases/archives/php-8.3.31-nts-Win32-vs16-x64.zip",
         "sha256": "389C1327D325F6B6B3B892A5B2E1484CA5B5DF775B6C4DDF5D1B5DC3B34AC761"
+      }
+    },
+    "source": {
+      "version": "8.3.31",
+      "url": "https://www.php.net/distributions/php-8.3.31.tar.xz",
+      "sha256": "66410CEE07F4B2BAEB0843140BB2A2B52EF930B5CF9B3D6E6D158B33AAE8FA37",
+      "strip_root_dir": "php-8.3.31",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make",
+          "pkg-config",
+          "re2c",
+          "bison"
+        ],
+        "pkgconfig": [
+          "libxml-2.0",
+          "sqlite3",
+          "libcurl",
+          "oniguruma",
+          "libzip",
+          "icu-uc",
+          "libpng",
+          "freetype2",
+          "openssl",
+          "zlib"
+        ]
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config",
+          "libxml2-dev",
+          "libsqlite3-dev",
+          "libcurl4-openssl-dev",
+          "libonig-dev",
+          "libzip-dev",
+          "libicu-dev",
+          "libpng-dev",
+          "libjpeg-dev",
+          "libfreetype-dev",
+          "libssl-dev",
+          "zlib1g-dev",
+          "libbz2-dev",
+          "re2c",
+          "bison"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config",
+          "libxml2-devel",
+          "sqlite-devel",
+          "libcurl-devel",
+          "oniguruma-devel",
+          "libzip-devel",
+          "libicu-devel",
+          "libpng-devel",
+          "libjpeg-turbo-devel",
+          "freetype-devel",
+          "openssl-devel",
+          "zlib-devel",
+          "bzip2-devel",
+          "re2c",
+          "bison"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf",
+          "libxml2",
+          "sqlite",
+          "curl",
+          "oniguruma",
+          "libzip",
+          "icu",
+          "libpng",
+          "libjpeg-turbo",
+          "freetype2",
+          "openssl",
+          "zlib",
+          "bzip2",
+          "re2c",
+          "bison"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config",
+          "libxml2-devel",
+          "sqlite3-devel",
+          "libcurl-devel",
+          "oniguruma-devel",
+          "libzip-devel",
+          "libicu-devel",
+          "libpng16-devel",
+          "libjpeg8-devel",
+          "freetype2-devel",
+          "libopenssl-devel",
+          "zlib-devel",
+          "libbz2-devel",
+          "re2c",
+          "bison"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf",
+          "libxml2-dev",
+          "sqlite-dev",
+          "curl-dev",
+          "oniguruma-dev",
+          "libzip-dev",
+          "icu-dev",
+          "libpng-dev",
+          "libjpeg-turbo-dev",
+          "freetype-dev",
+          "openssl-dev",
+          "zlib-dev",
+          "bzip2-dev",
+          "re2c",
+          "bison"
+        ]
       }
     }
   },
@@ -169,6 +768,129 @@
         "url": "https://windows.php.net/downloads/releases/archives/php-8.4.21-nts-Win32-vs17-x64.zip",
         "sha256": "2CB57D0D3A17B1248C6A53B600719D4B051E1C374373404D5031409C0725031D"
       }
+    },
+    "source": {
+      "version": "8.4.21",
+      "url": "https://www.php.net/distributions/php-8.4.21.tar.xz",
+      "sha256": "7CF5D8AB12C3B2016875BCFAEC71BEF1EF0B07BED6148F2C447577074431F984",
+      "strip_root_dir": "php-8.4.21",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make",
+          "pkg-config",
+          "re2c",
+          "bison"
+        ],
+        "pkgconfig": [
+          "libxml-2.0",
+          "sqlite3",
+          "libcurl",
+          "oniguruma",
+          "libzip",
+          "icu-uc",
+          "libpng",
+          "freetype2",
+          "openssl",
+          "zlib"
+        ]
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config",
+          "libxml2-dev",
+          "libsqlite3-dev",
+          "libcurl4-openssl-dev",
+          "libonig-dev",
+          "libzip-dev",
+          "libicu-dev",
+          "libpng-dev",
+          "libjpeg-dev",
+          "libfreetype-dev",
+          "libssl-dev",
+          "zlib1g-dev",
+          "libbz2-dev",
+          "re2c",
+          "bison"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config",
+          "libxml2-devel",
+          "sqlite-devel",
+          "libcurl-devel",
+          "oniguruma-devel",
+          "libzip-devel",
+          "libicu-devel",
+          "libpng-devel",
+          "libjpeg-turbo-devel",
+          "freetype-devel",
+          "openssl-devel",
+          "zlib-devel",
+          "bzip2-devel",
+          "re2c",
+          "bison"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf",
+          "libxml2",
+          "sqlite",
+          "curl",
+          "oniguruma",
+          "libzip",
+          "icu",
+          "libpng",
+          "libjpeg-turbo",
+          "freetype2",
+          "openssl",
+          "zlib",
+          "bzip2",
+          "re2c",
+          "bison"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config",
+          "libxml2-devel",
+          "sqlite3-devel",
+          "libcurl-devel",
+          "oniguruma-devel",
+          "libzip-devel",
+          "libicu-devel",
+          "libpng16-devel",
+          "libjpeg8-devel",
+          "freetype2-devel",
+          "libopenssl-devel",
+          "zlib-devel",
+          "libbz2-devel",
+          "re2c",
+          "bison"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf",
+          "libxml2-dev",
+          "sqlite-dev",
+          "curl-dev",
+          "oniguruma-dev",
+          "libzip-dev",
+          "icu-dev",
+          "libpng-dev",
+          "libjpeg-turbo-dev",
+          "freetype-dev",
+          "openssl-dev",
+          "zlib-dev",
+          "bzip2-dev",
+          "re2c",
+          "bison"
+        ]
+      }
     }
   },
   "php-8.5": {
@@ -180,6 +902,129 @@
         "filename": "php-8.5.6-nts-Win32-vs17-x64.zip",
         "url": "https://windows.php.net/downloads/releases/archives/php-8.5.6-nts-Win32-vs17-x64.zip",
         "sha256": "E25CC9400A7D176F18074F677EF0159D6B04AECFB255C924D808B7144075092F"
+      }
+    },
+    "source": {
+      "version": "8.5.6",
+      "url": "https://www.php.net/distributions/php-8.5.6.tar.xz",
+      "sha256": "826C600B7C6F956BD335558CA3BDBCAB23B22126C1CC8D9348BE2280A2204BB7",
+      "strip_root_dir": "php-8.5.6",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make",
+          "pkg-config",
+          "re2c",
+          "bison"
+        ],
+        "pkgconfig": [
+          "libxml-2.0",
+          "sqlite3",
+          "libcurl",
+          "oniguruma",
+          "libzip",
+          "icu-uc",
+          "libpng",
+          "freetype2",
+          "openssl",
+          "zlib"
+        ]
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config",
+          "libxml2-dev",
+          "libsqlite3-dev",
+          "libcurl4-openssl-dev",
+          "libonig-dev",
+          "libzip-dev",
+          "libicu-dev",
+          "libpng-dev",
+          "libjpeg-dev",
+          "libfreetype-dev",
+          "libssl-dev",
+          "zlib1g-dev",
+          "libbz2-dev",
+          "re2c",
+          "bison"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config",
+          "libxml2-devel",
+          "sqlite-devel",
+          "libcurl-devel",
+          "oniguruma-devel",
+          "libzip-devel",
+          "libicu-devel",
+          "libpng-devel",
+          "libjpeg-turbo-devel",
+          "freetype-devel",
+          "openssl-devel",
+          "zlib-devel",
+          "bzip2-devel",
+          "re2c",
+          "bison"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf",
+          "libxml2",
+          "sqlite",
+          "curl",
+          "oniguruma",
+          "libzip",
+          "icu",
+          "libpng",
+          "libjpeg-turbo",
+          "freetype2",
+          "openssl",
+          "zlib",
+          "bzip2",
+          "re2c",
+          "bison"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config",
+          "libxml2-devel",
+          "sqlite3-devel",
+          "libcurl-devel",
+          "oniguruma-devel",
+          "libzip-devel",
+          "libicu-devel",
+          "libpng16-devel",
+          "libjpeg8-devel",
+          "freetype2-devel",
+          "libopenssl-devel",
+          "zlib-devel",
+          "libbz2-devel",
+          "re2c",
+          "bison"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf",
+          "libxml2-dev",
+          "sqlite-dev",
+          "curl-dev",
+          "oniguruma-dev",
+          "libzip-dev",
+          "icu-dev",
+          "libpng-dev",
+          "libjpeg-turbo-dev",
+          "freetype-dev",
+          "openssl-dev",
+          "zlib-dev",
+          "bzip2-dev",
+          "re2c",
+          "bison"
+        ]
       }
     }
   },
@@ -193,6 +1038,45 @@
         "url": "https://xdebug.org/files/php_xdebug-3.5.1-8.1-nts-vs16-x86_64.dll",
         "sha256": "A39D322CF70C49D5681D1926D8E496597A116D6829FB110973A51980267B95FA"
       }
+    },
+    "source": {
+      "version": "3.5.1",
+      "url": "https://xdebug.org/files/xdebug-3.5.1.tgz",
+      "sha256": "0F26849A5EDF3D9120EDC100219854599D54F923A8A4D1CB4FE4403520E49678",
+      "strip_root_dir": "xdebug-3.5.1",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make"
+        ],
+        "pkgconfig": []
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf"
+        ]
+      }
     }
   },
   "xdebug-8.2": {
@@ -204,6 +1088,45 @@
         "filename": "php_xdebug-3.5.1-8.2-nts-vs16-x86_64.dll",
         "url": "https://xdebug.org/files/php_xdebug-3.5.1-8.2-nts-vs16-x86_64.dll",
         "sha256": "00AF08ED9936E2C768F48308DCEB91AAD6A0EDB0DB7F29695137663B9FC4EF25"
+      }
+    },
+    "source": {
+      "version": "3.5.1",
+      "url": "https://xdebug.org/files/xdebug-3.5.1.tgz",
+      "sha256": "0F26849A5EDF3D9120EDC100219854599D54F923A8A4D1CB4FE4403520E49678",
+      "strip_root_dir": "xdebug-3.5.1",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make"
+        ],
+        "pkgconfig": []
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf"
+        ]
       }
     }
   },
@@ -217,6 +1140,45 @@
         "url": "https://xdebug.org/files/php_xdebug-3.5.1-8.3-nts-vs16-x86_64.dll",
         "sha256": "27F081F0EA3012B44DEFCCC99CC21D75DB3C4CEFFB8E1435048FB300C9AAC189"
       }
+    },
+    "source": {
+      "version": "3.5.1",
+      "url": "https://xdebug.org/files/xdebug-3.5.1.tgz",
+      "sha256": "0F26849A5EDF3D9120EDC100219854599D54F923A8A4D1CB4FE4403520E49678",
+      "strip_root_dir": "xdebug-3.5.1",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make"
+        ],
+        "pkgconfig": []
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf"
+        ]
+      }
     }
   },
   "xdebug-8.4": {
@@ -229,6 +1191,45 @@
         "url": "https://xdebug.org/files/php_xdebug-3.5.1-8.4-nts-vs17-x86_64.dll",
         "sha256": "B386583D38741652135CB34A1B816855819C37D13C66F79CB8B107751A858BE3"
       }
+    },
+    "source": {
+      "version": "3.5.1",
+      "url": "https://xdebug.org/files/xdebug-3.5.1.tgz",
+      "sha256": "0F26849A5EDF3D9120EDC100219854599D54F923A8A4D1CB4FE4403520E49678",
+      "strip_root_dir": "xdebug-3.5.1",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make"
+        ],
+        "pkgconfig": []
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf"
+        ]
+      }
     }
   },
   "xdebug-8.5": {
@@ -240,6 +1241,45 @@
         "filename": "php_xdebug-3.5.1-8.5-nts-vs17-x86_64.dll",
         "url": "https://xdebug.org/files/php_xdebug-3.5.1-8.5-nts-vs17-x86_64.dll",
         "sha256": "8CDDAFD5326A97ED2B0321CD0529A76178238FB628E62C646F299AB4A1357E36"
+      }
+    },
+    "source": {
+      "version": "3.5.1",
+      "url": "https://xdebug.org/files/xdebug-3.5.1.tgz",
+      "sha256": "0F26849A5EDF3D9120EDC100219854599D54F923A8A4D1CB4FE4403520E49678",
+      "strip_root_dir": "xdebug-3.5.1",
+      "probe": {
+        "bins": [
+          "gcc",
+          "make"
+        ],
+        "pkgconfig": []
+      },
+      "build_deps": {
+        "debian": [
+          "build-essential",
+          "pkg-config"
+        ],
+        "fedora": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkgconf-pkg-config"
+        ],
+        "arch": [
+          "base-devel",
+          "pkgconf"
+        ],
+        "suse": [
+          "gcc",
+          "gcc-c++",
+          "make",
+          "pkg-config"
+        ],
+        "alpine": [
+          "build-base",
+          "pkgconf"
+        ]
       }
     }
   },

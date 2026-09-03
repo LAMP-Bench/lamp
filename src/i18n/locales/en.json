@@ -358,5 +358,23 @@
   },
   "services": {
     "exitedImmediately": "{{service}} started and then stopped right away. The port is probably already in use — another copy still running, or a leftover process from a previous session. Check Logs → {{service}} for the reason."
+  },
+  "sourceBuild": {
+    "compile": "Compile",
+    "rowHint": "No prebuilt binary for this platform, compile it here",
+    "title": "Compile {{name}} from source",
+    "intro": "No prebuilt binary exists for {{distro}}. Lamp Bench can build version {{version}} on this machine. Expect several minutes.",
+    "toolsNeeded": "Build tools required",
+    "toolsMissing": "Missing: {{list}}",
+    "toolsCommand": "Lamp Bench will run this, with your authorisation:",
+    "toolsManual": "Package manager not recognised. Install these yourself, then retry:",
+    "toolsNote": "This is the only step that uses your package manager, and it installs build tools, never a service.",
+    "copy": "Copy",
+    "start": "Install tools and compile",
+    "startNoDeps": "Start compiling",
+    "running": "Compiling…",
+    "ok": "Built successfully",
+    "failed": "Build failed",
+    "close": "Close"
   }
 }

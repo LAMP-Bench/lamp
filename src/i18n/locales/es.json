@@ -358,5 +358,23 @@
   },
   "services": {
     "exitedImmediately": "{{service}} arrancó y se detuvo inmediatamente. Lo más probable es que el puerto ya esté ocupado — otra copia en marcha, o un proceso que quedó de una sesión anterior. Mira Logs → {{service}} para ver el motivo."
+  },
+  "sourceBuild": {
+    "compile": "Compilar",
+    "rowHint": "No hay binario precompilado para esta plataforma, compílalo aquí",
+    "title": "Compilar {{name}} desde el código fuente",
+    "intro": "No existe binario precompilado para {{distro}}. Lamp Bench puede compilar la versión {{version}} en esta máquina. Tardará varios minutos.",
+    "toolsNeeded": "Hacen falta herramientas de compilación",
+    "toolsMissing": "Faltan: {{list}}",
+    "toolsCommand": "Lamp Bench ejecutará esto, con tu autorización:",
+    "toolsManual": "Gestor de paquetes no reconocido. Instala esto a mano y vuelve a intentarlo:",
+    "toolsNote": "Es el único paso que usa tu gestor de paquetes, y solo instala herramientas de compilación, nunca un servicio.",
+    "copy": "Copiar",
+    "start": "Instalar herramientas y compilar",
+    "startNoDeps": "Empezar a compilar",
+    "running": "Compilando…",
+    "ok": "Compilado correctamente",
+    "failed": "La compilación falló",
+    "close": "Cerrar"
   }
 }

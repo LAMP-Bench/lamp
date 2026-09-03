@@ -44,5 +44,6 @@ src-tauri/.updater-keys/*.key
 LANDING_PAGE_PROMPT.md
 AUDIT.md
 SPRINTS.md
+LINUX.md
 ORG_README.md
 TODO-LINUX.md

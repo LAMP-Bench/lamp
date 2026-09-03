@@ -359,5 +359,23 @@
   },
   "services": {
     "exitedImmediately": "O {{service}} arrancou e parou logo a seguir. Provavelmente a porta já está ocupada — outra cópia ainda em execução, ou um processo que ficou de uma sessão anterior. O motivo está em Registos → {{service}}."
+  },
+  "sourceBuild": {
+    "compile": "Compilar",
+    "rowHint": "Sem binário pré-compilado para esta plataforma, compile aqui",
+    "title": "Compilar {{name}} a partir do código-fonte",
+    "intro": "Não existe binário pré-compilado para {{distro}}. O Lamp Bench pode compilar a versão {{version}} nesta máquina. Conte com vários minutos.",
+    "toolsNeeded": "São necessárias ferramentas de compilação",
+    "toolsMissing": "Faltam: {{list}}",
+    "toolsCommand": "O Lamp Bench vai executar isto, com a sua autorização:",
+    "toolsManual": "Gestor de pacotes não reconhecido. Instale isto manualmente e tente de novo:",
+    "toolsNote": "É o único passo que usa o gestor de pacotes, e instala ferramentas de compilação, nunca um serviço.",
+    "copy": "Copiar",
+    "start": "Instalar ferramentas e compilar",
+    "startNoDeps": "Iniciar a compilação",
+    "running": "A compilar…",
+    "ok": "Compilado com sucesso",
+    "failed": "A compilação falhou",
+    "close": "Fechar"
   }
 }

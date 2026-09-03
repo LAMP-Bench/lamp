@@ -1,3 +1,4 @@
+mod build;
 mod cloud;
 mod cms;
 mod config_gen;
@@ -960,6 +961,75 @@ fn binary_remove(name: &str, state: tauri::State<AppState>) -> Result<(), String
 /// Whether this component has a download for the current OS at all. Lets the
 /// UI grey out what simply isn't packaged for the platform rather than
 /// showing an Install button that errors.
+/// What building this component from source would need: the distro we
+/// detected, which probes failed, and the exact package-manager command.
+/// Read-only. Nothing is installed or compiled by asking.
+#[tauri::command]
+fn source_build_report(name: String) -> build::DepReport {
+    build::dep_report(&name)
+}
+
+/// Install the build dependencies. Elevated, and only ever reached after the
+/// user has seen the report and the exact command in `source_build_report`.
+#[tauri::command]
+fn source_build_install_deps(name: String) -> Result<(), String> {
+    build::install_deps(&name)
+}
+
+/// Compile a component from source into `resources/`, streaming the build log
+/// to the frontend as `source-build-log` events.
+///
+/// Blocks the command thread for minutes, the same way `binary_download`
+/// blocks for a large transfer. Building a PHP version also builds the
+/// matching Xdebug, mirroring what the prebuilt path does, a failure there
+/// is non-fatal, since a brand-new PHP often has no Xdebug release yet.
+#[tauri::command]
+fn source_build(
+    name: String,
+    app: tauri::AppHandle,
+    state: tauri::State<AppState>,
+) -> Result<(), String> {
+    let jobs = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(2);
+    let work_root = state.runtime_dir.join("build");
+
+    let emit_name = name.clone();
+    let app_for_log = app.clone();
+    let mut log = move |line: &str| {
+        let _ = app_for_log.emit(
+            "source-build-log",
+            serde_json::json!({ "name": emit_name, "line": line }),
+        );
+    };
+
+    {
+        let mut ctx = build::Ctx {
+            resources_dir: state.resources_dir.clone(),
+            work_dir: work_root.join(&name),
+            jobs,
+            log: &mut log,
+        };
+        build::build(&name, &mut ctx)?;
+    }
+
+    if let Some(version) = name.strip_prefix("php-") {
+        let xdebug = format!("xdebug-{version}");
+        if build::recipe_for(&xdebug).is_some() {
+            let mut ctx = build::Ctx {
+                resources_dir: state.resources_dir.clone(),
+                work_dir: work_root.join(&xdebug),
+                jobs,
+                log: &mut log,
+            };
+            if let Err(e) = build::build(&xdebug, &mut ctx) {
+                log(&format!("xdebug build skipped: {e}"));
+            }
+        }
+    }
+    Ok(())
+}
+
 #[tauri::command]
 fn binary_available(name: String) -> bool {
     downloads::is_available_for_platform(&name)
@@ -1504,6 +1574,9 @@ pub fn run() {
             binary_remove,
             binary_list,
             binary_available,
+            source_build_report,
+            source_build_install_deps,
+            source_build,
             php_catalog,
             php_install,
             git_available,
