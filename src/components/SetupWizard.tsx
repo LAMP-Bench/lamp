@@ -36,12 +36,23 @@ export async function setupNeeded(): Promise<{
   // error and the user can Skip. This is more honest than the old
   // platform-supported gate that pretended Linux/macOS users had nothing to
   // download even though the app then refused to start any service.
-  const checks = await Promise.all(
-    ESSENTIALS.map((e) =>
-      invoke<boolean>("binary_installed", { name: e.name }).catch(() => false),
+  // Only components that actually have a download for this OS can gate the
+  // wizard. Counting the ones with no build as "missing" would re-show the
+  // setup screen on every launch, forever, with nothing the user could do.
+  const [checks, availability] = await Promise.all([
+    Promise.all(
+      ESSENTIALS.map((e) =>
+        invoke<boolean>("binary_installed", { name: e.name }).catch(() => false),
+      ),
     ),
-  );
-  return { needed: !checks.every(Boolean), platformSupported: true };
+    Promise.all(
+      ESSENTIALS.map((e) =>
+        invoke<boolean>("binary_available", { name: e.name }).catch(() => true),
+      ),
+    ),
+  ]);
+  const needed = ESSENTIALS.some((_, i) => availability[i] && !checks[i]);
+  return { needed, platformSupported: true };
 }
 
 type ItemStatus =

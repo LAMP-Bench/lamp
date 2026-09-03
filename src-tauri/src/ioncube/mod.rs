@@ -60,10 +60,24 @@ pub fn install(php_version: &str, php_dir: &Path, platform: &str) -> Result<(), 
                 format!("ioncube_loader_win_{php_version}.dll"),
             )
         }
+        "linux-x64" => (
+            "https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz"
+                .to_string(),
+            format!("ioncube_loader_lin_{php_version}.so"),
+        ),
+        "macos-arm64" => (
+            "https://downloads.ioncube.com/loader_downloads/ioncube_loaders_dar_arm64.tar.gz"
+                .to_string(),
+            format!("ioncube_loader_dar_{php_version}.so"),
+        ),
+        "macos-x64" => (
+            "https://downloads.ioncube.com/loader_downloads/ioncube_loaders_dar_x86-64.tar.gz"
+                .to_string(),
+            format!("ioncube_loader_dar_{php_version}.so"),
+        ),
         other => {
             return Err(format!(
-                "ionCube auto-install is only wired for Windows right now (got {other}). \
-                 Linux/macOS PHP binaries aren't bundled yet."
+                "ionCube publishes no loader package for {other}."
             ))
         }
     };
@@ -104,23 +118,27 @@ pub fn install(php_version: &str, php_dir: &Path, platform: &str) -> Result<(), 
     }
 
     // Pull just the one loader matching this PHP version out of the archive.
-    let cursor = std::io::Cursor::new(buf);
-    let mut archive = zip::ZipArchive::new(cursor).map_err(|e| format!("open ionCube zip: {e}"))?;
+    // Windows packages are zips, Unix ones tar.gz, so dispatch on the magic
+    // bytes rather than the URL.
     let ext_dir = php_dir.join("ext");
     fs::create_dir_all(&ext_dir).map_err(|e| e.to_string())?;
-
-    let mut installed_path: Option<std::path::PathBuf> = None;
-    for i in 0..archive.len() {
-        let mut file = archive.by_index(i).map_err(|e| format!("zip entry {i}: {e}"))?;
-        let name = file.name().replace('\\', "/");
-        if name.ends_with(&loader_match) {
-            let target = ext_dir.join(&loader_match);
-            let mut out = fs::File::create(&target).map_err(|e| e.to_string())?;
-            std::io::copy(&mut file, &mut out).map_err(|e| e.to_string())?;
-            installed_path = Some(target);
-            break;
-        }
-    }
+    let target = ext_dir.join(&loader_match);
+    let installed_path = if buf.starts_with(b"PK") {
+        extract_from_zip(buf, &loader_match, &target)?
+    } else if buf.starts_with(&[0x1f, 0x8b]) {
+        extract_from_targz(buf, &loader_match, &target)?
+    } else {
+        let preview: String = buf
+            .iter()
+            .take(120)
+            .map(|&b| if b.is_ascii_graphic() || b == b' ' { b as char } else { '.' })
+            .collect();
+        return Err(format!(
+            "ionCube download wasn't an archive ({} bytes). The server likely \
+             returned an error page. First bytes: {preview}",
+            buf.len()
+        ));
+    };
 
     let loader_path = installed_path.ok_or_else(|| {
         format!(
@@ -131,6 +149,56 @@ pub fn install(php_version: &str, php_dir: &Path, platform: &str) -> Result<(), 
 
     register_zend_extension(php_dir, &loader_path)?;
     Ok(())
+}
+
+/// Copy the archive member whose name ends with `loader_match` to `target`.
+/// `None` means the package has no loader for this PHP version, a PHP newer
+/// than ionCube supports, usually.
+fn extract_from_zip(
+    buf: Vec<u8>,
+    loader_match: &str,
+    target: &Path,
+) -> Result<Option<std::path::PathBuf>, String> {
+    let mut archive = zip::ZipArchive::new(std::io::Cursor::new(buf))
+        .map_err(|e| format!("open ionCube zip: {e}"))?;
+    for i in 0..archive.len() {
+        let mut file = archive
+            .by_index(i)
+            .map_err(|e| format!("ionCube zip entry {i}: {e}"))?;
+        let name = file.name().replace('\\', "/");
+        if name.ends_with(loader_match) {
+            let mut out = fs::File::create(target).map_err(|e| e.to_string())?;
+            std::io::copy(&mut file, &mut out).map_err(|e| e.to_string())?;
+            return Ok(Some(target.to_path_buf()));
+        }
+    }
+    Ok(None)
+}
+
+fn extract_from_targz(
+    buf: Vec<u8>,
+    loader_match: &str,
+    target: &Path,
+) -> Result<Option<std::path::PathBuf>, String> {
+    let decoder = flate2::read::GzDecoder::new(std::io::Cursor::new(buf));
+    let mut archive = tar::Archive::new(decoder);
+    let entries = archive
+        .entries()
+        .map_err(|e| format!("read ionCube tar: {e}"))?;
+    for entry in entries {
+        let mut entry = entry.map_err(|e| format!("ionCube tar entry: {e}"))?;
+        let name = entry
+            .path()
+            .map_err(|e| format!("ionCube tar entry path: {e}"))?
+            .to_string_lossy()
+            .to_string();
+        if name.ends_with(loader_match) {
+            let mut out = fs::File::create(target).map_err(|e| e.to_string())?;
+            std::io::copy(&mut entry, &mut out).map_err(|e| e.to_string())?;
+            return Ok(Some(target.to_path_buf()));
+        }
+    }
+    Ok(None)
 }
 
 /// Ensure the version's php.ini loads the ionCube loader as a zend_extension.

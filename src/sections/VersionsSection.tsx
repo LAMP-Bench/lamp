@@ -39,6 +39,9 @@ export function VersionsSection() {
   const toast = useToast();
   const [names, setNames] = useState<string[]>([]);
   const [installed, setInstalled] = useState<Record<string, boolean>>({});
+  // Components with no binaries.json entry for the current OS. Listing them
+  // with a working Install button would be a lie.
+  const [available, setAvailable] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState<string | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [showMore, setShowMore] = useState(false);
@@ -55,6 +58,15 @@ export function VersionsSection() {
     const map: Record<string, boolean> = {};
     list.forEach((n, i) => (map[n] = flags[i]));
     setInstalled(map);
+
+    const avail = await Promise.all(
+      list.map((n) =>
+        invoke<boolean>("binary_available", { name: n }).catch(() => true)
+      )
+    );
+    const amap: Record<string, boolean> = {};
+    list.forEach((n, i) => (amap[n] = avail[i]));
+    setAvailable(amap);
   }
 
   useEffect(() => {
@@ -109,9 +121,13 @@ export function VersionsSection() {
           {title}
         </h3>
         <div className="rounded-lg border border-neutral-200 bg-white divide-y divide-neutral-100">
-          {visible.map((name) => (
-            <Row key={name} name={name} />
-          ))}
+          {visible.map((name) =>
+            available[name] === false ? (
+              <UnavailableRow key={name} name={name} />
+            ) : (
+              <Row key={name} name={name} />
+            )
+          )}
           {!showMore && missing.length > 0 && (
             <div className="px-4 py-1.5 text-[11px] text-neutral-400">
               {missing.length} more available — “{t("versions.downloadMore")}”
@@ -119,6 +135,23 @@ export function VersionsSection() {
           )}
         </div>
       </section>
+    );
+  }
+
+  function UnavailableRow({ name }: { name: string }) {
+    return (
+      <div className="px-4 py-2 flex items-center gap-3 text-sm opacity-60">
+        <FiPackage className="text-neutral-400 shrink-0" />
+        <code className="flex-1 text-neutral-500 font-mono text-xs truncate">
+          {name}
+        </code>
+        <span
+          className="text-[11px] text-neutral-400 border border-neutral-200 rounded px-2 py-1"
+          title={t("versions.unavailableHint")}
+        >
+          {t("versions.unavailable")}
+        </span>
+      </div>
     );
   }
 

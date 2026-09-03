@@ -44,7 +44,9 @@
     "ioncubeInstalling": "Installation…",
     "ioncubeDone": "ionCube installé pour PHP {{version}}. Redémarrez Apache/Nginx.",
     "noPhp": "Aucune version PHP installée — installez-en une ci-dessus d'abord.",
-    "cancelDownload": "Arrêter ce téléchargement"
+    "cancelDownload": "Arrêter ce téléchargement",
+    "unavailable": "indisponible",
+    "unavailableHint": "Pas encore empaqueté pour cette plateforme. L'amont ne publie que les sources de ce composant, il n'y a donc rien à télécharger."
   },
   "topbar": {
     "editor": "Éditeur",

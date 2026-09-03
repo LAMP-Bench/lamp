@@ -34,6 +34,8 @@ pub fn create_database(mysql_dir: &Path, port: u16, db_name: &str) -> Result<(),
     );
     let output = hidden_command(&mysql)
         .args([
+            // See services/mysql.rs: never inherit the system my.cnf.
+            "--no-defaults",
             "--protocol=TCP",
             "-h",
             "127.0.0.1",

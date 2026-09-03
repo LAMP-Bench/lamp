@@ -1,4 +1,4 @@
-use super::{bin_path, hidden_command, kill_tree, posix, Service, ServiceStatus};
+use super::{bin_path, kill_tree, posix, service_command, Service, ServiceStatus};
 use crate::hosts::Host;
 use crate::ssl::{LocalCa, SSL_PORT};
 use std::fs;
@@ -231,11 +231,16 @@ impl Service for ApacheService {
         if !httpd.exists() {
             return Err(format!("httpd binary not found at {}", httpd.display()));
         }
-        let child = hidden_command(&httpd)
-            .arg("-f")
-            .arg(&conf)
-            .arg("-d")
-            .arg(&self.apache_dir)
+        let mut cmd = service_command(&httpd);
+        cmd.arg("-f").arg(&conf).arg("-d").arg(&self.apache_dir);
+        // Unix httpd forks a daemon and the process we spawned exits at once.
+        // That loses us the server entirely: status() reports Stopped while
+        // Apache is serving, stop() has nothing to kill, and the listening
+        // socket stays held. -DFOREGROUND keeps the real server as our direct
+        // child. Windows httpd runs in the foreground and doesn't take it.
+        #[cfg(unix)]
+        cmd.arg("-DFOREGROUND");
+        let child = cmd
             .spawn()
             .map_err(|e| format!("failed to spawn httpd: {e}"))?;
         self.child = Some(child);
@@ -307,6 +312,27 @@ fn build_conf(
     let runtime = posix(runtime_dir);
     let pma = posix(pma_dir);
     let default_cgi = php_cgi_path(default_php_dir);
+    let default_php_root = posix(default_php_dir);
+
+    // Unix httpd needs an MPM and mod_unixd loaded as DSOs; on Windows both
+    // are compiled into the server and a LoadModule line for them is a hard
+    // startup error. mod_unixd in particular has to come before mod_fcgid,
+    // which links against ap_unixd_setup_child, without it httpd refuses to
+    // start with "undefined symbol: ap_unixd_setup_child". Guarded with
+    // <IfFile> like the optional modules below, so a distro Apache that
+    // compiles either of them in still starts.
+    let platform_modules = if cfg!(windows) {
+        String::new()
+    } else {
+        "<IfFile \"modules/mod_mpm_event.so\">\n\
+         \x20   LoadModule mpm_event_module modules/mod_mpm_event.so\n\
+         </IfFile>\n\
+         <IfFile \"modules/mod_unixd.so\">\n\
+         \x20   LoadModule unixd_module modules/mod_unixd.so\n\
+         </IfFile>\n"
+            .to_string()
+    };
+    let default_vhost_env = format!("\x20   FcgidInitialEnv PHPRC \"{default_php_root}\"\n");
     let ssl = posix(ssl_dir);
     let htdocs = posix(htdocs_dir);
 
@@ -318,6 +344,7 @@ fn build_conf(
          Listen {port}\n\
          Listen {ssl_port}\n\
          \n\
+         {platform_modules}\
          LoadModule authn_core_module modules/mod_authn_core.so\n\
          LoadModule authz_core_module modules/mod_authz_core.so\n\
          LoadModule authz_host_module modules/mod_authz_host.so\n\
@@ -365,6 +392,15 @@ fn build_conf(
          </IfFile>\n\
          \n\
          FcgidInitialEnv PATH \"{CGI_PATH}\"\n\
+         # PHPRC is where php-cgi looks for php.ini. Windows PHP also checks
+         # beside the binary, but Linux and macOS builds use a compiled-in
+         # path, so without this they start fine and run with no php.ini at
+         # all, no extensions, no Xdebug, no mail routed to MailHog. It is
+         # set per vhost below as well, since each vhost pins its own PHP
+         # version; this server-level one covers the phpMyAdmin alias.
+         # FcgidInitialEnv is only valid in server and virtual-host context,
+         # inside <Directory> Apache refuses to start.\n\
+         FcgidInitialEnv PHPRC \"{default_php_root}\"\n\
          # php-cgi retires itself after PHP_FCGI_MAX_REQUESTS (default 500)\n\
          # requests. That is lower than FcgidMaxRequestsPerProcess below, so\n\
          # the process would vanish while mod_fcgid still believed it was\n\
@@ -403,6 +439,7 @@ fn build_conf(
     // `localhost:8080/<project>/`.
     out.push_str(&format!(
         "<VirtualHost *:{port}>\n\
+         {default_vhost_env}\
          \x20   DocumentRoot \"{htdocs}\"\n\
          \x20   <Directory \"{htdocs}\">\n\
          \x20       Options Indexes FollowSymLinks ExecCGI\n\
@@ -418,6 +455,7 @@ fn build_conf(
 
     out.push_str(&format!(
         "<VirtualHost *:{ssl_port}>\n\
+         {default_vhost_env}\
          \x20   DocumentRoot \"{htdocs}\"\n\
          \x20   SSLEngine on\n\
          \x20   SSLCertificateFile \"{ssl}/localhost.crt\"\n\
@@ -436,10 +474,16 @@ fn build_conf(
 
     for host in hosts {
         let docroot = posix(Path::new(&host.docroot));
-        let cgi = php_cgi_path(&php_dir_for(&host.php_version));
+        let php_root_path = php_dir_for(&host.php_version);
+        let cgi = php_cgi_path(&php_root_path);
+        let host_env = format!(
+            "\x20   FcgidInitialEnv PHPRC \"{}\"\n",
+            posix(&php_root_path)
+        );
         let extras = render_extras(&host.apache_extra);
         let host_inner = format!(
-            "\x20   ServerName {name}\n\
+            "{host_env}\
+             \x20   ServerName {name}\n\
              \x20   DocumentRoot \"{docroot}\"\n\
              \x20   <Directory \"{docroot}\">\n\
              \x20       Options Indexes FollowSymLinks ExecCGI\n\

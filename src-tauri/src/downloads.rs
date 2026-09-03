@@ -196,6 +196,22 @@ fn raw_file_target<'a>(entry: &'a Entry, pe: Option<&'a PlatformEntry>) -> Optio
         .or(entry.raw_file.as_deref())
 }
 
+/// Does the manifest carry a download for this component on the platform we
+/// are running on? Several have no Linux or macOS entry, upstream publishes
+/// source tarballs only for Apache, nginx, PHP and Redis. The UI needs to
+/// tell "not installed yet" apart from "there is nothing here to install",
+/// instead of offering a button that always fails.
+pub fn is_available_for_platform(name: &str) -> bool {
+    load_manifest()
+        .ok()
+        .and_then(|m| {
+            m.entries
+                .get(name)
+                .map(|e| e.platforms.contains_key(current_platform()))
+        })
+        .unwrap_or(false)
+}
+
 /// Does this binary currently exist on disk under `resources_dir`?
 pub fn is_installed(name: &str, resources_dir: &Path) -> bool {
     let manifest = match load_manifest() {

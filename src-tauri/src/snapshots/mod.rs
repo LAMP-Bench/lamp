@@ -160,6 +160,8 @@ fn run_mysqldump(d: &DbCapture) -> Result<Vec<u8>, String> {
     // of ordinary CJK text) coming back mangled.
     let output = hidden_command(&dumper)
         .args([
+            // See services/mysql.rs: never inherit the system my.cnf.
+            "--no-defaults",
             "--protocol=TCP",
             "-h",
             "127.0.0.1",
@@ -389,6 +391,8 @@ fn restore_mysql_dump(sql: &[u8], mysql_dir: &Path, port: u16) -> Result<(), Str
     }
     let mut child = hidden_command(&client)
         .args([
+            // See services/mysql.rs: never inherit the system my.cnf.
+            "--no-defaults",
             "--protocol=TCP",
             "-h",
             "127.0.0.1",

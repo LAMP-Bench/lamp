@@ -1,0 +1,271 @@
+# Builds the Linux service binaries Lamp Bench downloads at runtime.
+#
+# WHY THIS EXISTS
+# ---------------
+# Lamp Bench downloads binaries and runs them in place; it never installs
+# anything into the system. On Windows we can point `binaries.json` at
+# ApacheLounge, windows.php.net and friends. No equivalent exists for Linux,
+# the Apache Software Foundation's newest Linux binary is httpd 2.0.48 from
+# 2003, and nginx and Redis ship source only. So we compile them ourselves,
+# exactly like MAMP and XAMPP do, and host the result on our own release.
+#
+# The output must match the layout the Windows zips already produce, because
+# the app looks for binaries at fixed paths and the only cross-platform
+# difference is meant to stay the executable suffix:
+#
+#   apache/bin/httpd, apache/modules/*.so (mod_fcgid included)
+#   php-<major.minor>/{php,php-cgi,php.ini-development}, php-<v>/ext/*.so
+#   nginx/nginx + nginx/conf/{mime.types,fastcgi_params}
+#   redis/redis-server
+#
+# Everything must be relocatable, the user picks the install directory , so
+# build with -Wl,-rpath,'$ORIGIN/../lib' and bundle non-glibc dependencies.
+#
+# STATUS: this has never been run. Treat the first execution as debugging, not
+# as a release. The SHA256s it prints at the end are what goes into
+# `scripts/binaries.json`. They can't be known before then.
+
+name: build linux binaries
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Upload to the linux-binaries release (off = build and inspect only)"
+        type: boolean
+        default: false
+
+env:
+  # Kept in step with the Windows entries in scripts/binaries.json so a host
+  # behaves the same whichever platform it was created on.
+  HTTPD_VERSION: "2.4.66"
+  APR_VERSION: "1.7.5"
+  APR_UTIL_VERSION: "1.6.3"
+  PCRE2_VERSION: "10.44"
+  MOD_FCGID_VERSION: "2.3.9"
+  PHP_VERSION: "8.4.21"
+  XDEBUG_VERSION: "3.5.1"
+  NGINX_VERSION: "1.30.0"
+  # Windows is pinned to tporadowski's 5.0.14 fork because that's the only
+  # maintained Windows port. On Linux we can take a current upstream release;
+  # 7.2.x is the newest under the original BSD licence.
+  REDIS_VERSION: "7.2.5"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # AlmaLinux 8 is glibc 2.28. Building against it means the output runs on
+    # anything from roughly Debian 10 / Ubuntu 20.04 onward, the same reason
+    # MySQL publishes a glibc2.17 tarball. Building on ubuntu-latest directly
+    # would produce binaries that refuse to start on any older distro.
+    container: almalinux:8
+    steps:
+      - name: Install build toolchain
+        run: |
+          # AlmaLinux 8's base repos don't carry everything PHP needs.
+          # oniguruma-devel (mbstring, mandatory since PHP 7.4) and patchelf
+          # live in EPEL; libzip-devel lives in PowerTools. Without both repos
+          # enabled the PHP configure step fails on a missing dependency.
+          dnf -y install epel-release dnf-plugins-core
+          dnf config-manager --set-enabled powertools
+          dnf -y install gcc gcc-c++ make automake libtool tar xz gzip \
+            perl perl-IPC-Cmd findutils diffutils patch which file \
+            zlib-devel openssl-devel expat-devel libxml2-devel sqlite-devel \
+            libcurl-devel oniguruma-devel libzip-devel libicu-devel \
+            libpng-devel libjpeg-turbo-devel freetype-devel \
+            bzip2-devel readline-devel patchelf re2c bison
+
+      - uses: actions/checkout@v4
+
+      - name: Prepare output tree
+        run: |
+          mkdir -p /out /src
+          # Bundle every non-system shared library a binary depends on into
+          # the component's own lib/ dir, then point RPATH at it relative to
+          # the binary. This is what makes the tarball relocatable: the user
+          # picks the install directory, so nothing may be absolute.
+          cat > /usr/local/bin/bundle-deps <<'SCRIPT'
+          #!/bin/bash
+          # usage: bundle-deps <component-root> <binary> [<binary>...]
+          set -euo pipefail
+          root="$1"; shift
+          mkdir -p "$root/lib"
+          for bin in "$@"; do
+            [ -f "$bin" ] || continue
+            ldd "$bin" 2>/dev/null | awk '/=> \//{print $3}' | while read -r lib; do
+              case "$lib" in
+                # Leave the core C library and its direct companions alone,
+                # bundling those is how you get a binary that segfaults on a
+                # host with a different kernel.
+                */libc.so*|*/libm.so*|*/libpthread.so*|*/libdl.so*|\
+                */librt.so*|*/ld-linux*|*/libgcc_s.so*|*/libresolv.so*) continue ;;
+              esac
+              cp -Lu "$lib" "$root/lib/" 2>/dev/null || true
+            done
+            patchelf --set-rpath '$ORIGIN/../lib' "$bin" || true
+          done
+          # The bundled libraries have to find each other too.
+          for lib in "$root"/lib/*.so*; do
+            [ -f "$lib" ] && patchelf --set-rpath '$ORIGIN' "$lib" || true
+          done
+          SCRIPT
+          chmod +x /usr/local/bin/bundle-deps
+
+      # ---------------------------------------------------------------- Apache
+      - name: Build Apache httpd + mod_fcgid
+        run: |
+          cd /src
+          curl -fsSLO https://archive.apache.org/dist/httpd/httpd-${HTTPD_VERSION}.tar.gz
+          curl -fsSLO https://archive.apache.org/dist/apr/apr-${APR_VERSION}.tar.gz
+          curl -fsSLO https://archive.apache.org/dist/apr/apr-util-${APR_UTIL_VERSION}.tar.gz
+          curl -fsSLO https://github.com/PCRE2Project/pcre2/releases/download/pcre2-${PCRE2_VERSION}/pcre2-${PCRE2_VERSION}.tar.gz
+          for f in *.tar.gz; do tar xzf "$f"; done
+
+          cd /src/pcre2-${PCRE2_VERSION}
+          ./configure --prefix=/deps --disable-static && make -j"$(nproc)" && make install
+
+          # APR and APR-util build inside the httpd tree, the classic
+          # srclib layout, which avoids version-skew against a system APR.
+          mv /src/apr-${APR_VERSION} /src/httpd-${HTTPD_VERSION}/srclib/apr
+          mv /src/apr-util-${APR_UTIL_VERSION} /src/httpd-${HTTPD_VERSION}/srclib/apr-util
+
+          cd /src/httpd-${HTTPD_VERSION}
+          # --enable-mods-shared=most and --enable-mpms-shared=all are load
+          # bearing: the generated httpd.conf loads mpm_event and unixd as
+          # DSOs on Unix (see services/apache.rs), so they must not be static.
+          ./configure \
+            --prefix=/out/apache \
+            --with-included-apr \
+            --with-pcre=/deps/bin/pcre2-config \
+            --enable-mods-shared=most \
+            --enable-mpms-shared=all \
+            --enable-ssl --enable-rewrite --enable-so
+          make -j"$(nproc)" && make install
+
+          cd /src
+          curl -fsSLO https://archive.apache.org/dist/httpd/mod_fcgid/mod_fcgid-${MOD_FCGID_VERSION}.tar.gz
+          tar xzf mod_fcgid-${MOD_FCGID_VERSION}.tar.gz
+          cd mod_fcgid-${MOD_FCGID_VERSION}
+          APXS=/out/apache/bin/apxs ./configure.apxs
+          make -j"$(nproc)"
+          # services::apache::FCGID_MODULE looks for mod_fcgid alongside every
+          # other module on Unix (modules/), and only Windows uses the
+          # separate modules-extra/ dir. That split exists because the
+          # Windows build pulls mod_fcgid from ApacheLounge as its own
+          # download. Install it where the generated conf will look.
+          cp modules/fcgid/.libs/mod_fcgid.so /out/apache/modules/
+
+          bundle-deps /out/apache /out/apache/bin/httpd /out/apache/modules/*.so
+
+      # ------------------------------------------------------------------- PHP
+      - name: Build PHP + Xdebug
+        run: |
+          cd /src
+          curl -fsSLO https://www.php.net/distributions/php-${PHP_VERSION}.tar.xz
+          tar xJf php-${PHP_VERSION}.tar.xz
+          cd php-${PHP_VERSION}
+          # NTS (no --enable-zts) because we run php-cgi under FastCGI.
+          #
+          # Every extension ensure_all_php_inis() writes an `extension=` line
+          # for MUST be built =shared, matching the Windows build where they
+          # ship as DLLs in ext/. Built statically they still work, but the
+          # generated php.ini then names .so files that don't exist and PHP
+          # emits "Unable to load dynamic library" on every single request,
+          # and the extension toggle UI has nothing to toggle.
+          ./configure \
+            --prefix=/out/php-tmp \
+            --enable-cgi \
+            --without-pear \
+            --enable-mysqlnd \
+            --with-mysqli=shared,mysqlnd --with-pdo-mysql=shared,mysqlnd \
+            --with-curl=shared --enable-mbstring=shared --with-openssl=shared \
+            --enable-gd=shared --with-jpeg --with-freetype \
+            --enable-intl=shared --with-zip=shared \
+            --enable-exif=shared --enable-fileinfo=shared \
+            --enable-opcache \
+            --enable-soap=shared --enable-sockets=shared --with-zlib --with-bz2
+          make -j"$(nproc)" && make install
+
+          # Flatten to the layout the app expects: php and php-cgi at the
+          # root of the version dir, not under bin/.
+          PHP_MINOR="$(echo "$PHP_VERSION" | cut -d. -f1,2)"
+          DEST="/out/php-${PHP_MINOR}"
+          mkdir -p "$DEST/ext"
+          cp /out/php-tmp/bin/php "$DEST/php"
+          cp /out/php-tmp/bin/php-cgi "$DEST/php-cgi"
+          cp /out/php-tmp/lib/php/extensions/*/*.so "$DEST/ext/" 2>/dev/null || true
+          cp php.ini-development "$DEST/php.ini-development"
+
+          # Xdebug has to be compiled against this exact PHP build.
+          cd /src
+          curl -fsSLO https://xdebug.org/files/xdebug-${XDEBUG_VERSION}.tgz
+          tar xzf xdebug-${XDEBUG_VERSION}.tgz
+          cd xdebug-${XDEBUG_VERSION}
+          /out/php-tmp/bin/phpize
+          ./configure --with-php-config=/out/php-tmp/bin/php-config
+          make -j"$(nproc)"
+          cp modules/xdebug.so "$DEST/ext/xdebug.so"
+
+          bundle-deps "$DEST" "$DEST/php" "$DEST/php-cgi" "$DEST"/ext/*.so
+          rm -rf /out/php-tmp
+
+      # ----------------------------------------------------------------- nginx
+      - name: Build nginx
+        run: |
+          cd /src
+          curl -fsSLO https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
+          tar xzf nginx-${NGINX_VERSION}.tar.gz
+          cd nginx-${NGINX_VERSION}
+          # --prefix is only a default; the app always passes -p and -c at
+          # runtime, so nothing here is baked into the user's install.
+          ./configure --prefix=/out/nginx --with-http_ssl_module --with-pcre
+          make -j"$(nproc)" && make install
+          # The app looks for the binary at the root of the dir, matching the
+          # Windows zip, not at sbin/nginx.
+          mv /out/nginx/sbin/nginx /out/nginx/nginx
+          rmdir /out/nginx/sbin || true
+          bundle-deps /out/nginx /out/nginx/nginx
+
+      # ----------------------------------------------------------------- Redis
+      - name: Build Redis
+        run: |
+          cd /src
+          curl -fsSLO https://download.redis.io/releases/redis-${REDIS_VERSION}.tar.gz
+          tar xzf redis-${REDIS_VERSION}.tar.gz
+          cd redis-${REDIS_VERSION}
+          make -j"$(nproc)"
+          mkdir -p /out/redis
+          cp src/redis-server src/redis-cli /out/redis/
+          bundle-deps /out/redis /out/redis/redis-server /out/redis/redis-cli
+
+      # --------------------------------------------------------------- Package
+      - name: Package and checksum
+        run: |
+          mkdir -p /artifacts
+          cd /out
+          for comp in apache nginx redis php-*; do
+            [ -d "$comp" ] || continue
+            tar czf "/artifacts/${comp}-linux-x64.tar.gz" "$comp"
+          done
+          cd /artifacts
+          # These are the values that go into scripts/binaries.json. The
+          # manifest deliberately has no Linux entries for these components
+          # until a real run produces them.
+          sha256sum *.tar.gz | tee SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-binaries
+          path: /artifacts/
+
+      - name: Publish to the linux-binaries release
+        if: inputs.publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dnf -y install gh || true
+          gh release view linux-binaries --repo "$GITHUB_REPOSITORY" \
+            || gh release create linux-binaries --repo "$GITHUB_REPOSITORY" \
+                 --title "Linux service binaries" --notes "Built by build-linux-binaries.yml" --prerelease
+          gh release upload linux-binaries /artifacts/*.tar.gz /artifacts/SHA256SUMS.txt \
+            --repo "$GITHUB_REPOSITORY" --clobber

@@ -59,6 +59,12 @@
         "url": "https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-8.0.46-macos15-x86_64.tar.gz",
         "sha256": "8590BC6C3203FE17F51F757DC9132FB755D1B73CBDAD9D12A67F85025A3C3B8F",
         "strip_root_dir": "mysql-8.0.46-macos15-x86_64"
+      },
+      "linux-x64": {
+        "filename": "mysql-8.0.46-linux-glibc2.17-x86_64-minimal.tar.xz",
+        "url": "https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-8.0.46-linux-glibc2.17-x86_64-minimal.tar.xz",
+        "sha256": "E2777D490FCAADC5A4BE06DB89B6935C78909BD9C3382AF859AB284AF0C950B0",
+        "strip_root_dir": "mysql-8.0.46-linux-glibc2.17-x86_64-minimal"
       }
     }
   },

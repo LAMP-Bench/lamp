@@ -44,7 +44,9 @@
     "ioncubeInstalling": "Instalando…",
     "ioncubeDone": "ionCube instalado para PHP {{version}}. Reinicia Apache/Nginx.",
     "noPhp": "Aún no hay versiones de PHP instaladas — instala una arriba primero.",
-    "cancelDownload": "Detener esta descarga"
+    "cancelDownload": "Detener esta descarga",
+    "unavailable": "no disponible",
+    "unavailableHint": "Todavía no empaquetado para esta plataforma. El proyecto original solo publica el código fuente de este componente, así que no hay nada que descargar."
   },
   "topbar": {
     "editor": "Editor",

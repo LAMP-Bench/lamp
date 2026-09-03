@@ -44,7 +44,9 @@
     "ioncubeInstalling": "Installing…",
     "ioncubeDone": "ionCube installed for PHP {{version}}. Restart Apache/Nginx.",
     "noPhp": "No PHP versions installed yet — install one above first.",
-    "cancelDownload": "Stop this download"
+    "cancelDownload": "Stop this download",
+    "unavailable": "unavailable",
+    "unavailableHint": "Not packaged for this platform yet. Upstream publishes source only for this component, so there is nothing to download here."
   },
   "topbar": {
     "editor": "Editor",

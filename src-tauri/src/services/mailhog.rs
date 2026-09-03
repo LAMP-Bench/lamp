@@ -1,4 +1,4 @@
-use super::{hidden_command, kill_tree, resolve_binary, Service, ServiceStatus};
+use super::{kill_tree, resolve_binary, service_command, Service, ServiceStatus};
 use std::fs;
 use std::path::PathBuf;
 use std::process::Child;
@@ -58,7 +58,7 @@ impl Service for MailhogService {
             .map_err(|e| format!("open mailhog log: {e}"))?;
         let log_clone = log.try_clone().map_err(|e| e.to_string())?;
 
-        let child = hidden_command(&bin)
+        let child = service_command(&bin)
             .arg("-smtp-bind-addr")
             .arg(format!("127.0.0.1:{}", self.smtp_port))
             .arg("-ui-bind-addr")

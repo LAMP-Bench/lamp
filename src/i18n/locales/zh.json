@@ -353,7 +353,9 @@
     "ioncubeInstalling": "正在安装…",
     "ioncubeDone": "已为 PHP {{version}} 安装 ionCube。请重启 Apache/Nginx。",
     "noPhp": "尚未安装任何 PHP 版本 — 请先在上方安装一个。",
-    "cancelDownload": "停止此下载"
+    "cancelDownload": "停止此下载",
+    "unavailable": "不可用",
+    "unavailableHint": "尚未为此平台打包。该组件上游仅发布源代码，因此这里没有可下载的内容。"
   },
   "services": {
     "exitedImmediately": "{{service}} 启动后立即停止了。端口很可能已被占用 — 可能有另一个副本仍在运行，或上次会话遗留了进程。原因请查看 日志 → {{service}}。"

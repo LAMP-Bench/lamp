@@ -202,11 +202,12 @@ fn parse_extension_line(raw: &str) -> Option<(String, bool)> {
     if value.is_empty() {
         return None;
     }
-    // Normalise php_curl.dll / curl → curl for display + matching.
+    // Normalise php_curl.dll / curl.so / curl → curl for display + matching.
     let name = value
         .trim_matches('"')
         .trim_start_matches("php_")
         .trim_end_matches(".dll")
+        .trim_end_matches(".so")
         .to_string();
     if name.is_empty() {
         None
@@ -280,6 +281,11 @@ mod tests {
             Some(("mbstring".into(), true))
         );
         assert_eq!(parse_extension_line(";  extension = \"intl\""), Some(("intl".into(), false)));
+        // Linux/macOS spelling, same extension, different suffix.
+        assert_eq!(
+            parse_extension_line("extension=curl.so"),
+            Some(("curl".into(), true))
+        );
     }
 
     #[test]

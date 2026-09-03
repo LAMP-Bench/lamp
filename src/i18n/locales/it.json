@@ -353,7 +353,9 @@
     "ioncubeInstalling": "Installazione…",
     "ioncubeDone": "ionCube installato per PHP {{version}}. Riavvia Apache/Nginx.",
     "noPhp": "Nessuna versione di PHP installata — installane prima una qui sopra.",
-    "cancelDownload": "Interrompi questo download"
+    "cancelDownload": "Interrompi questo download",
+    "unavailable": "non disponibile",
+    "unavailableHint": "Non ancora pacchettizzato per questa piattaforma. Il progetto originale pubblica solo il codice sorgente di questo componente, quindi non c'è nulla da scaricare."
   },
   "services": {
     "exitedImmediately": "{{service}} si è avviato e si è fermato subito. Probabilmente la porta è già occupata — un'altra copia ancora in esecuzione, o un processo rimasto da una sessione precedente. Il motivo è in Log → {{service}}."

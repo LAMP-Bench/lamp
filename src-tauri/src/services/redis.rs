@@ -1,4 +1,4 @@
-use super::{hidden_command, kill_tree, posix, resolve_binary, Service, ServiceStatus};
+use super::{kill_tree, posix, resolve_binary, service_command, Service, ServiceStatus};
 use std::fs;
 use std::path::PathBuf;
 use std::process::Child;
@@ -72,7 +72,7 @@ impl Service for RedisService {
                 bundled.display()
             )
         })?;
-        let child = hidden_command(&server)
+        let child = service_command(&server)
             .arg(&conf)
             .spawn()
             .map_err(|e| format!("failed to spawn redis-server: {e}"))?;

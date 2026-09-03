@@ -41,6 +41,32 @@ pub fn hidden_command<S: AsRef<OsStr>>(program: S) -> Command {
     cmd
 }
 
+/// Like `hidden_command`, but for the long-running services we later have to
+/// shut down as a unit (httpd, mysqld, nginx, php-cgi, redis, mailhog).
+///
+/// On Unix the child gets its own process group via `setsid`, so `kill_tree`
+/// can signal the whole group. Without it, a signal reaches only the parent
+/// PID, Apache's and nginx's forked workers survive, keep the listening
+/// socket open, and the next `start()` fails with "address already in use".
+/// That is the same problem `taskkill /T` solves on Windows.
+pub fn service_command<S: AsRef<OsStr>>(program: S) -> Command {
+    #[allow(unused_mut)]
+    let mut cmd = hidden_command(program);
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::CommandExt;
+        unsafe {
+            // Runs in the forked child before exec; `setsid` is
+            // async-signal-safe, which is the bar for pre_exec closures.
+            cmd.pre_exec(|| {
+                libc::setsid();
+                Ok(())
+            });
+        }
+    }
+    cmd
+}
+
 /// Directories worth searching for a service binary beyond `PATH`.
 ///
 /// Daemons live in `sbin`, which is not on a desktop user's `PATH` on most
@@ -109,7 +135,8 @@ pub fn posix(p: &Path) -> String {
 /// targeted PID. Apache spawns a worker (mpm_winnt) under its parent, and
 /// MySQL similarly forks helper threads — leaving the worker alive holds the
 /// listening port and breaks the next `start()`. On Windows we shell out to
-/// `taskkill /F /T` which walks the whole tree.
+/// `taskkill /F /T` which walks the whole tree; on Unix we signal the process
+/// group that `service_command` put the child in.
 pub fn kill_tree(child: &mut Child) {
     #[cfg(windows)]
     {
@@ -122,7 +149,39 @@ pub fn kill_tree(child: &mut Child) {
             ])
             .output();
     }
-    #[cfg(not(windows))]
+    #[cfg(unix)]
+    {
+        // Signal the whole process group (negative pid) rather than just the
+        // leader, so forked workers go down with their parent.
+        //
+        // SIGTERM first, with a grace period. mysqld flushes InnoDB and
+        // releases its lock file on SIGTERM; SIGKILL leaves the data dir
+        // dirty and the next start pays for crash recovery, or refuses
+        // outright. Only what is still alive after the grace period is
+        // killed hard.
+        let pid = child.id() as i32;
+        unsafe {
+            libc::kill(-pid, libc::SIGTERM);
+        }
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+        loop {
+            match child.try_wait() {
+                Ok(Some(_)) => return,
+                Ok(None) => {}
+                // Unwaitable (already reaped elsewhere). Nothing useful left
+                // to do here.
+                Err(_) => break,
+            }
+            if std::time::Instant::now() >= deadline {
+                unsafe {
+                    libc::kill(-pid, libc::SIGKILL);
+                }
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(100));
+        }
+    }
+    #[cfg(not(any(windows, unix)))]
     {
         let _ = child.kill();
     }

@@ -2102,6 +2102,7 @@ version = "0.1.0"
 dependencies = [
  "flate2",
  "image",
+ "libc",
  "lzma-rs",
  "oxipng",
  "rand",

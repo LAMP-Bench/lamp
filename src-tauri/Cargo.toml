@@ -47,3 +47,9 @@ oxipng = { version = "9", default-features = false }
 # Deploy → FTP upload. Sync API, pure Rust, no native libssl dep. SFTP
 # lives behind a separate russh-sftp wiring (Phase 7.x) and isn't here yet.
 suppaftp = "6"
+
+# Unix-only: process-group signalling in `services::kill_tree`. SIGTERM to the
+# group is what brings Apache's and nginx's forked workers down with their
+# parent, the Unix counterpart of `taskkill /T`.
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"

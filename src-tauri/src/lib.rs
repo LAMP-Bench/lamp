@@ -8,6 +8,8 @@ mod dyndns;
 mod ioncube;
 mod hosts;
 mod images;
+#[cfg(test)]
+mod integration_tests;
 mod php;
 mod services;
 mod snapshots;
@@ -955,6 +957,14 @@ fn binary_remove(name: &str, state: tauri::State<AppState>) -> Result<(), String
     downloads::remove(name, &state.resources_dir)
 }
 
+/// Whether this component has a download for the current OS at all. Lets the
+/// UI grey out what simply isn't packaged for the platform rather than
+/// showing an Install button that errors.
+#[tauri::command]
+fn binary_available(name: String) -> bool {
+    downloads::is_available_for_platform(&name)
+}
+
 #[tauri::command]
 fn binary_list() -> Vec<String> {
     downloads::list_manifest_entries()
@@ -1493,6 +1503,7 @@ pub fn run() {
             binary_download_cancel,
             binary_remove,
             binary_list,
+            binary_available,
             php_catalog,
             php_install,
             git_available,

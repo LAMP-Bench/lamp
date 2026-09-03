@@ -77,14 +77,33 @@ pub fn ensure_trusted(ca_cert_path: &Path) -> Result<bool, String> {
 
 #[cfg(target_os = "linux")]
 pub fn ensure_trusted(ca_cert_path: &Path) -> Result<bool, String> {
-    // /etc/ssl/certs/ca-certificates.crt is the concatenated trust bundle on
-    // Debian/Ubuntu. update-ca-certificates rebuilds it from .crt files in
-    // /usr/local/share/ca-certificates/. Fedora/RHEL use a different path
-    // (/etc/pki/ca-trust/source/anchors + update-ca-trust); we try both.
+    // Every distro family puts the anchor directory somewhere different:
+    // Debian/Ubuntu rebuild /etc/ssl/certs/ca-certificates.crt from
+    // /usr/local/share/ca-certificates/ via update-ca-certificates;
+    // Fedora/RHEL use /etc/pki/ca-trust/source/anchors + update-ca-trust;
+    // Arch uses /etc/ca-certificates/trust-source/anchors, also with
+    // update-ca-trust. We try each and take the first whose parent exists,
+    // which doubles as the distro detection.
     let target_paths: &[(&str, &str)] = &[
         ("/usr/local/share/ca-certificates/lamp-bench.crt", "update-ca-certificates"),
         ("/etc/pki/ca-trust/source/anchors/lamp-bench.crt", "update-ca-trust"),
+        // Arch and derivatives (CachyOS, Manjaro, EndeavourOS) match neither
+        // of the above. Without this the loop finds nothing, the error is
+        // swallowed by the caller (trust install is best-effort), and every
+        // HTTPS vhost shows a browser warning with nothing explaining why.
+        (
+            "/etc/ca-certificates/trust-source/anchors/lamp-bench.crt",
+            "update-ca-trust",
+        ),
     ];
+
+    // Installing into the system trust store needs root, which means a polkit
+    // dialog. Fine when a person is driving the app; an automated run (CI,
+    // integration tests, a headless box) has nobody to answer it and would
+    // stall. The caller already treats failure here as non-fatal.
+    if std::env::var_os("LAMP_BENCH_SKIP_CA_TRUST").is_some() {
+        return Err("CA trust install skipped via LAMP_BENCH_SKIP_CA_TRUST".into());
+    }
 
     let mut last_err = String::from("no supported trust store path found");
     for (dest, refresh_cmd) in target_paths {

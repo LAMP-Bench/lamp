@@ -226,6 +226,18 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
     if (failure) toast("error", serviceErrorText(t, spec.label, failure));
   }
 
+  // Whether binaries.json has an entry for this component on the current OS
+  // at all. Apache, nginx, PHP and Redis have no Unix entry, upstream ships
+  // source tarballs only, and an Install button that always errors reads
+  // like a bug rather than a platform gap.
+  const [available, setAvailable] = useState(true);
+  useEffect(() => {
+    if (spec.binaryName == null) return;
+    invoke<boolean>("binary_available", { name: spec.binaryName })
+      .then(setAvailable)
+      .catch(() => setAvailable(true));
+  }, [spec.binaryName]);
+
   async function install() {
     if (spec.binaryName == null) return;
     setInstalling(true);
@@ -327,6 +339,13 @@ function ServiceRow({ spec }: { spec: SvcSpec }) {
           <span className="text-[10px] text-neutral-400 font-mono">…</span>
         ) : installed ? (
           <Toggle checked={running} onChange={onToggle} disabled={busy} />
+        ) : !available ? (
+          <span
+            className="px-2 py-0.5 rounded text-[11px] text-neutral-400 border border-neutral-200"
+            title={t("versions.unavailableHint")}
+          >
+            {t("versions.unavailable")}
+          </span>
         ) : (
           installing ? (
             <button
